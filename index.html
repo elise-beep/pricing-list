@@ -286,6 +286,7 @@ tbody td{padding:10px 12px;vertical-align:middle;overflow:hidden;text-overflow:e
 <nav class="tab-nav">
   <button class="tab-btn active" onclick="switchTab('pricelist')" id="tab-pricelist">Price List</button>
   <button class="tab-btn" onclick="switchTab('calculator')" id="tab-calculator">Services &amp; Product Calculator</button>
+  <button class="tab-btn" onclick="switchTab('handrail')" id="tab-handrail">Handrail Calculator</button>
 </nav>
 
 <!-- ── ADMIN MODAL ── -->
@@ -451,6 +452,102 @@ tbody td{padding:10px 12px;vertical-align:middle;overflow:hidden;text-overflow:e
     </div>
 
     <div class="section"><p class="sec-title">Job history</p><div id="history-list"><p class="history-loading">Loading job history...</p></div></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     TAB 3 — HANDRAIL CALCULATOR
+════════════════════════════════════════════════════════ -->
+<div class="tab-pane" id="pane-handrail">
+  <div class="calc-tab-wrap">
+    <h2>Handrail Calculator</h2>
+    <p class="sub">Per-metre rate formula — any diameter supported &mdash; 30% net profit target</p>
+
+    <div id="hr-inputs" class="section">
+      <p class="sec-title">Job inputs</p>
+      <div class="field-grid">
+        <div class="field">
+          <label>Diameter (mm)</label>
+          <input type="number" id="hr-diameter" value="40" min="1" step="1" oninput="calcHandrail()">
+        </div>
+        <div class="field">
+          <label>Total metres</label>
+          <input type="number" id="hr-total" value="20" min="0.1" step="0.5" oninput="calcHandrail()">
+        </div>
+        <div class="field">
+          <label>Style</label>
+          <select id="hr-style" onchange="calcHandrail()" style="padding:7px 10px;font-size:15px;border:0.5px solid rgba(0,0,0,0.18);border-radius:8px;background:#f0ede8;color:#1a1917;width:100%;font-family:inherit">
+            <option value="wrap">Wrap</option>
+            <option value="stitch">Stitch</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Straight metres (S)</label>
+          <input type="number" id="hr-straight" value="20" min="0" step="0.5" oninput="syncHandrailMetres('straight')">
+        </div>
+        <div class="field">
+          <label>Single curve metres (C)</label>
+          <input type="number" id="hr-curve" value="0" min="0" step="0.5" oninput="syncHandrailMetres('curve')">
+        </div>
+        <div class="field">
+          <label>3D curve metres (D)</label>
+          <input type="number" id="hr-3d" value="0" min="0" step="0.5" oninput="syncHandrailMetres('3d')">
+        </div>
+        <div class="field">
+          <label>Hide cost per hide $</label>
+          <input type="number" id="hr-hide-cost" value="500" min="1" step="10" oninput="calcHandrail()">
+        </div>
+        <div class="field">
+          <label>Subcontractor cost (ex GST) $</label>
+          <input type="number" id="hr-subco" value="0" min="0" step="10" oninput="calcHandrail()">
+        </div>
+        <div class="field">
+          <label>Subco markup %</label>
+          <input type="number" id="hr-subco-markup" value="15" min="0" max="100" step="5" oninput="calcHandrail()">
+        </div>
+        <div class="field">
+          <label>Shipping (ex GST) $</label>
+          <input type="number" id="hr-shipping" value="0" min="0" step="5" oninput="calcHandrail()">
+        </div>
+        <div class="field">
+          <label>Other direct costs (ex GST) $</label>
+          <input type="number" id="hr-direct" value="0" min="0" step="10" oninput="calcHandrail()">
+        </div>
+        <div class="field">
+          <label>Target net profit (after tax) %</label>
+          <input type="number" id="hr-target" value="30" min="0" max="80" step="5" oninput="calcHandrail()">
+        </div>
+        <div class="field">
+          <label>Company tax rate %</label>
+          <input type="number" id="hr-tax" value="25" min="0" max="30" step="2.5" oninput="calcHandrail()">
+        </div>
+      </div>
+      <div id="hr-geometry-warning" class="hidden" style="margin-top:10px;padding:8px 12px;background:#fcebeb;border-radius:8px;font-size:13px;color:#a32d2d;font-weight:500"></div>
+      <div id="hr-all-straight-note" class="hidden" style="margin-top:8px;padding:6px 12px;background:#faeeda;border-radius:8px;font-size:12px;color:#854f0b">Assumed all straight (confirm)</div>
+    </div>
+
+    <div id="hr-metrics" class="metrics">
+      <div class="metric"><p class="metric-label">Total cost base</p><p class="metric-value" id="hr-m-cost">&mdash;</p><p class="metric-sub">ex GST</p></div>
+      <div class="metric"><p class="metric-label">Required gross margin</p><p class="metric-value" id="hr-m-gm">&mdash;</p><p class="metric-sub">before tax</p></div>
+      <div class="metric hi"><p class="metric-label">Quote ex GST</p><p class="metric-value" id="hr-m-ex">&mdash;</p><p class="metric-sub">&mdash;</p></div>
+      <div class="metric hi"><p class="metric-label">Invoice inc GST</p><p class="metric-value" id="hr-m-inc">&mdash;</p><p class="metric-sub">what you send</p></div>
+      <div class="metric"><p class="metric-label">Net profit $</p><p class="metric-value" id="hr-m-profit">&mdash;</p><p class="metric-sub" id="hr-m-pct">after tax</p></div>
+    </div>
+
+    <div class="section"><p class="sec-title">Cost breakdown</p><div class="bd" id="hr-breakdown">&mdash;</div></div>
+
+    <div class="section">
+      <p class="sec-title">Save to job history</p>
+      <div class="field-grid">
+        <div class="field"><label>Job name</label><input type="text" id="hr-job-name" placeholder="e.g. Smith staircase handrail"></div>
+        <div class="field"><label>Date</label><input type="date" id="hr-job-date"></div>
+        <div class="field full"><label>Description / notes</label><textarea id="hr-job-desc" placeholder="e.g. 40mm wrap, mixed curve job"></textarea></div>
+      </div>
+      <button class="btn primary" id="hr-save-btn" onclick="saveHandrailJob()">Save to history</button>
+      <div class="toast" id="hr-toast"></div>
+    </div>
+
+    <div class="section"><p class="sec-title">Job history</p><div id="hr-history-list"><p class="history-loading">Loading job history...</p></div></div>
   </div>
 </div>
 
@@ -943,17 +1040,13 @@ function calcService() {
   var direct   = cval('s-direct');
   var target   = cval('s-target')/100;
   var taxRate  = cval('s-tax')/100;
-  // $350 inc GST / 1.1 = $318.18 ex GST — already the charge-out rate, no margin applied
+  // Updated: $350 inc GST / 1.1 = $318.18 ex GST
   var rateEx   = 350/1.1;
   var internal = hours*rateEx;
   var subcoMkp = subco*(1+markup);
-  // Only pass-through costs (subco + shipping + direct) are grossed up for margin.
-  // Internal hours are already at charge-out rate and are added straight to the price.
-  var passThroughCost = subcoMkp+shipping+direct;
-  var total    = internal+passThroughCost;
+  var total    = internal+subcoMkp+shipping+direct;
   var gmn      = grossMarginNeeded(target,taxRate);
-  var passThroughPrice = passThroughCost===0 ? 0 : passThroughCost/(1-gmn);
-  var price    = internal+passThroughPrice;
+  var price    = total===0 ? 0 : total/(1-gmn);
   var priceGST = price*1.1;
   var gross    = price-total;
   var tax      = gross*taxRate;
@@ -966,12 +1059,12 @@ function calcService() {
   c$('sm-profit').textContent = cfmt(net);
   c$('sm-pct').textContent    = netPct.toFixed(1)+'% after tax';
   c$('breakdown').innerHTML   =
-    'Internal hours: <b>'+hours+' hrs &times; '+cfmt(rateEx)+' = '+cfmt(internal)+'</b> (charge-out rate, no markup)<br>'+
+    'Internal hours: <b>'+hours+' hrs &times; '+cfmt(rateEx)+' = '+cfmt(internal)+'</b><br>'+
     'Subcontractor: <b>'+cfmt(subco)+' + '+cpct(Math.round(markup*100))+' markup = '+cfmt(subcoMkp)+'</b><br>'+
     'Shipping: <b>'+cfmt(shipping)+'</b><br>'+
     'Other direct costs: <b>'+cfmt(direct)+'</b><br>'+
     '<b>Total cost base: '+cfmt(total)+'</b><hr>'+
-    'Pass-through costs grossed up for margin (to net '+cpct(cval('s-target'))+' after '+cpct(cval('s-tax'))+' tax): <b>'+cpct(Math.round(gmn*100))+' gross margin needed</b><br>'+
+    'Gross margin needed (to net '+cpct(cval('s-target'))+' after '+cpct(cval('s-tax'))+' tax): <b>'+cpct(Math.round(gmn*100))+'</b><br>'+
     'Quote ex GST: <b>'+cfmt(price)+'</b> &rarr; inc GST: <b>'+cfmt(priceGST)+'</b><br>'+
     'Gross profit: <b>'+cfmt(gross)+'</b> &rarr; tax: <b>'+cfmt(tax)+'</b> &rarr; net profit: <b>'+cfmt(net)+' ('+netPct.toFixed(1)+'%)</b>';
   clastCalc = {type:'service',hours:hours,subco:subco,markup:Math.round(markup*100),
@@ -1135,6 +1228,260 @@ loadHistory();
 buildSidebar();
 applyFilters();
 loadFromSheet();
+
+// ════════════════════════════════════════════════════════
+// HANDRAIL CALCULATOR
+// ════════════════════════════════════════════════════════
+
+// Rate card: base rate at 30mm and per-mm increment for each style/geometry
+// Formula: rate = base30 + (diameter - 30) * perMm
+const HR_RATES = {
+  wrap: {
+    straight:  { base30: 305, perMm: 1.50 },
+    curve:     { base30: 364, perMm: 2.05 },
+    curve3d:   { base30: 437, perMm: 2.30 }  // nudged +10
+  },
+  stitch: {
+    straight:  { base30: 536, perMm: 2.85 },
+    curve:     { base30: 645, perMm: 3.20 },
+    curve3d:   { base30: 755, perMm: 3.60 }
+  }
+};
+
+// Labour hours per metre by style/geometry
+const HR_LABOUR = {
+  wrap:   { straight: 0.5, curve: 1.0, curve3d: 1.5 },
+  stitch: { straight: 1.0, curve: 1.5, curve3d: 2.0 }
+};
+
+const HR_INTERNAL_RATE = 100;  // Internal cost rate used to derive original rate card
+const HR_ADMIN         = 300;
+const HR_SHORT_RUN_FEE = 400;
+const HR_SHORT_RUN_MIN = 15;
+const HR_MAT_MARKUP    = 0.15;
+const HR_HIDE_AREA     = 1.15; // m² usable per hide
+
+var hrLastCalc = null;
+
+function hrGetRate(style, geometry, diameter) {
+  var r = HR_RATES[style][geometry];
+  return r.base30 + (diameter - 30) * r.perMm;
+}
+
+function hrcval(id) { return parseFloat(document.getElementById(id).value) || 0; }
+function hrc$(id)   { return document.getElementById(id); }
+function hrfmt(n)   { return '$' + Number(n||0).toLocaleString('en-AU', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+function hrpct(n)   { return n.toFixed(1) + '%'; }
+
+function syncHandrailMetres(changed) {
+  var total = hrcval('hr-total');
+  var s = hrcval('hr-straight');
+  var c = hrcval('hr-curve');
+  var d = hrcval('hr-3d');
+  // When any geometry field changes, we just recalculate
+  calcHandrail();
+}
+
+function calcHandrail() {
+  var diameter  = hrcval('hr-diameter');
+  var total     = hrcval('hr-total');
+  var style     = hrc$('hr-style').value;
+  var S         = hrcval('hr-straight');
+  var C         = hrcval('hr-curve');
+  var D         = hrcval('hr-3d');
+  var hideCost  = hrcval('hr-hide-cost') || 500;
+  var subco     = hrcval('hr-subco');
+  var subcoMkup = hrcval('hr-subco-markup') / 100;
+  var shipping  = hrcval('hr-shipping');
+  var direct    = hrcval('hr-direct');
+  var targetNet = hrcval('hr-target') / 100;
+  var taxRate   = hrcval('hr-tax') / 100;
+
+  var warn = hrc$('hr-geometry-warning');
+  var note = hrc$('hr-all-straight-note');
+
+  warn.classList.add('hidden'); warn.textContent = '';
+  note.classList.add('hidden');
+
+  if (!diameter || diameter <= 0) {
+    warn.textContent = 'Please enter a valid diameter.';
+    warn.classList.remove('hidden'); return;
+  }
+  if (!total || total <= 0) {
+    warn.textContent = 'Please enter total metres.';
+    warn.classList.remove('hidden'); return;
+  }
+
+  // If all geometry fields are 0, assume all straight
+  var geoSum = S + C + D;
+  var assumedAllStraight = false;
+  if (geoSum === 0) {
+    S = total; C = 0; D = 0; geoSum = total;
+    assumedAllStraight = true;
+    hrc$('hr-straight').value = total;
+  }
+
+  // Validate geometry sum
+  if (Math.abs(geoSum - total) > 0.01) {
+    warn.textContent = 'S + C + D (' + geoSum.toFixed(2) + 'm) does not equal Total metres (' + total.toFixed(2) + 'm). Please correct before continuing.';
+    warn.classList.remove('hidden');
+    ['hr-m-cost','hr-m-gm','hr-m-ex','hr-m-inc','hr-m-profit'].forEach(function(id){ hrc$(id).textContent = '—'; });
+    hrc$('hr-m-pct').textContent = 'after tax';
+    hrc$('hr-breakdown').innerHTML = '—';
+    return;
+  }
+
+  if (assumedAllStraight) note.classList.remove('hidden');
+
+  // ── SELL SUBTOTAL (rate card) ──
+  var rateS    = hrGetRate(style, 'straight', diameter);
+  var rateC    = hrGetRate(style, 'curve', diameter);
+  var rateD    = hrGetRate(style, 'curve3d', diameter);
+  var subtotal = (S * rateS) + (C * rateC) + (D * rateD);
+
+  var shortRun = total < HR_SHORT_RUN_MIN;
+  var sellEx   = subtotal + HR_ADMIN + (shortRun ? HR_SHORT_RUN_FEE : 0);
+  var sellInc  = sellEx * 1.10;
+  var avgRateEx  = total > 0 ? sellEx / total : 0;
+  var avgRateInc = total > 0 ? sellInc / total : 0;
+
+  // ── INTERNAL COST BASE ──
+  var labourHrsRaw = (S * HR_LABOUR[style].straight) + (C * HR_LABOUR[style].curve) + (D * HR_LABOUR[style].curve3d);
+  var labourHrs    = Math.ceil(labourHrsRaw);
+  var labourCost   = labourHrs * HR_INTERNAL_RATE;
+
+  // Material cost
+  var area    = total * ((Math.PI * diameter * 1.15) / 1000);
+  var hides   = Math.ceil(area / HR_HIDE_AREA) + 1;
+  var rawMat  = hides * hideCost;
+  var matCost = rawMat * (1 + HR_MAT_MARKUP);
+
+  // Subcontractor with markup
+  var subcoTotal = subco * (1 + subcoMkup);
+
+  var costBase = labourCost + matCost + subcoTotal + shipping + direct + HR_ADMIN;
+
+  // ── MARGIN & PROFIT ──
+  var grossProfit = sellEx - costBase;
+  var gm          = sellEx > 0 ? grossProfit / sellEx : 0;
+  var tax         = grossProfit * taxRate;
+  var netProfit   = grossProfit - tax;
+  var netPct      = sellEx > 0 ? netProfit / sellEx * 100 : 0;
+  var gmNeeded    = 1 - ((1 - targetNet) * (1 - taxRate));
+  var belowTarget = netPct < (targetNet * 100 - 0.5);
+
+  // ── UPDATE METRICS ──
+  hrc$('hr-m-cost').textContent   = hrfmt(costBase);
+  hrc$('hr-m-gm').textContent     = hrpct(gmNeeded * 100);
+  hrc$('hr-m-ex').textContent     = hrfmt(sellEx);
+  hrc$('hr-m-inc').textContent    = hrfmt(sellInc);
+  hrc$('hr-m-profit').textContent = hrfmt(netProfit);
+  hrc$('hr-m-pct').textContent    = hrpct(netPct) + ' after tax' + (belowTarget ? ' ⚠' : '');
+
+  var profitMetric = hrc$('hr-m-profit').closest('.metric');
+  profitMetric.className = 'metric' + (belowTarget ? ' warning' : ' success');
+
+  // ── BREAKDOWN ──
+  var breakdown =
+    'Diameter: <b>' + diameter + 'mm</b> &nbsp;|&nbsp; Style: <b>' + style.charAt(0).toUpperCase() + style.slice(1) + '</b><br>' +
+    'Geometry: <b>S=' + S + 'm, C=' + C + 'm, D=' + D + 'm</b> (total ' + total + 'm)<hr>' +
+    '<b>Sell price build-up (rate card)</b><br>' +
+    (S > 0 ? 'Straight: ' + S + 'm &times; ' + hrfmt(rateS) + '/m = <b>' + hrfmt(S * rateS) + '</b><br>' : '') +
+    (C > 0 ? 'Single curve: ' + C + 'm &times; ' + hrfmt(rateC) + '/m = <b>' + hrfmt(C * rateC) + '</b><br>' : '') +
+    (D > 0 ? '3D curve: ' + D + 'm &times; ' + hrfmt(rateD) + '/m = <b>' + hrfmt(D * rateD) + '</b><br>' : '') +
+    'Subtotal: <b>' + hrfmt(subtotal) + '</b><br>' +
+    'Admin fee: <b>' + hrfmt(HR_ADMIN) + '</b><br>' +
+    (shortRun ? 'Short run setup fee (&lt;' + HR_SHORT_RUN_MIN + 'm): <b>' + hrfmt(HR_SHORT_RUN_FEE) + '</b><br>' : '') +
+    '<b>Quote ex GST: ' + hrfmt(sellEx) + '</b> &rarr; inc GST: <b>' + hrfmt(sellInc) + '</b><br>' +
+    'Average rate per metre (including fees): <b>' + hrfmt(avgRateEx) + ' ex GST / ' + hrfmt(avgRateInc) + ' inc GST</b><hr>' +
+    '<b>Internal cost breakdown</b><br>' +
+    'Labour: ' + labourHrs + ' hrs (raw ' + labourHrsRaw.toFixed(2) + ', ceiled) &times; $' + HR_INTERNAL_RATE + '/hr = <b>' + hrfmt(labourCost) + '</b><br>' +
+    'Material: ' + hides + ' hides (' + area.toFixed(3) + 'm² &divide; ' + HR_HIDE_AREA + ' + 1 buffer) &times; ' + hrfmt(hideCost) + ' &times; 1.15 markup = <b>' + hrfmt(matCost) + '</b><br>' +
+    (subco > 0 ? 'Subcontractor: ' + hrfmt(subco) + ' + ' + Math.round(subcoMkup * 100) + '% markup = <b>' + hrfmt(subcoTotal) + '</b><br>' : '') +
+    (shipping > 0 ? 'Shipping: <b>' + hrfmt(shipping) + '</b><br>' : '') +
+    (direct > 0 ? 'Other direct costs: <b>' + hrfmt(direct) + '</b><br>' : '') +
+    'Admin: <b>' + hrfmt(HR_ADMIN) + '</b><br>' +
+    '<b>Total cost base: ' + hrfmt(costBase) + '</b><hr>' +
+    'Gross profit: <b>' + hrfmt(grossProfit) + '</b> (' + hrpct(gm * 100) + ' GM) &rarr; tax: <b>' + hrfmt(tax) + '</b> &rarr; net profit: <b>' + hrfmt(netProfit) + ' (' + hrpct(netPct) + ')</b>' +
+    (belowTarget ? '<br><span style="color:#854f0b">&#9888; Below ' + hrpct(targetNet * 100) + ' net profit target. Consider reviewing rate or job mix.</span>' : '');
+
+  hrc$('hr-breakdown').innerHTML = breakdown;
+
+  hrLastCalc = {
+    type: 'handrail',
+    diameter: diameter, total: total, style: style,
+    straight: S, curve: C, curve3d: D,
+    hideCost: hideCost,
+    subco: subco, subcoMarkup: Math.round(subcoMkup * 100),
+    shipping: shipping, direct: direct,
+    target: targetNet * 100, taxRate: taxRate * 100,
+    labourHrs: labourHrs, hides: hides,
+    costBase: costBase, sellEx: sellEx, sellInc: sellInc,
+    netProfit: netProfit, netPct: netPct,
+    avgRateEx: avgRateEx, avgRateInc: avgRateInc
+  };
+}
+
+function showHrToast(msg, type) {
+  var t = hrc$('hr-toast');
+  t.textContent = msg;
+  t.className = 'toast ' + type;
+  setTimeout(function(){ t.className = 'toast'; }, 4000);
+}
+
+async function saveHandrailJob() {
+  var name = hrc$('hr-job-name').value.trim();
+  if (!name) { hrc$('hr-job-name').focus(); return; }
+  if (!hrLastCalc) { showHrToast('Please calculate a job first.', 'error'); return; }
+
+  var job = Object.assign({ id: Date.now(), name: name, date: hrc$('hr-job-date').value, desc: hrc$('hr-job-desc').value.trim() }, hrLastCalc);
+  var btn = hrc$('hr-save-btn');
+  btn.disabled = true; btn.textContent = 'Saving...';
+  try {
+    await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(Object.assign({ action: 'save_handrail_job' }, job))
+    });
+    showHrToast('Job saved!', 'success');
+    hrc$('hr-job-name').value = ''; hrc$('hr-job-desc').value = '';
+    setTimeout(loadHrHistory, 2000);
+  } catch(e) { showHrToast('Could not save — check connection', 'error'); }
+  btn.disabled = false; btn.textContent = 'Save to history';
+}
+
+async function loadHrHistory() {
+  var el = hrc$('hr-history-list');
+  try {
+    var res = await fetch(APPS_SCRIPT_URL + '?action=history_handrail&t=' + Date.now());
+    var d = await res.json();
+    var jobs = d.jobs || [];
+    if (!jobs.length) { el.innerHTML = '<p class="history-empty">No handrail jobs saved yet.</p>'; return; }
+    el.innerHTML = jobs.sort(function(a,b){ return b.id - a.id; }).map(function(j) {
+      return '<div class="job-card">' +
+        '<div class="job-card-top">' +
+          '<span class="job-name">' + j.name + ' <span class="type-badge" style="background:#fce8e8;color:#480405">handrail</span></span>' +
+          '<span class="job-price">' + hrfmt(j.sellInc) + ' inc GST</span>' +
+        '</div>' +
+        (j.desc ? '<div class="job-desc">' + j.desc + '</div>' : '') +
+        '<div class="job-meta">' +
+          (j.date ? '<span>' + j.date + '</span>' : '') +
+          '<span>' + j.diameter + 'mm ' + j.style + '</span>' +
+          '<span>' + j.total + 'm total</span>' +
+          (j.subco > 0 ? '<span>Subco ' + hrfmt(j.subco) + ' +' + j.subcoMarkup + '%</span>' : '') +
+          (j.shipping > 0 ? '<span>Shipping ' + hrfmt(j.shipping) + '</span>' : '') +
+          '<span>Net ' + (j.netPct ? parseFloat(j.netPct).toFixed(1) : '—') + '%</span>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  } catch(e) {
+    el.innerHTML = '<p class="history-empty">Could not load history.</p>';
+  }
+}
+
+// Init handrail calculator
+calcHandrail();
+loadHrHistory();
 
 </script>
 </body>
