@@ -943,40 +943,43 @@ function calcService() {
   var direct   = cval('s-direct');
   var target   = cval('s-target')/100;
   var taxRate  = cval('s-tax')/100;
-  // $350 inc GST / 1.1 = $318.18 ex GST — already the charge-out rate, no margin applied
-  var rateEx   = 350/1.1;
-  var internal = hours*rateEx;
-  var subcoMkp = subco*(1+markup);
-  // Only pass-through costs (subco + shipping + direct) are grossed up for margin.
-  // Internal hours are already at charge-out rate and are added straight to the price.
-  var passThroughCost = subcoMkp+shipping+direct;
-  var total    = internal+passThroughCost;
-  var gmn      = grossMarginNeeded(target,taxRate);
+  // Sell rate: $350 inc GST = $318.18 ex GST — what the client is billed per hour
+  // Cost rate: $100/hr — true internal cost (salary + super + overhead allocation per hourly-rate-breakdown.md)
+  var sellRateEx = 350/1.1;
+  var costRateEx = 100;
+  var labourSell = hours * sellRateEx;   // revenue from hours
+  var labourCost = hours * costRateEx;   // true cost of hours
+  var subcoMkp   = subco*(1+markup);
+  // Total cost base uses the true internal cost of labour, not the sell rate
+  var totalCost  = labourCost + subcoMkp + shipping + direct;
+  // Total price = sell rate for hours + grossed-up pass-through costs
+  var passThroughCost  = subcoMkp + shipping + direct;
+  var gmn              = grossMarginNeeded(target, taxRate);
   var passThroughPrice = passThroughCost===0 ? 0 : passThroughCost/(1-gmn);
-  var price    = internal+passThroughPrice;
-  var priceGST = price*1.1;
-  var gross    = price-total;
-  var tax      = gross*taxRate;
-  var net      = gross-tax;
+  var price    = labourSell + passThroughPrice;
+  var priceGST = price * 1.1;
+  var gross    = price - totalCost;
+  var tax      = gross * taxRate;
+  var net      = gross - tax;
   var netPct   = price>0 ? net/price*100 : 0;
-  c$('sm-cost').textContent   = cfmt(total);
+  c$('sm-cost').textContent   = cfmt(totalCost);
   c$('sm-gross').textContent  = cpct(Math.round(gmn*100));
   c$('sm-price').textContent  = cfmt(price);
   c$('sm-gst').textContent    = cfmt(priceGST);
   c$('sm-profit').textContent = cfmt(net);
   c$('sm-pct').textContent    = netPct.toFixed(1)+'% after tax';
   c$('breakdown').innerHTML   =
-    'Internal hours: <b>'+hours+' hrs &times; '+cfmt(rateEx)+' = '+cfmt(internal)+'</b> (charge-out rate, no markup)<br>'+
+    'Internal hours: <b>'+hours+' hrs &times; '+cfmt(sellRateEx)+' (sell) = '+cfmt(labourSell)+'</b> &mdash; cost base: '+hours+' hrs &times; $'+costRateEx+'/hr = <b>'+cfmt(labourCost)+'</b><br>'+
     'Subcontractor: <b>'+cfmt(subco)+' + '+cpct(Math.round(markup*100))+' markup = '+cfmt(subcoMkp)+'</b><br>'+
     'Shipping: <b>'+cfmt(shipping)+'</b><br>'+
     'Other direct costs: <b>'+cfmt(direct)+'</b><br>'+
-    '<b>Total cost base: '+cfmt(total)+'</b><hr>'+
-    'Pass-through costs grossed up for margin (to net '+cpct(cval('s-target'))+' after '+cpct(cval('s-tax'))+' tax): <b>'+cpct(Math.round(gmn*100))+' gross margin needed</b><br>'+
+    '<b>Total cost base: '+cfmt(totalCost)+'</b><hr>'+
+    'Gross margin needed on pass-through costs (to net '+cpct(cval('s-target'))+' after '+cpct(cval('s-tax'))+' tax): <b>'+cpct(Math.round(gmn*100))+'</b><br>'+
     'Quote ex GST: <b>'+cfmt(price)+'</b> &rarr; inc GST: <b>'+cfmt(priceGST)+'</b><br>'+
     'Gross profit: <b>'+cfmt(gross)+'</b> &rarr; tax: <b>'+cfmt(tax)+'</b> &rarr; net profit: <b>'+cfmt(net)+' ('+netPct.toFixed(1)+'%)</b>';
   clastCalc = {type:'service',hours:hours,subco:subco,markup:Math.round(markup*100),
                shipping:shipping,direct:direct,target:cval('s-target'),taxRate:cval('s-tax'),
-               totalCost:total,price:price,priceGST:priceGST,netProfit:net,netPct:netPct};
+               totalCost:totalCost,price:price,priceGST:priceGST,netProfit:net,netPct:netPct};
 }
 
 function calcProduct() {
