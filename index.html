@@ -322,8 +322,8 @@ tbody td{padding:10px 12px;vertical-align:middle;overflow:hidden;text-overflow:e
     <aside class="sidebar">
       <div class="rate-display">
         <div class="rd-label">Hourly rate</div>
-        <div class="rd-val">$350 <span style="font-size:12px;font-weight:400;color:var(--amber)">inc GST</span></div>
-        <div class="rd-note">$318.18 ex GST</div>
+        <div class="rd-val">$299 <span style="font-size:12px;font-weight:400;color:var(--amber)">inc GST</span></div>
+        <div class="rd-note">$271.82 ex GST</div>
       </div>
       <div class="sidebar-divider"></div>
       <div class="filter-group">
@@ -382,7 +382,7 @@ tbody td{padding:10px 12px;vertical-align:middle;overflow:hidden;text-overflow:e
 <div class="tab-pane" id="pane-calculator">
   <div class="calc-tab-wrap">
     <h2>Services &amp; Product Calculator</h2>
-    <p class="sub">Target 30% net profit after tax &mdash; $350/hr inc GST ($318.18 ex GST) for service labour</p>
+    <p class="sub">Target 30% net profit after tax &mdash; $299/hr inc GST ($271.82 ex GST) for service labour</p>
 
     <div class="toggle-wrap">
       <button class="toggle-btn active" id="btn-service" onclick="setMode('service')">Service job</button>
@@ -461,8 +461,8 @@ const CATALOGUE = [{"id":"CON-001","category":"Centre Console","sub_category":"R
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxnkN2DnqqB29pmb5hzbc3rNHMp4DtWKkvBiwKVZMRjmCdt9WGYxn5dsV05nHDVYL2ebg/exec';
 const ADMIN_PW        = 'admin2024';
 const ADMIN_PASSWORD  = ADMIN_PW;
-// Updated: $350 inc GST / 1.1 = $318.18 ex GST
-const RATE_EX         = 350 / 1.1;
+// Updated: $299 inc GST / 1.1 = $271.82 ex GST
+const RATE_EX         = 299 / 1.1;
 const SUBCO_MUP       = 0.15;
 const GM              = 0.35;
 const CC_FEE          = 0.02;
@@ -499,7 +499,7 @@ function evenRound(n) {
   return c%2===0 ? c : c+1;
 }
 
-// Updated: uses RATE_EX = $318.18/hr (was $400)
+// Updated: uses RATE_EX = $271.82/hr ($299 inc GST)
 function calcPrice(d) {
   var smk    = (d.subco_markup !== undefined) ? d.subco_markup : SUBCO_MUP;
   var margin = (d.margin_override !== undefined) ? d.margin_override : GM;
@@ -943,9 +943,9 @@ function calcService() {
   var direct   = cval('s-direct');
   var target   = cval('s-target')/100;
   var taxRate  = cval('s-tax')/100;
-  // Sell rate: $350 inc GST = $318.18 ex GST — what the client is billed per hour
+  // Sell rate: $299 inc GST = $271.82 ex GST — what the client is billed per hour
   // Cost rate: $100/hr — true internal cost (salary + super + overhead allocation per hourly-rate-breakdown.md)
-  var sellRateEx = 350/1.1;
+  var sellRateEx = 299/1.1;
   var costRateEx = 100;
   var labourSell = hours * sellRateEx;   // revenue from hours
   var labourCost = hours * costRateEx;   // true cost of hours
