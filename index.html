@@ -1194,7 +1194,11 @@ async function loadFromSheet() {
     if(!res.ok) throw new Error('server returned '+res.status);
     var json = await res.json();
     if(json.status!=='ok' || !json.rows || !json.rows.length) throw new Error(json.message||'no live data returned');
-    CATALOGUE = json.rows;
+    CATALOGUE = json.rows.map(function(r){
+      if(r.name===undefined)            r.name = r.service_name;
+      if(r.margin_override===undefined) r.margin_override = r.margin_pct;
+      return r;
+    });
     edited = {};
     hideLiveError();
     if(badge){ badge.textContent='✓ Live'; badge.className='sync-badge sync-ok'; }
