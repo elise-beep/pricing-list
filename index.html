@@ -399,6 +399,8 @@ tbody td{padding:10px 12px;vertical-align:middle;overflow:hidden;text-overflow:e
         <div class="field"><label>Subco markup %</label><input type="number" id="s-markup" value="15" min="0" max="100" step="5" oninput="calcService()"></div>
         <div class="field"><label>Shipping (ex GST) $</label><input type="number" id="s-shipping" value="0" min="0" step="5" oninput="calcService()"></div>
         <div class="field"><label>Other direct costs (ex GST) $</label><input type="number" id="s-direct" value="0" min="0" step="10" oninput="calcService()"></div>
+        <div class="field"><label>Leather hide</label><select id="s-hide" onchange="calcService()"><option value="0">None</option></select></div>
+        <div class="field"><label>Hide qty</label><input type="number" id="s-hide-qty" value="1" min="0" step="1" oninput="calcService()"></div>
         <div class="field"><label>Target net profit (after tax) %</label><input type="number" id="s-target" value="30" min="0" max="80" step="5" oninput="calcService()"></div>
         <div class="field"><label>Company tax rate %</label><input type="number" id="s-tax" value="25" min="0" max="30" step="5" oninput="calcService()"></div>
       </div>
@@ -869,6 +871,7 @@ function handleFilter(el) {
 function buildSidebar() {
   var catSet={}, tierSet={}, vehSet={};
   CATALOGUE.forEach(function(d) {
+    if(d.category==='General Material') return;
     catSet[d.category]     = (catSet[d.category]||0)+1;
     tierSet[d.tier]        = (tierSet[d.tier]||0)+1;
     // For vehicle type counts, only count non-Tier-A rows
@@ -918,6 +921,7 @@ function clearFilter(type) {
 function applyFilters() {
   var q = (document.getElementById('search').value||'').toLowerCase().trim();
   var items = CATALOGUE.filter(function(item) {
+    if(item.category==='General Material') return false;
     // Category filter
     if(filters.cat.length && filters.cat.indexOf(item.category) === -1) return false;
 
@@ -1152,6 +1156,7 @@ function exportXeroCSV() {
   var headers=['ItemCode','ItemName','PurchasesDescription','PurchasesUnitPrice','PurchasesAccount','PurchasesTaxRate','SalesDescription','SalesUnitPrice','SalesAccount','SalesTaxRate','InventoryAssetAccount','CostOfGoodsSoldAccount'];
   var rows=[headers];
   CATALOGUE.forEach(function(item){
+    if(item.category==='General Material') return;
     var d=edited[item.id]||item;
     var exRounded = edited[item.id] ? (calcPrice(d).incGst/1.1)
                   : (item.total_ex_rounded!=null ? item.total_ex_rounded : (item.final_inc_gst||0)/1.1);
@@ -1195,6 +1200,7 @@ async function loadFromSheet() {
   }
   buildSidebar();
   applyFilters();
+  populateHideDropdown();
 }
 
 function showLiveError(msg,kind){
@@ -1232,6 +1238,17 @@ function setMode(m) {
 
 function grossMarginNeeded(target,taxRate) { return target/(1-taxRate); }
 
+function populateHideDropdown(){
+  var sel=document.getElementById('s-hide');
+  if(!sel) return;
+  var cur=sel.value;
+  var hides=CATALOGUE.filter(function(i){return i.category==='General Material';})
+                     .sort(function(a,b){return (a.materials_cost||0)-(b.materials_cost||0);});
+  sel.innerHTML='<option value="0">None</option>'+hides.map(function(h){
+    return '<option value="'+(h.materials_cost||0)+'">'+(h.name||h.id)+' ($'+Math.round(h.materials_cost||0)+')</option>';
+  }).join('');
+  sel.value=cur; if(sel.selectedIndex<0) sel.value='0';
+}
 function calcService() {
   var hours    = cval('s-hours');
   var subco    = cval('s-subco');
@@ -1240,6 +1257,8 @@ function calcService() {
   var direct   = cval('s-direct');
   var target   = cval('s-target')/100;
   var taxRate  = cval('s-tax')/100;
+  var hideSel  = document.getElementById('s-hide');
+  var hideCost = (hideSel ? (parseFloat(hideSel.value)||0) : 0) * cval('s-hide-qty');
   // Sell rate: $299 inc GST = $271.82 ex GST — what the client is billed per hour
   // Cost rate: TRUE labour cost (break-even) = annual cost base / billable hours = 254704/1408 = $180.90/hr ex GST.
   // Matches Settings!B24 and the Catalogue TRUE profit columns exactly (uses exact value, displayed rounded to $180.90).
@@ -1249,9 +1268,9 @@ function calcService() {
   var labourCost = hours * costRateEx;   // true cost of hours
   var subcoMkp   = subco*(1+markup);
   // Total cost base uses the true internal cost of labour, not the sell rate
-  var totalCost  = labourCost + subcoMkp + shipping + direct;
+  var totalCost  = labourCost + subcoMkp + shipping + direct + hideCost;
   // Total price = sell rate for hours + grossed-up pass-through costs
-  var passThroughCost  = subcoMkp + shipping + direct;
+  var passThroughCost  = subcoMkp + shipping + direct + hideCost;
   var gmn              = grossMarginNeeded(target, taxRate);
   var passThroughPrice = passThroughCost===0 ? 0 : passThroughCost/(1-gmn);
   var price    = labourSell + passThroughPrice;
