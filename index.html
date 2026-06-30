@@ -315,9 +315,7 @@ tbody td{padding:10px 12px;vertical-align:middle;overflow:hidden;text-overflow:e
   <!-- Toolbar -->
   <div class="toolbar">
     <span class="export-label" id="export-label" style="display:none">Export</span>
-    <button class="export-btn" id="export-zoho" onclick="exportCSV('zoho')" style="display:none">&#8595; Zoho CRM CSV</button>
-    <button class="export-btn" id="export-sm8" onclick="exportCSV('servicem8')" style="display:none">&#8595; ServiceM8 CSV</button>
-    <button class="export-btn" id="export-excel" onclick="exportCSV('zoho')" style="display:none">&#8595; Excel</button>
+    <button class="export-btn" id="export-xero" onclick="exportXeroCSV()" style="display:none">&#8595; Xero Items CSV</button>
     <span id="export-locked" style="font-size:12px;color:var(--text3)">&#128274; Log in as admin to export</span>
   </div>
 
@@ -832,7 +830,7 @@ function toggleAdmin() {
     document.getElementById('admin-btn').textContent = 'Admin Login';
     document.getElementById('admin-btn').classList.remove('active');
     document.querySelectorAll('.admin-panel').forEach(function(el){el.classList.remove('show');});
-    ['export-label','export-zoho','export-sm8','export-excel'].forEach(function(id){
+    ['export-label','export-xero'].forEach(function(id){
       document.getElementById(id).style.display = 'none';
     });
     document.getElementById('export-locked').style.display = '';
@@ -852,7 +850,7 @@ function confirmAdmin() {
   err.style.display = 'none';
   closeModal();
   document.querySelectorAll('.admin-panel').forEach(function(el){el.classList.add('show');});
-  ['export-label','export-zoho','export-sm8','export-excel'].forEach(function(id){
+  ['export-label','export-xero'].forEach(function(id){
     document.getElementById(id).style.display = '';
   });
   document.getElementById('export-locked').style.display = 'none';
@@ -1149,39 +1147,27 @@ async function saveToSheet(id) {
 }
 
 // ── EXPORTS ──────────────────────────────────────────────────────
-function exportCSV(type) {
-  var rows;
-  if(type==='servicem8') {
-    rows = [['Item Number','Name','Purchase Cost','Price']];
-    CATALOGUE.forEach(function(item) {
-      var d=edited[item.id]||item;
-      var cost = edited[item.id] ? calcPrice(d).totalCost : item.total_cost;
-      var inc  = edited[item.id] ? calcPrice(d).incGst    : item.final_inc_gst;
-      rows.push([item.id, item.customer_description, cost.toFixed(2), inc.toFixed(2)]);
-    });
-  } else {
-    rows = [['Product Id','Product Owner','Product Owner Id','Product Name','Product Code',
-             'Vendor Name','Vendor Id','Taxable','Product Category','Product Sub Category',
-             'Unit Price','Tax','Active','Description','Qty Ordered','Qty In Stock',
-             'Reorder Level','Reorder Qty','Handler','Product Id (plain)',
-             'Field1','Field2','Field3','Material','Tier','Field4','Price inc GST',
-             'Vehicle Type','Manufacturer']];
-    CATALOGUE.forEach(function(item) {
-      var d=edited[item.id]||item;
-      var qEx = edited[item.id] ? calcPrice(d).quoteEx  : item.quote_ex;
-      var inc = edited[item.id] ? calcPrice(d).incGst   : item.final_inc_gst;
-      rows.push(['',item.customer_description,'',item.customer_description,item.id,
-                 item.subcontractor||'','','true',item.category,'',
-                 qEx.toFixed(2),'GST - 10.0 %','true','',0,0,0,0,'',item.id,
-                 '','','',item.material_rate_key||'',item.tier,'',inc.toFixed(2),
-                 item.vehicle_type||'','']);
-    });
-  }
-  var csv = rows.map(function(r){return r.map(function(c){return '"'+(c||'')+'"';}).join(',');}).join('\n');
-  var a = document.createElement('a');
-  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
-  a.download = type==='servicem8' ? 'servicem8_export.csv' : 'zoho_export.csv';
+function exportXeroCSV() {
+  if(!CATALOGUE.length){ alert('Live prices aren\u2019t loaded \u2014 nothing to export. Refresh once the spreadsheet is reachable.'); return; }
+  var headers=['ItemCode','ItemName','PurchasesDescription','PurchasesUnitPrice','PurchasesAccount','PurchasesTaxRate','SalesDescription','SalesUnitPrice','SalesAccount','SalesTaxRate','InventoryAssetAccount','CostOfGoodsSoldAccount'];
+  var rows=[headers];
+  CATALOGUE.forEach(function(item){
+    var d=edited[item.id]||item;
+    var exRounded = edited[item.id] ? (calcPrice(d).incGst/1.1)
+                  : (item.total_ex_rounded!=null ? item.total_ex_rounded : (item.final_inc_gst||0)/1.1);
+    var unit = exRounded>0 ? (Math.round(exRounded*100)/100).toFixed(2) : '';
+    var name = ((item.category||'')+' - '+(item.sub_category||'')+' - '+(item.name||'')).slice(0,50);
+    rows.push([item.id, name, '', '', '', '', item.customer_description||'', unit, '200', 'GST on Income', '', '']);
+  });
+  var csv = '\ufeff' + rows.map(function(r){
+    return r.map(function(c){ return '"'+String(c==null?'':c).replace(/"/g,'""')+'"'; }).join(',');
+  }).join('\r\n');
+  var blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='chrome_mercy_studio_xero_items.csv';
   a.click();
+  URL.revokeObjectURL(a.href);
 }
 
 // ── SHEET SYNC ───────────────────────────────────────────────────
