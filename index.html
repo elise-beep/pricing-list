@@ -95,7 +95,7 @@ thead th{background:var(--chrome);color:#ccc;padding:10px 12px;text-align:left;f
 thead th:hover{color:#fff}
 thead th.sort-asc::after{content:' ↑';color:var(--gold)}
 thead th.sort-desc::after{content:' ↓';color:var(--gold)}
-.col-cat{width:130px}.col-tier{width:90px}.col-mat{width:110px}
+.col-cat{width:130px}.col-tier{width:90px}
 .col-name{width:auto}
 .col-price{width:140px;text-align:right!important}
 .col-action{width:130px;text-align:right!important}
@@ -198,7 +198,7 @@ tbody td{padding:10px 12px;vertical-align:middle;overflow:hidden;text-overflow:e
 .empty h3{font-size:15px;color:var(--text2);margin-bottom:6px}
 .empty p{font-size:13px;color:var(--text3)}
 
-@media(max-width:800px){.sidebar{display:none}.col-mat{display:none}}
+@media(max-width:800px){.sidebar{display:none}}
 
 /* ── CALCULATOR ── */
 .calc-tab-wrap{max-width:760px;margin:0 auto;padding:2rem 1.5rem}
@@ -358,14 +358,13 @@ tbody td{padding:10px 12px;vertical-align:middle;overflow:hidden;text-overflow:e
         <table id="main-table">
           <thead>
             <tr>
+              <th style="width:100px;color:#ccc;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;padding:10px 8px;cursor:pointer" onclick="sortBy('id')">SKU</th>
               <th class="col-cat" onclick="sortBy('category')">Category</th>
               <th style="width:120px;color:#ccc;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;padding:10px 8px;cursor:pointer" onclick="sortBy('sub_category')">Sub Category</th>
-              <th style="width:100px;color:#ccc;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;padding:10px 8px;cursor:pointer" onclick="sortBy('id')">SKU</th>
-              <th class="col-name" onclick="sortBy('name')">Service</th>
+              <th class="col-name" onclick="sortBy('customer_description')">Customer Description</th>
               <th class="col-tier" onclick="sortBy('tier')">Tier</th>
-              <th class="col-mat">Material</th>
               <th style="width:100px;color:#ccc;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;padding:10px 8px">Supplier</th>
-              <th class="col-price" onclick="sortBy('final_inc_gst')" style="text-align:right">Price (inc GST)</th>
+              <th class="col-price" onclick="sortBy('final_inc_gst')" style="text-align:right">Material Price inc. GST</th>
               <th class="col-action" style="text-align:right">Detail</th>
             </tr>
           </thead>
@@ -738,6 +737,7 @@ renderAnchors(); render(false);
 <script>
 // ── CATALOGUE DATA (v15 — single price per service) ──────────────
 let CATALOGUE = [];
+let MATERIAL_RATES = {}; // key/value map from the Material Rates sheet (Settings endpoint)
 
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby8SQ_uojL8geWjKJJ7B2HpxE363pkkOJqPVTDb1MFxOiPJoDrKIJgH6sbwL9bnC4kTqA/exec';
 const ADMIN_PW        = 'admin2024';
@@ -873,7 +873,6 @@ function handleFilter(el) {
 function buildSidebar() {
   var catSet={}, tierSet={}, vehSet={};
   CATALOGUE.forEach(function(d) {
-    if(d.category==='General Material') return;
     catSet[d.category]     = (catSet[d.category]||0)+1;
     tierSet[d.tier]        = (tierSet[d.tier]||0)+1;
     // For vehicle type counts, only count non-Tier-A rows
@@ -923,7 +922,6 @@ function clearFilter(type) {
 function applyFilters() {
   var q = (document.getElementById('search').value||'').toLowerCase().trim();
   var items = CATALOGUE.filter(function(item) {
-    if(item.category==='General Material') return false;
     // Category filter
     if(filters.cat.length && filters.cat.indexOf(item.category) === -1) return false;
 
@@ -982,19 +980,18 @@ function renderTable(items) {
     var exRnd   = edited[item.id] ? calcPrice(d).totalExRounded : item.total_ex_rounded;
     var tc   = TIER_CLASS[item.tier] || 'b-ta';
     var bc   = CAT_CLASS[item.category] || 'b-cus';
-    var mat  = clean(item.material_rate_key) || '&mdash;';
     var sup  = clean(d.subcontractor) || '&mdash;';
     var subcat = clean(item.sub_category) || '&mdash;';
+    var custDesc = clean(item.customer_description) || item.name;
     var rowbg = i%2===0 ? '' : ' class="row-alt"';
 
     rows.push(
       '<tr id="row-'+item.id+'"'+rowbg+'>'+
+        '<td class="td-sku">'+item.id+'</td>'+
         '<td class="td-cat"><span class="badge '+bc+'">'+item.category+'</span></td>'+
         '<td class="td-subcat">'+subcat+'</td>'+
-        '<td class="td-sku">'+item.id+'</td>'+
-        '<td class="td-name"><div class="n">'+item.name+'</div></td>'+
+        '<td class="td-name"><div class="n">'+custDesc+'</div></td>'+
         '<td><span class="badge '+tc+'">'+item.tier+'</span></td>'+
-        '<td style="font-size:12px;color:var(--text2)">'+mat+'</td>'+
         '<td style="font-size:12px;color:var(--text2);white-space:nowrap">'+sup+'</td>'+
         '<td class="td-price-cell">'+
           '<div class="price-main">'+fmt(incGst)+'</div>'+
@@ -1005,7 +1002,7 @@ function renderTable(items) {
         '</td>'+
       '</tr>'+
       '<tr class="detail-row'+(i%2===0?'':' row-alt')+'" id="drow-'+item.id+'" style="display:none">'+
-        '<td colspan="9" id="dcell-'+item.id+'"></td>'+
+        '<td colspan="8" id="dcell-'+item.id+'"></td>'+
       '</tr>'
     );
   }
@@ -1158,7 +1155,6 @@ function exportXeroCSV() {
   var headers=['ItemCode','ItemName','PurchasesDescription','PurchasesUnitPrice','PurchasesAccount','PurchasesTaxRate','SalesDescription','SalesUnitPrice','SalesAccount','SalesTaxRate','InventoryAssetAccount','CostOfGoodsSoldAccount'];
   var rows=[headers];
   CATALOGUE.forEach(function(item){
-    if(item.category==='General Material') return;
     var d=edited[item.id]||item;
     var exRounded = edited[item.id] ? (calcPrice(d).incGst/1.1)
                   : (item.total_ex_rounded!=null ? item.total_ex_rounded : (item.final_inc_gst||0)/1.1);
@@ -1199,6 +1195,13 @@ async function loadFromSheet() {
     CATALOGUE = [];
     if(badge){ badge.textContent='⚠ Offline'; badge.className='sync-badge sync-err'; }
     showLiveError('Live prices are unavailable ('+e.message+'). To avoid showing out-of-date pricing, nothing is displayed here. Check the Google Sheet / Apps Script is published, then refresh.','error');
+  }
+  try {
+    var sres = await fetch(APPS_SCRIPT_URL+'?action=settings&t='+Date.now());
+    var sjson = await sres.json();
+    MATERIAL_RATES = (sjson.status==='ok' && sjson.material_rates) ? sjson.material_rates : {};
+  } catch(e) {
+    MATERIAL_RATES = {};
   }
   buildSidebar();
   applyFilters();
@@ -1244,10 +1247,12 @@ function populateHideDropdown(){
   var sel=document.getElementById('s-hide');
   if(!sel) return;
   var cur=sel.value;
-  var hides=CATALOGUE.filter(function(i){return i.category==='General Material';})
-                     .sort(function(a,b){return (a.materials_cost||0)-(b.materials_cost||0);});
+  var hides=Object.keys(MATERIAL_RATES)
+    .filter(function(k){ return k.toLowerCase().indexOf('hide')>-1; })
+    .map(function(k){ return {name:k, cost:Number(MATERIAL_RATES[k])||0}; })
+    .sort(function(a,b){ return a.cost-b.cost; });
   sel.innerHTML='<option value="0">None</option>'+hides.map(function(h){
-    return '<option value="'+(h.materials_cost||0)+'">'+(h.name||h.id)+' ($'+Math.round(h.materials_cost||0)+')</option>';
+    return '<option value="'+h.cost+'">'+h.name+' ($'+Math.round(h.cost)+')</option>';
   }).join('');
   sel.value=cur; if(sel.selectedIndex<0) sel.value='0';
 }
