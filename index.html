@@ -987,7 +987,7 @@ function renderTable(items) {
 
     rows.push(
       '<tr id="row-'+item.id+'"'+rowbg+'>'+
-        '<td class="td-sku">'+item.id+'</td>'+
+        '<td class="td-sku">'+(item.sku||item.id)+'</td>'+
         '<td class="td-cat"><span class="badge '+bc+'">'+item.category+'</span></td>'+
         '<td class="td-subcat">'+subcat+'</td>'+
         '<td class="td-name"><div class="n">'+custDesc+'</div></td>'+
@@ -1128,7 +1128,10 @@ async function saveToSheet(id) {
   try {
     var res  = await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
-      headers: {'Content-Type':'application/json'},
+      // text/plain avoids a CORS preflight (OPTIONS) request, which Apps
+      // Script web apps don't handle — application/json here silently
+      // breaks every POST save. doPost still parses the raw JSON body fine.
+      headers: {'Content-Type':'text/plain;charset=utf-8'},
       body: JSON.stringify({
         password: ADMIN_PASSWORD, action: 'update_item', id: id,
         labour_hrs: d.labour_hrs, subco_cost: d.subco_cost,
@@ -1160,7 +1163,7 @@ function exportXeroCSV() {
                   : (item.total_ex_rounded!=null ? item.total_ex_rounded : (item.final_inc_gst||0)/1.1);
     var unit = exRounded>0 ? (Math.round(exRounded*100)/100).toFixed(2) : '';
     var name = ((item.category||'')+' - '+(item.sub_category||'')+' - '+(item.name||'')).slice(0,50);
-    rows.push([item.id, name, '', '', '', '', item.customer_description||'', unit, '200', 'GST on Income', '', '']);
+    rows.push([(item.sku||item.id), name, '', '', '', '', item.customer_description||'', unit, '200', 'GST on Income', '', '']);
   });
   var csv = '\ufeff' + rows.map(function(r){
     return r.map(function(c){ return '"'+String(c==null?'':c).replace(/"/g,'""')+'"'; }).join(',');
@@ -1373,7 +1376,10 @@ async function saveJob() {
   var job=Object.assign({id:Date.now(),name:name,date:c$('job-date').value,desc:c$('job-desc').value.trim()},clastCalc);
   var btn=c$('save-btn'); btn.disabled=true; btn.textContent='Saving...';
   try {
-    await fetch(APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'application/json'},
+    // text/plain avoids a CORS preflight (OPTIONS) — Apps Script can't
+    // handle preflight, so application/json was silently killing every
+    // history save. doPost still parses the raw JSON body unchanged.
+    await fetch(APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
       body:JSON.stringify(Object.assign({action:'save_job'},job))});
     showToast('Job saved — reloading history...','success');
     c$('job-name').value=''; c$('job-desc').value='';
