@@ -267,33 +267,30 @@ tbody td{padding:10px 12px;vertical-align:middle;overflow:hidden;text-overflow:e
 .live-error{margin:12px 20px;padding:12px 16px;border-radius:8px;font-size:14px;font-weight:500;background:#fdecea;color:#8b1a1a;border:1px solid #f5c6cb}
 .live-error.loading{background:#eef2ff;color:#3a4a8b;border-color:#c7d2fe}
 /* ── SPECIFICATIONS TAB ─────────────────────────────────────── */
-.spec-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;padding:20px 24px 40px;align-items:start}
-@media(max-width:1200px){.spec-grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:700px){.spec-grid{grid-template-columns:1fr}}
+.spec-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;padding:20px 24px 40px;align-items:start}
+@media(max-width:800px){.spec-grid{grid-template-columns:1fr}}
 .spec-col{background:#fff;border:0.5px solid rgba(0,0,0,0.1);border-radius:12px;overflow:hidden}
-.spec-col-hd{background:var(--chrome);padding:14px 16px}
-.spec-col-hd .eyebrow{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.5);font-weight:600;margin-bottom:4px}
-.spec-col-hd h3{font-size:17px;font-weight:600;margin:0;color:#fff;letter-spacing:-.01em}
-.spec-col-hd .spec-code{font-size:10px;font-family:monospace;color:rgba(255,255,255,.45);margin-top:4px}
-.spec-filters{display:flex;gap:8px;padding:10px 14px;background:#f8f7f4;border-bottom:0.5px solid rgba(0,0,0,0.07)}
-.spec-filters select{flex:1;padding:6px 8px;font-size:13px;border:0.5px solid rgba(0,0,0,0.15);border-radius:7px;background:#fff;color:#1a1917;font-family:inherit;cursor:pointer}
+.spec-col-hd{background:var(--chrome);padding:16px 18px}
+.spec-col-hd .eyebrow{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.5);font-weight:600;margin-bottom:6px}
+.spec-col-hd h3{font-size:18px;font-weight:600;margin:0;color:#fff;letter-spacing:-.01em}
+.spec-col-hd .spec-code{font-size:10px;font-family:monospace;color:rgba(255,255,255,.4);margin-top:4px;letter-spacing:.04em}
+.spec-filters{display:flex;gap:8px;padding:12px 16px;background:#f8f7f4;border-bottom:0.5px solid rgba(0,0,0,0.07);flex-wrap:wrap}
+.spec-filters select{flex:1;min-width:90px;padding:7px 10px;font-size:13px;border:0.5px solid rgba(0,0,0,0.15);border-radius:7px;background:#fff;color:#1a1917;font-family:inherit;cursor:pointer}
 .spec-filters select:focus{outline:2px solid var(--brand);outline-offset:1px}
 .spec-tbl{width:100%;border-collapse:collapse;font-size:13px}
-.spec-tbl th{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#9a9890;padding:8px 14px;text-align:left;border-bottom:0.5px solid rgba(0,0,0,0.08);font-weight:600;background:#fafaf8}
+.spec-tbl th{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#9a9890;padding:9px 16px;text-align:left;border-bottom:0.5px solid rgba(0,0,0,0.08);font-weight:600;background:#fafaf8}
 .spec-tbl th.r,.spec-tbl td.r{text-align:right}
-.spec-tbl td{padding:7px 14px;border-bottom:0.5px solid rgba(0,0,0,0.05);color:#1a1917;vertical-align:top;line-height:1.35}
-.spec-tbl td.svc{font-weight:500;font-size:13px}
-.spec-tbl td.cat-pill span{display:inline-block;font-size:10px;padding:1px 6px;border-radius:4px;border:0.5px solid rgba(0,0,0,0.1);color:#6b6860;background:#f0ede8;margin-top:2px}
+.spec-tbl td{padding:8px 16px;border-bottom:0.5px solid rgba(0,0,0,0.05);color:#1a1917;vertical-align:middle;line-height:1.35}
+.spec-tbl td.svc{font-weight:500}
+.spec-tbl td.qty-cell{color:#6b6860;font-size:13px;text-align:right}
+.spec-tbl td.price-cell{text-align:right;white-space:nowrap}
+.spec-tbl td.price-cell .px{font-size:11px;color:#9a9890;margin-top:1px}
 .spec-tbl tr:last-child td{border-bottom:0}
-.spec-tbl tr.sub-row td{border-top:1px solid rgba(0,0,0,0.08);color:#6b6860;font-size:12px;padding-top:9px;background:#fafaf8}
-.spec-tbl tr.adj-row td{color:#6b6860;font-size:12px;background:#fafaf8}
-.spec-tbl tr.adj-row td.r{color:#0a5c3e}
-.spec-tbl tr.adj-row.pos td.r{color:#854f0b}
-.spec-tbl tr.total-row td{font-weight:700;font-size:14px;border-top:1.5px solid rgba(0,0,0,0.1);background:#f0ede8;color:#1a1917;padding:10px 14px}
-.spec-tbl tr.total-row td.r{font-size:17px;color:var(--chrome);letter-spacing:-.01em}
-.spec-tbl .ex-price{font-size:11px;color:#9a9890;font-weight:400;margin-top:1px}
-.spec-missing{padding:16px 14px;font-size:13px;color:#9a9890;text-align:center}
-.spec-loading{padding:24px 14px;font-size:13px;color:#9a9890;text-align:center}
+.spec-tbl tfoot tr td{border-top:1.5px solid rgba(0,0,0,0.1);font-weight:700;font-size:15px;padding:12px 16px;background:#f0ede8;color:#1a1917}
+.spec-tbl tfoot tr td.r{font-size:18px;color:var(--chrome);letter-spacing:-.01em}
+.spec-tbl tfoot .ex-total{font-size:11px;color:#9a9890;font-weight:400;margin-top:2px}
+.spec-missing{padding:32px 16px;font-size:13px;color:#9a9890;text-align:center}
+.spec-loading-msg{padding:24px 16px;font-size:13px;color:#9a9890;text-align:center}
 </style>
 </head>
 <body>
@@ -601,6 +598,18 @@ tbody td{padding:10px 12px;vertical-align:middle;overflow:hidden;text-overflow:e
   .xrow{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;font-size:12.5px;padding:4px 0}
   .xrow .code{font-family:var(--mono);color:var(--steel);font-size:12px}
   .xrow .amt{font-family:var(--mono)}
+  .frow{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;padding:5px 0;gap:12px}
+  .frow .fl{color:var(--mut);flex:1}
+  .frow .fr{font-family:var(--mono);white-space:nowrap}
+  .frow.per-piece .fr{color:var(--tan)}
+  .frow.highlight{background:rgba(10,92,62,.07);padding:6px 10px;border-radius:7px;margin:4px -10px;font-weight:600}
+  .frow.highlight .fl{color:var(--ink)}
+  .frow.highlight .fr{color:#0a5c3e}
+  .tot-row{display:flex;justify-content:space-between;align-items:flex-end;padding:10px 0 4px;border-top:1.5px solid var(--line);margin-top:6px}
+  .tot-row .tl{font-size:13px;font-weight:600;color:var(--ink)}
+  .tot-row .tr{text-align:right}
+  .tot-row .big{font-size:26px;font-weight:600;letter-spacing:-.01em;color:var(--chrome)}
+  .tot-row .ex{font-size:11px;color:var(--dim);margin-top:2px}
   .foot{color:var(--dim);font-size:11.5px;margin-top:18px;text-align:center}
   .specrow{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center;padding:11px 15px;border-bottom:1px solid var(--line)}
   .specrow:last-child{border-bottom:0}
@@ -709,12 +718,14 @@ function compute(cartArg, freightMult){
 
   var groups={};
   lines.forEach(function(L){(groups[L.it.sub]=groups[L.it.sub]||[]).push(L);});
-  var savingEx=0, shipBefore=0, shipAfter=0, gdetail=[];
+  var savingEx=0, shipBefore=0, shipAfter=0, shipMax=0, gdetail=[];
   Object.keys(groups).forEach(function(k){
     var fb=groups[k].filter(function(L){return L.g&gt;0;});
     if(fb.length===0) return;
     var units=fb.reduce(function(a,L){return a+L.qty;},0);
-    var kept=Math.max.apply(null,fb.map(function(L){return L.g;})) * mult;
+    var rawMax=Math.max.apply(null,fb.map(function(L){return L.g;}));
+    shipMax=Math.max(shipMax, rawMax);          // highest single item, before multiplier
+    var kept=rawMax * mult;
     var maxLine=null; fb.forEach(function(L){if(!maxLine &amp;&amp; L.g*mult===kept) maxLine=L;});
     var baked=fb.reduce(function(a,L){return a+L.g*L.qty;},0);
     var sav=baked-kept; savingEx+=sav; shipBefore+=baked; shipAfter+=kept;
@@ -743,7 +754,7 @@ function compute(cartArg, freightMult){
 
   return {lines:lines,naiveEx:naiveEx,naiveInc:naiveInc,savingEx:savingEx,
     netEx:netEx,withFee:withFee,gst:gst,totalInc:totalInc,gdetail:gdetail,
-    shipBefore:shipBefore,shipAfter:shipAfter};
+    shipBefore:shipBefore,shipAfter:shipAfter,shipMax:shipMax};
 }
 
 function addItem(id){var f=cart.filter(function(c){return c.id===id;})[0]; if(f) f.qty++; else cart.push({id:id,qty:1}); render(true);}
@@ -783,19 +794,11 @@ function renderQuote(flash){
   var el=document.getElementById(&#x27;quote&#x27;);
   if(!r.lines.length){el.innerHTML=&#x27;&lt;div class=&quot;empty&quot;&gt;Add services from the left to build a quote.&lt;/div&gt;&#x27;; return;}
 
-  var saved=r.savingEx&gt;0;
-  var ba=&#x27;&lt;div class=&quot;ba&quot;&gt;&lt;div class=&quot;tag&quot;&gt;Internal view&lt;/div&gt;&#x27;+
-    (saved?&#x27;&lt;div class=&quot;row naive&quot;&gt;&lt;span&gt;If freight were charged per piece&lt;/span&gt;&lt;span class=&quot;mono&quot;&gt;&#x27;+fmt0(r.naiveInc)+&#x27;&lt;/span&gt;&lt;/div&gt;&#x27;:&#x27;&#x27;)+
-    &#x27;&lt;div class=&quot;row&quot; style=&quot;margin-top:&#x27;+(saved?&#x27;4px&#x27;:&#x27;0&#x27;)+&#x27;&quot;&gt;&lt;span class=&quot;eyebrow&quot; style=&quot;color:var(--mut)&quot;&gt;Quote total (inc GST)&lt;/span&gt;&#x27;+
-    &#x27;&lt;span class=&quot;big &#x27;+(flash?&#x27;flash&#x27;:&#x27;&#x27;)+&#x27;&quot;&gt;&#x27;+fmt0(r.totalInc)+&#x27;&lt;/span&gt;&lt;/div&gt;&#x27;+
-    &#x27;&lt;div style=&quot;text-align:right;font-size:12px;color:var(--dim);margin-top:2px&quot;&gt;ex GST &#x27;+exFmt(r.totalInc)+&#x27;&lt;/div&gt;&#x27;+
-    (saved?&#x27;&lt;div class=&quot;savebadge&quot;&gt;Shared shipping recovered &#x27;+fmt0(r.naiveInc-r.totalInc)+&#x27; of freight you won&amp;rsquo;t spend&lt;/div&gt;&#x27;:&#x27;&#x27;)+
-    &#x27;&lt;/div&gt;&#x27;;
-
+  // Cart rows
   var rows=r.lines.map(function(L){
     var recon;
     if(L.g&gt;0){
-      var parts=[&#x27;freight in price &#x27;+fmt0(L.freightBaked)];
+      var parts=[&#x27;freight in price: &#x27;+fmt0(L.freightBaked)+&#x27; ex&#x27;];
       if(L.keptEx&gt;0) parts.push(&#x27;&lt;span class=&quot;rk&quot;&gt;kept &#x27;+fmt0(L.keptEx)+&#x27;&lt;/span&gt;&#x27;);
       if(L.droppedEx&gt;0) parts.push(&#x27;&lt;span class=&quot;rd&quot;&gt;dropped \u2212&#x27;+fmt0(L.droppedEx)+&#x27;&lt;/span&gt;&#x27;);
       recon=parts.join(&#x27; &amp;middot; &#x27;);
@@ -810,13 +813,47 @@ function renderQuote(flash){
       &#x27;&lt;button class=&quot;rm&quot; aria-label=&quot;Remove&quot; title=&quot;Remove&quot; onclick=&quot;removeItem(\&#x27;&#x27;+L.it.id+&#x27;\&#x27;)&quot;&gt;\u00d7&lt;/button&gt;&lt;/div&gt;&lt;/div&gt;&#x27;;
   }).join(&#x27;&#x27;);
 
-  var shipBlock = r.shipBefore&gt;0 ? &#x27;&lt;div class=&quot;sect&quot;&gt;&lt;div class=&quot;lbl&quot;&gt;Shipping allocated in the price (ex GST)&lt;/div&gt;&#x27;+
-    &#x27;&lt;div class=&quot;aline&quot;&gt;&lt;span&gt;Before &amp;mdash; charged per piece&lt;/span&gt;&lt;span class=&quot;mono&quot;&gt;&#x27;+fmt0(r.shipBefore)+&#x27;&lt;/span&gt;&lt;/div&gt;&#x27;+
-    &#x27;&lt;div class=&quot;aline&quot;&gt;&lt;span&gt;Now &amp;mdash; this quote&lt;/span&gt;&lt;span class=&quot;mono rk&quot;&gt;&#x27;+fmt0(r.shipAfter)+&#x27;&lt;/span&gt;&lt;/div&gt;&#x27;+
-    &#x27;&lt;div class=&quot;aline&quot;&gt;&lt;span&gt;Freight removed&lt;/span&gt;&lt;span class=&quot;mono rd&quot;&gt;\u2212&#x27;+fmt0(r.shipBefore-r.shipAfter)+&#x27;&lt;/span&gt;&lt;/div&gt;&#x27;+
-    &#x27;&lt;/div&gt;&#x27; : &#x27;&#x27;;
+  // Freight breakdown — only shown when freight is present
+  var freightBlock = &#x27;&#x27;;
+  if(r.shipBefore &gt; 0){
+    var afterCC = r.shipAfter * 1.02;
+    freightBlock =
+      &#x27;&lt;div class=&quot;sect&quot;&gt;&lt;div class=&quot;lbl&quot;&gt;Freight breakdown &amp;mdash; ex GST&lt;/div&gt;&#x27;+
+        &#x27;&lt;div class=&quot;frow per-piece&quot;&gt;&#x27;+
+          &#x27;&lt;span class=&quot;fl&quot;&gt;Per piece &amp;mdash; if all items shipped individually&lt;/span&gt;&#x27;+
+          &#x27;&lt;span class=&quot;fr&quot;&gt;&#x27;+fmt0(r.shipBefore)+&#x27;&lt;/span&gt;&#x27;+
+        &#x27;&lt;/div&gt;&#x27;+
+        &#x27;&lt;div class=&quot;frow&quot;&gt;&#x27;+
+          &#x27;&lt;span class=&quot;fl&quot;&gt;Highest single freight item retained&lt;/span&gt;&#x27;+
+          &#x27;&lt;span class=&quot;fr&quot;&gt;&#x27;+fmt0(r.shipMax)+&#x27;&lt;/span&gt;&#x27;+
+        &#x27;&lt;/div&gt;&#x27;+
+        &#x27;&lt;div class=&quot;frow highlight&quot;&gt;&#x27;+
+          &#x27;&lt;span class=&quot;fl&quot;&gt;&amp;times; 1.5 multiplier applied&lt;/span&gt;&#x27;+
+          &#x27;&lt;span class=&quot;fr&quot;&gt;&#x27;+fmt0(r.shipAfter)+&#x27;&lt;/span&gt;&#x27;+
+        &#x27;&lt;/div&gt;&#x27;+
+        &#x27;&lt;div class=&quot;frow&quot;&gt;&#x27;+
+          &#x27;&lt;span class=&quot;fl&quot;&gt;&amp;times; 1.02 processing fee&lt;/span&gt;&#x27;+
+          &#x27;&lt;span class=&quot;fr&quot;&gt;&#x27;+fmt0(afterCC)+&#x27;&lt;/span&gt;&#x27;+
+        &#x27;&lt;/div&gt;&#x27;+
+      &#x27;&lt;/div&gt;&#x27;;
+  }
 
-  el.innerHTML=ba+shipBlock+rows;
+  // Quote totals
+  var totalsBlock =
+    &#x27;&lt;div class=&quot;sect&quot;&gt;&#x27;+
+      &#x27;&lt;div class=&quot;lbl&quot;&gt;Quote totals&lt;/div&gt;&#x27;+
+      &#x27;&lt;div class=&quot;aline&quot;&gt;&lt;span&gt;Ex GST&lt;/span&gt;&lt;span class=&quot;mono&quot;&gt;&#x27;+fmt(r.withFee)+&#x27;&lt;/span&gt;&lt;/div&gt;&#x27;+
+      &#x27;&lt;div class=&quot;aline&quot;&gt;&lt;span&gt;GST (10%)&lt;/span&gt;&lt;span class=&quot;mono&quot;&gt;&#x27;+fmt(r.gst)+&#x27;&lt;/span&gt;&lt;/div&gt;&#x27;+
+      &#x27;&lt;div class=&quot;tot-row&quot;&gt;&#x27;+
+        &#x27;&lt;span class=&quot;tl&quot;&gt;Inc GST&lt;/span&gt;&#x27;+
+        &#x27;&lt;div class=&quot;tr&quot;&gt;&#x27;+
+          &#x27;&lt;div class=&quot;big &#x27;+(flash?&#x27;flash&#x27;:&#x27;&#x27;)+&#x27;&quot;&gt;&#x27;+fmt0(r.totalInc)+&#x27;&lt;/div&gt;&#x27;+
+          &#x27;&lt;div class=&quot;ex&quot;&gt;ex GST &#x27;+exFmt(r.totalInc)+&#x27;&lt;/div&gt;&#x27;+
+        &#x27;&lt;/div&gt;&#x27;+
+      &#x27;&lt;/div&gt;&#x27;+
+    &#x27;&lt;/div&gt;&#x27;;
+
+  el.innerHTML = freightBlock + totalsBlock + rows;
 }
 
 function render(flash){renderCatalogue();renderQuote(flash);updateSaveSpecBtn();}
@@ -934,7 +971,7 @@ loadCatalogue();
     <div>
       <div style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--brand);font-weight:600;margin-bottom:3px">Chrome Mercy Studio</div>
       <h2 style="font-size:20px;font-weight:600;margin:0;letter-spacing:-.01em;color:var(--text)">Specifications</h2>
-      <div style="font-size:13px;color:var(--text2);margin-top:3px">Classic leather throughout. Prices recalculate live from catalogue — freight ×1.5 multiplier applied.</div>
+      <div style="font-size:13px;color:var(--text2);margin-top:3px">Select any two specifications to compare side by side.</div>
     </div>
     <div id="spec-status" style="font-size:12px;color:var(--text2)"></div>
   </div>
@@ -1037,36 +1074,39 @@ function switchTab(tab) {
 }
 
 // ── SPECIFICATIONS TAB ────────────────────────────────────────────
-var SPEC_LIST = [];
-var SPEC_PRICES = {};    // {code: totalInc} from iframe
-var specTabReady = false;
+var SPEC_LIST      = [];
+var SPEC_PRICES    = {};  // {code: totalInc} from iframe
+var specTabReady   = false;
 
 function fmt0(n){ return '$'+Math.round(n||0).toLocaleString('en-AU'); }
 
 var COLLECTIONS = ['Select','Reserve','Private','Atelier'];
-var COL_ID = {Select:'select',Reserve:'reserve',Private:'private',Atelier:'atelier'};
+
+// Each comparison slot has its own state
+var SLOT_DEFAULTS = [
+  {collection:'Select',  tier:'1', seats:'5'},
+  {collection:'Reserve', tier:'1', seats:'5'}
+];
 
 async function initSpecTab(){
-  if(specTabReady) { renderSpecGrid(); return; }
+  if(specTabReady){ renderSpecGrid(); return; }
   document.getElementById('spec-status').textContent = 'Loading\u2026';
-  // Load spec list from Apps Script
   try{
     var res = await fetch(APPS_SCRIPT_URL+'?action=list_specifications&t='+Date.now());
     var json = await res.json();
     SPEC_LIST = (json.status==='ok' && json.specifications) ? json.specifications : [];
   }catch(e){ SPEC_LIST=[]; }
-  // Render column shells immediately so user sees content
   renderSpecGrid();
   document.getElementById('spec-status').textContent = 'Fetching live prices\u2026';
-  // Get reconciled totals from iframe (has 1.5× multiplier already applied)
   try{
-    var prices = await getSpecPricesFromIframe(6000);
+    var prices = await getSpecPricesFromIframe(7000);
     SPEC_PRICES = {};
     prices.forEach(function(s){ SPEC_PRICES[s.code] = s.totalInc; });
   }catch(e){ SPEC_PRICES={}; }
   specTabReady = true;
-  renderSpecGrid();
-  document.getElementById('spec-status').textContent = SPEC_LIST.length+' specifications loaded';
+  // Re-render body of each slot with prices now available
+  [0,1].forEach(function(idx){ refreshSlotBody(idx); });
+  document.getElementById('spec-status').textContent = SPEC_LIST.length+' specifications';
 }
 
 function getSpecPricesFromIframe(timeoutMs){
@@ -1081,99 +1121,117 @@ function getSpecPricesFromIframe(timeoutMs){
     }
     window.addEventListener('message',onMsg);
     frame.contentWindow.postMessage({type:'cm_get_spec_prices'},'*');
-    setTimeout(function(){ if(!done){ window.removeEventListener('message',onMsg); resolve([]); } }, timeoutMs||6000);
+    setTimeout(function(){ if(!done){ window.removeEventListener('message',onMsg); resolve([]); } }, timeoutMs||7000);
   });
 }
 
-function specByName(name){
+function specByFilters(collection, tier, seats){
+  var name = collection+' \u2014 '+seats+' Seat \u2014 T'+tier;
   return SPEC_LIST.filter(function(s){ return s.name===name; })[0]||null;
+}
+
+function collectionForSlot(idx){
+  var el = document.getElementById('scol-'+idx);
+  return el ? el.value : SLOT_DEFAULTS[idx].collection;
+}
+function tierForSlot(idx){
+  var el = document.getElementById('stier-'+idx);
+  return el ? el.value : SLOT_DEFAULTS[idx].tier;
+}
+function seatsForSlot(idx){
+  var el = document.getElementById('sseats-'+idx);
+  return el ? el.value : SLOT_DEFAULTS[idx].seats;
 }
 
 function renderSpecGrid(){
   var grid = document.getElementById('spec-grid');
-  grid.innerHTML = COLLECTIONS.map(function(col){
-    var cid = COL_ID[col];
-    return '<div class="spec-col" id="spcol-'+cid+'">'+
+  grid.innerHTML = [0,1].map(function(idx){
+    var d = SLOT_DEFAULTS[idx];
+    var collOpts = COLLECTIONS.map(function(c){
+      return '<option value="'+c+'"'+(c===d.collection?' selected':'')+'>'+c+'</option>';
+    }).join('');
+    return '<div class="spec-col">'+
       '<div class="spec-col-hd">'+
-        '<div class="eyebrow">Collection</div>'+
-        '<h3>'+col+'</h3>'+
-        '<div class="spec-code" id="scode-'+cid+'"></div>'+
+        '<div class="eyebrow">Specification '+(idx===0?'A':'B')+'</div>'+
+        '<h3 id="sname-'+idx+'">'+d.collection+'</h3>'+
+        '<div class="spec-code" id="scode-'+idx+'"></div>'+
       '</div>'+
       '<div class="spec-filters">'+
-        '<select id="stier-'+cid+'" onchange="updateSpecCol(\''+cid+'\')">'+
+        '<select id="scol-'+idx+'" onchange="updateSlot('+idx+')">'+collOpts+'</select>'+
+        '<select id="stier-'+idx+'" onchange="updateSlot('+idx+')">'+
           '<option value="1" selected>Tier 1</option>'+
           '<option value="2">Tier 2</option>'+
           '<option value="3">Tier 3</option>'+
           '<option value="4">Tier 4</option>'+
         '</select>'+
-        '<select id="sseats-'+cid+'" onchange="updateSpecCol(\''+cid+'\')">'+
+        '<select id="sseats-'+idx+'" onchange="updateSlot('+idx+')">'+
           '<option value="2">2 Seat</option>'+
           '<option value="5" selected>5 Seat</option>'+
           '<option value="7">7 Seat</option>'+
         '</select>'+
       '</div>'+
-      '<div id="sbody-'+cid+'"><div class="spec-loading">Loading\u2026</div></div>'+
+      '<div id="sbody-'+idx+'"><div class="spec-loading-msg">Loading\u2026</div></div>'+
     '</div>';
   }).join('');
-  // Render each column body
-  COLLECTIONS.forEach(function(col){ updateSpecCol(COL_ID[col]); });
+  [0,1].forEach(function(idx){ refreshSlotBody(idx); });
 }
 
-function updateSpecCol(cid){
-  var col = COLLECTIONS.filter(function(c){ return COL_ID[c]===cid; })[0];
-  var tier  = document.getElementById('stier-'+cid)  ? document.getElementById('stier-'+cid).value  : '1';
-  var seats = document.getElementById('sseats-'+cid) ? document.getElementById('sseats-'+cid).value : '5';
-  var specName = col+' \u2014 '+seats+' Seat \u2014 T'+tier;
-  var spec = specByName(specName);
-  var codeEl = document.getElementById('scode-'+cid);
-  var bodyEl = document.getElementById('sbody-'+cid);
+function updateSlot(idx){
+  var col = collectionForSlot(idx);
+  var nameEl = document.getElementById('sname-'+idx);
+  if(nameEl) nameEl.textContent = col;
+  refreshSlotBody(idx);
+}
+
+function refreshSlotBody(idx){
+  var collection = collectionForSlot(idx);
+  var tier       = tierForSlot(idx);
+  var seats      = seatsForSlot(idx);
+  var spec       = specByFilters(collection, tier, seats);
+  var codeEl     = document.getElementById('scode-'+idx);
+  var bodyEl     = document.getElementById('sbody-'+idx);
 
   if(!spec){
     if(codeEl) codeEl.textContent='';
     if(bodyEl) bodyEl.innerHTML='<div class="spec-missing">Specification not found</div>';
     return;
   }
-  if(codeEl) codeEl.textContent=spec.code;
+  if(codeEl) codeEl.textContent = spec.code;
 
-  // Build component rows using main CATALOGUE
-  var naiveTotal = 0;
+  // Component rows — use CATALOGUE for names and standalone prices
   var rowsHtml = spec.components.map(function(c){
     var item = CATALOGUE.find(function(r){ return r.id===c.id; });
-    if(!item) return '<tr><td class="svc" colspan="4" style="color:#9a9890;font-style:italic">'+c.id+' (not in catalogue)</td></tr>';
+    if(!item) return '<tr><td class="svc" colspan="3" style="color:#9a9890;font-style:italic">'+c.id+' (not in catalogue)</td></tr>';
     var unitInc = Number(item.final_inc_gst)||0;
     var lineInc = unitInc * c.qty;
     var unitEx  = Math.round(unitInc/1.1);
-    naiveTotal += lineInc;
-    var catBadge = item.category ? '<div class="cat-pill"><span>'+item.category+'</span></div>' : '';
     return '<tr>'+
-      '<td><div class="svc">'+(item.service_name||item.name||c.id)+'</div>'+catBadge+'</td>'+
-      '<td class="r">'+c.qty+'</td>'+
-      '<td class="r">'+fmt0(unitInc)+'<div class="ex-price">'+fmt0(unitEx)+' ex</div></td>'+
-      '<td class="r">'+fmt0(lineInc)+'</td>'+
+      '<td class="svc">'+(item.service_name||item.name||c.id)+'</td>'+
+      '<td class="qty-cell">'+c.qty+'</td>'+
+      '<td class="price-cell">'+fmt0(lineInc)+
+        '<div class="px">'+fmt0(unitEx)+' ex ea</div>'+
+      '</td>'+
     '</tr>';
   }).join('');
 
+  // Total from iframe (includes 1.5× freight multiplier)
   var totalInc = SPEC_PRICES[spec.code];
-  var freightAdj = (totalInc != null) ? (totalInc - naiveTotal) : null;
-  var isPos = freightAdj != null && freightAdj > 0;
-
-  var footHtml =
-    '<tr class="sub-row"><td colspan="3">Components subtotal (inc GST)</td><td class="r">'+fmt0(naiveTotal)+'</td></tr>'+
-    (freightAdj != null
-      ? '<tr class="adj-row'+(isPos?' pos':'')+'"><td colspan="3">Freight reconciliation (×1.5 multiplier)</td><td class="r">'+(freightAdj>=0?'+':'')+fmt0(freightAdj)+'</td></tr>'
-      : '<tr class="adj-row"><td colspan="3">Freight reconciliation</td><td class="r" style="color:#9a9890">Loading\u2026</td></tr>')+
-    '<tr class="total-row"><td colspan="3">Specification total (inc GST)</td><td class="r">'+(totalInc!=null ? fmt0(totalInc) : '<span style="color:#9a9890;font-size:13px">Loading\u2026</span>')+'</td></tr>';
+  var totalHtml = totalInc != null
+    ? fmt0(totalInc)+'<div class="ex-total">ex GST '+fmt0(totalInc/1.1)+'</div>'
+    : '<span style="color:#9a9890;font-size:13px;font-weight:400">Loading\u2026</span>';
 
   bodyEl.innerHTML =
     '<table class="spec-tbl">'+
       '<thead><tr>'+
         '<th>Service</th>'+
         '<th class="r">Qty</th>'+
-        '<th class="r">Each</th>'+
         '<th class="r">Total</th>'+
       '</tr></thead>'+
       '<tbody>'+rowsHtml+'</tbody>'+
-      '<tfoot>'+footHtml+'</tfoot>'+
+      '<tfoot><tr>'+
+        '<td colspan="2">Specification total (inc GST)</td>'+
+        '<td class="r">'+totalHtml+'</td>'+
+      '</tr></tfoot>'+
     '</table>';
 }
 
