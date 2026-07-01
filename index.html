@@ -289,21 +289,35 @@ tbody td{padding:10px 12px;vertical-align:middle;overflow:hidden;text-overflow:e
 .spec-tbl tr:last-child td{border-bottom:0}
 .spec-tbl tfoot tr td{padding:10px 16px;color:#1a1917;font-size:13px}
 .spec-tbl tfoot tr td.r{text-align:right}
-.spec-tbl .ex-total{font-size:11px;color:#9a9890;font-weight:400;margin-top:2px}
-/* Individual price column — muted, reference only */
+.spec-tbl .ex-total{font-weight:400;margin-top:3px}
+/* Individual price column */
 .spec-tbl td.ind-price{text-align:right;color:#9a9890;font-size:13px}
-/* Package price column — prominent */
 .spec-tbl td.pkg-price{text-align:right;font-weight:600;font-size:14px;color:#1a1917}
-.pkg-save{color:#0a5c3e;font-weight:500;font-size:11px;margin-top:2px}
-/* Footer row 1 — if booked individually (muted) */
-.spec-tbl tr.spec-before td{background:#f8f7f4;border-top:1.5px solid rgba(0,0,0,0.08);color:#9a9890;font-size:12px;font-weight:400;padding:9px 16px}
-.spec-tbl tr.spec-before td.r{color:#6b6860;font-size:13px}
-/* Footer row 2 — saving (green, medium weight) */
-.spec-tbl tr.spec-saving td{background:#f0faf5;border-top:none;color:#0a5c3e;font-size:13px;font-weight:600;padding:9px 16px}
-.spec-tbl tr.spec-saving td.r{font-size:15px;color:#0a5c3e}
-/* Footer row 3 — spec total (large, red, hero) */
-.spec-tbl tr.spec-total-row td{background:#f0ede8;border-top:2px solid rgba(72,4,5,0.15);font-weight:700;font-size:14px;color:#1a1917;padding:13px 16px}
-.spec-tbl tr.spec-total-row td.r{font-size:20px;color:var(--chrome);letter-spacing:-.01em}
+/* ── THREE SELLING ROWS ───────────────────────────────────────── */
+/* Row 1: If booked individually — warm grey, struck-through feel */
+.spec-tbl tr.spec-before td{
+  background:#f5f3f0;border-top:2px solid #e2dfd8;
+  color:#6b6860;font-size:13px;font-weight:500;padding:12px 16px;letter-spacing:.01em}
+.spec-tbl tr.spec-before td.r{
+  font-size:16px;font-weight:600;color:#9a9890;
+  text-decoration:line-through;text-decoration-color:#c0b8b0}
+.spec-tbl tr.spec-before .ex-total{font-size:11px;color:#b0a898;text-decoration:none}
+/* Row 2: Saving — strong green, punchy */
+.spec-tbl tr.spec-saving td{
+  background:#0a5c3e;border-top:none;
+  color:rgba(255,255,255,.85);font-size:13px;font-weight:600;
+  padding:12px 16px;letter-spacing:.02em;text-transform:uppercase}
+.spec-tbl tr.spec-saving td.r{
+  font-size:20px;font-weight:700;color:#fff;letter-spacing:-.01em}
+.spec-tbl tr.spec-saving .ex-total{font-size:11px;color:rgba(255,255,255,.6);text-transform:none;letter-spacing:0}
+/* Row 3: Spec total — Chrome Mercy red, largest, hero */
+.spec-tbl tr.spec-total-row td{
+  background:var(--chrome);border-top:none;
+  color:rgba(255,255,255,.85);font-size:14px;font-weight:700;
+  padding:14px 16px;letter-spacing:.02em;text-transform:uppercase}
+.spec-tbl tr.spec-total-row td.r{
+  font-size:24px;font-weight:700;color:#fff;letter-spacing:-.02em}
+.spec-tbl tr.spec-total-row .ex-total{font-size:11px;color:rgba(255,255,255,.6);text-transform:none;letter-spacing:0}
 .spec-missing{padding:32px 16px;font-size:13px;color:#9a9890;text-align:center}
 .spec-loading-msg{padding:24px 16px;font-size:13px;color:#9a9890;text-align:center}
 .sp-col li.upsell{color:var(--chrome);font-style:italic;margin-top:6px;list-style:none;margin-left:-4px;padding-left:0}
@@ -1376,7 +1390,7 @@ function refreshSlotBody(idx){
   var totalInc = Number(spec.final_inc_gst)||0;
   var recipe = SPEC_RECIPES[spec.service_name||spec.name] || [];
 
-  // Two-pass: compute naiveTotal first so we can proportion package prices per line
+  // Two-pass: compute naiveTotal first so footer rows can reference it
   var naiveTotal = 0;
   var componentData = recipe.map(function(c){
     var item=CATALOGUE.find(function(r){return r.id===c.id || r.sku===c.id;});
@@ -1390,21 +1404,15 @@ function refreshSlotBody(idx){
   var rowsHtml;
   if(componentData.length){
     rowsHtml = componentData.map(function(d){
-      // Package price = proportional share of spec total based on this component's weight
       var pkgLine = naiveTotal > 0 ? Math.round((d.lineInc / naiveTotal) * totalInc) : 0;
-      var lineSaving = d.lineInc - pkgLine;
-      var savingPill = lineSaving > 0
-        ? '<div class="px pkg-save">saves '+fmt0(lineSaving)+'</div>'
-        : '';
       return '<tr>'+
         '<td class="svc">'+d.nm+'</td>'+
         '<td class="qty-cell">'+d.qty+'</td>'+
-        '<td class="price-cell ind-price">'+fmt0(d.lineInc)+'<div class="px">ex '+fmt0(d.unitInc/1.1)+' ea</div></td>'+
-        '<td class="price-cell pkg-price">'+fmt0(pkgLine)+savingPill+'</td>'+
+        '<td class="price-cell">'+fmt0(pkgLine)+'<div class="px">'+fmt0(pkgLine/1.1)+' ex</div></td>'+
       '</tr>';
     }).join('');
   } else {
-    rowsHtml = '<tr><td class="svc" colspan="4" style="color:#9a9890">Component list unavailable</td></tr>';
+    rowsHtml = '<tr><td class="svc" colspan="3" style="color:#9a9890">Component list unavailable</td></tr>';
   }
 
   var saving = naiveTotal - totalInc;
@@ -1414,23 +1422,22 @@ function refreshSlotBody(idx){
       '<thead><tr>'+
         '<th>Service</th>'+
         '<th class="r">Qty</th>'+
-        '<th class="r">Individual</th>'+
-        '<th class="r">In package</th>'+
+        '<th class="r">Package price</th>'+
       '</tr></thead>'+
       '<tbody>'+rowsHtml+'</tbody>'+
       '<tfoot>'+
         '<tr class="spec-before">'+
-          '<td colspan="3">If booked individually</td>'+
+          '<td colspan="2">If booked individually</td>'+
           '<td class="r">'+fmt0(naiveTotal)+'<div class="ex-total">ex GST '+fmt0(naiveTotal/1.1)+'</div></td>'+
         '</tr>'+
         (saving>0
           ? '<tr class="spec-saving">'+
-              '<td colspan="3">Specification saving</td>'+
+              '<td colspan="2">Specification saving</td>'+
               '<td class="r">\u2212'+fmt0(saving)+'<div class="ex-total">ex GST \u2212'+fmt0(saving/1.1)+'</div></td>'+
             '</tr>'
           : '')+
         '<tr class="spec-total-row">'+
-          '<td colspan="3">Specification total</td>'+
+          '<td colspan="2">Specification total</td>'+
           '<td class="r">'+fmt0(totalInc)+'<div class="ex-total">ex GST '+fmt0(totalInc/1.1)+'</div></td>'+
         '</tr>'+
       '</tfoot>'+
