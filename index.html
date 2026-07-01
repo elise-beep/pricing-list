@@ -287,37 +287,18 @@ tbody td{padding:10px 12px;vertical-align:middle;overflow:hidden;text-overflow:e
 .spec-tbl td.price-cell{text-align:right;white-space:nowrap}
 .spec-tbl td.price-cell .px{font-size:11px;color:#9a9890;margin-top:1px}
 .spec-tbl tr:last-child td{border-bottom:0}
-.spec-tbl tfoot tr td{padding:10px 16px;color:#1a1917;font-size:13px}
+.spec-tbl tfoot tr td{padding:8px 16px;font-size:13px;font-weight:500}
 .spec-tbl tfoot tr td.r{text-align:right}
-.spec-tbl .ex-total{font-weight:400;margin-top:3px}
-/* Individual price column */
-.spec-tbl td.ind-price{text-align:right;color:#9a9890;font-size:13px}
-.spec-tbl td.pkg-price{text-align:right;font-weight:600;font-size:14px;color:#1a1917}
-/* ── THREE SELLING ROWS ───────────────────────────────────────── */
-/* Row 1: If booked individually — warm grey, struck-through feel */
-.spec-tbl tr.spec-before td{
-  background:#f5f3f0;border-top:2px solid #e2dfd8;
-  color:#6b6860;font-size:13px;font-weight:500;padding:12px 16px;letter-spacing:.01em}
-.spec-tbl tr.spec-before td.r{
-  font-size:16px;font-weight:600;color:#9a9890;
-  text-decoration:line-through;text-decoration-color:#c0b8b0}
-.spec-tbl tr.spec-before .ex-total{font-size:11px;color:#b0a898;text-decoration:none}
-/* Row 2: Saving — strong green, punchy */
-.spec-tbl tr.spec-saving td{
-  background:#0a5c3e;border-top:none;
-  color:rgba(255,255,255,.85);font-size:13px;font-weight:600;
-  padding:12px 16px;letter-spacing:.02em;text-transform:uppercase}
-.spec-tbl tr.spec-saving td.r{
-  font-size:20px;font-weight:700;color:#fff;letter-spacing:-.01em}
-.spec-tbl tr.spec-saving .ex-total{font-size:11px;color:rgba(255,255,255,.6);text-transform:none;letter-spacing:0}
-/* Row 3: Spec total — Chrome Mercy red, largest, hero */
-.spec-tbl tr.spec-total-row td{
-  background:var(--chrome);border-top:none;
-  color:rgba(255,255,255,.85);font-size:14px;font-weight:700;
-  padding:14px 16px;letter-spacing:.02em;text-transform:uppercase}
-.spec-tbl tr.spec-total-row td.r{
-  font-size:24px;font-weight:700;color:#fff;letter-spacing:-.02em}
-.spec-tbl tr.spec-total-row .ex-total{font-size:11px;color:rgba(255,255,255,.6);text-transform:none;letter-spacing:0}
+.spec-tbl .ex-total{font-size:11px;font-weight:400;margin-top:2px;opacity:.75}
+/* Row 1: If booked individually — red */
+.spec-tbl tr.spec-before td{background:#c0392b;color:#fff;border-top:2px solid rgba(0,0,0,0.1)}
+.spec-tbl tr.spec-before td.r{color:#fff;font-size:13px;font-weight:600}
+/* Row 2: Specification saving — green */
+.spec-tbl tr.spec-saving td{background:#0a5c3e;color:#fff;border-top:none}
+.spec-tbl tr.spec-saving td.r{color:#fff;font-size:13px;font-weight:600}
+/* Row 3: Specification total — blue */
+.spec-tbl tr.spec-total-row td{background:#1D4ED8;color:#fff;border-top:none}
+.spec-tbl tr.spec-total-row td.r{color:#fff;font-size:13px;font-weight:700}
 .spec-missing{padding:32px 16px;font-size:13px;color:#9a9890;text-align:center}
 .spec-loading-msg{padding:24px 16px;font-size:13px;color:#9a9890;text-align:center}
 .sp-col li.upsell{color:var(--chrome);font-style:italic;margin-top:6px;list-style:none;margin-left:-4px;padding-left:0}
