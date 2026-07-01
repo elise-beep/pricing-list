@@ -267,8 +267,7 @@ tbody td{padding:10px 12px;vertical-align:middle;overflow:hidden;text-overflow:e
 .live-error{margin:12px 20px;padding:12px 16px;border-radius:8px;font-size:14px;font-weight:500;background:#fdecea;color:#8b1a1a;border:1px solid #f5c6cb}
 .live-error.loading{background:#eef2ff;color:#3a4a8b;border-color:#c7d2fe}
 /* ── SPECIFICATIONS TAB ─────────────────────────────────────── */
-.spec-layout{display:grid;grid-template-columns:1fr 380px;gap:20px;padding:20px 24px 40px;align-items:start}
-@media(max-width:1100px){.spec-layout{grid-template-columns:1fr}}
+.spec-layout{display:flex;flex-direction:column;gap:0;padding:20px 24px 40px}
 .spec-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
 @media(max-width:800px){.spec-grid{grid-template-columns:1fr}}
 .spec-col{background:#fff;border:0.5px solid rgba(0,0,0,0.1);border-radius:12px;overflow:hidden}
@@ -291,24 +290,57 @@ tbody td{padding:10px 12px;vertical-align:middle;overflow:hidden;text-overflow:e
 .spec-tbl tfoot tr td{border-top:1.5px solid rgba(0,0,0,0.1);font-weight:700;font-size:15px;padding:12px 16px;background:#f0ede8;color:#1a1917}
 .spec-tbl tfoot tr td.r{font-size:18px;color:var(--chrome);letter-spacing:-.01em}
 .spec-tbl tfoot .ex-total{font-size:11px;color:#9a9890;font-weight:400;margin-top:2px}
+.spec-tbl tr.spec-before td{font-weight:400;font-size:13px;color:#6b6860;background:#fafaf8;border-top:1px solid rgba(0,0,0,0.07);padding:9px 16px}
+.spec-tbl tr.spec-before td.r{font-size:14px;color:#6b6860}
+.spec-tbl tr.spec-saving td{font-weight:500;font-size:13px;color:#0a5c3e;background:#f0faf5;padding:7px 16px;border-top:none}
+.spec-tbl tr.spec-saving td.r{font-size:14px;color:#0a5c3e}
 .spec-missing{padding:32px 16px;font-size:13px;color:#9a9890;text-align:center}
 .spec-loading-msg{padding:24px 16px;font-size:13px;color:#9a9890;text-align:center}
-/* Sales script accordion */
-.spec-script{position:sticky;top:16px}
-.script-hd{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--brand);font-weight:600;margin-bottom:12px}
-.acc-item{background:#fff;border:0.5px solid rgba(0,0,0,0.1);border-radius:10px;margin-bottom:8px;overflow:hidden}
-.acc-btn{width:100%;text-align:left;padding:12px 14px;font-size:13px;font-weight:600;color:#1a1917;background:#fff;border:none;cursor:pointer;font-family:inherit;display:flex;justify-content:space-between;align-items:center;gap:8px}
-.acc-btn:hover{background:#faf9f6}
-.acc-btn .chev{color:#9a9890;transition:transform .15s;font-size:11px}
-.acc-item.open .acc-btn .chev{transform:rotate(90deg)}
-.acc-body{display:none;padding:0 14px 14px;font-size:13px;line-height:1.6;color:#4a4844}
-.acc-item.open .acc-body{display:block}
-.acc-body p{margin:8px 0}
-.acc-body .quote{background:#f5f2ec;border-left:2px solid var(--brand);border-radius:0 7px 7px 0;padding:9px 11px;margin:8px 0;font-style:italic;color:#3a3834}
-.acc-body .price-tag{display:inline-block;background:#f0ede8;border-radius:6px;padding:2px 8px;font-weight:600;color:var(--chrome);font-family:monospace;font-size:12px}
-.acc-body ul{margin:8px 0;padding-left:18px}
-.acc-body li{margin:4px 0}
-.acc-body .lbl{font-weight:600;color:#1a1917;font-size:12px;text-transform:uppercase;letter-spacing:.04em;margin-top:12px;display:block}
+.sp-col li.upsell{color:var(--chrome);font-style:italic;margin-top:6px;list-style:none;margin-left:-4px;padding-left:0}
+.sp-col li.upsell::before{content:'\2192\00a0';font-style:normal}
+/* Price difference calculator */
+.spec-delta{margin-top:16px;background:#fff;border:0.5px solid rgba(0,0,0,0.1);border-radius:12px;padding:16px 20px;display:none}
+.spec-delta.visible{display:block}
+.spec-delta-title{font-size:10px;text-transform:uppercase;letter-spacing:.1em;font-weight:700;color:#9a9890;margin-bottom:12px}
+.spec-delta-grid{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px}
+.spec-delta-col{text-align:center}
+.spec-delta-col .dl-label{font-size:11px;color:#9a9890;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+.spec-delta-col .dl-name{font-size:13px;font-weight:600;color:#1a1917;margin-bottom:2px}
+.spec-delta-col .dl-price{font-size:22px;font-weight:700;color:var(--chrome);letter-spacing:-.01em}
+.spec-delta-col .dl-ex{font-size:11px;color:#9a9890;margin-top:2px}
+.spec-delta-arrow{text-align:center;color:#9a9890}
+.spec-delta-diff{text-align:center;padding:12px 20px;background:#f0faf5;border-radius:10px;border:1px solid rgba(10,92,62,.15)}
+.spec-delta-diff .dd-label{font-size:11px;color:#6b6860;margin-bottom:4px}
+.spec-delta-diff .dd-amount{font-size:24px;font-weight:700;color:#0a5c3e;letter-spacing:-.01em}
+.spec-delta-diff .dd-ex{font-size:11px;color:#9a9890;margin-top:2px}
+.spec-delta-diff .dd-note{font-size:12px;color:#5c5b57;margin-top:6px;line-height:1.4}
+.spec-delta-diff.higher .dd-amount{color:var(--chrome)}
+/* Sales script two-column reference */
+.spec-script{margin-top:28px}
+.script-hd{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--brand);font-weight:600;margin-bottom:14px}
+.script-cols{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+@media(max-width:900px){.script-cols{grid-template-columns:1fr}}
+.script-panel{display:flex;flex-direction:column;gap:0}
+.sp-title{font-size:10px;text-transform:uppercase;letter-spacing:.1em;font-weight:700;color:#9a9890;margin:0 0 8px;padding-bottom:6px;border-bottom:1px solid rgba(0,0,0,0.08)}
+.sp-col{background:#fff;border:0.5px solid rgba(0,0,0,0.1);border-radius:10px;padding:12px 14px;margin-bottom:8px}
+.sp-col-name{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px}
+.sp-col-price{font-size:18px;font-weight:700;color:var(--chrome);letter-spacing:-.01em;margin-bottom:8px}
+.sp-col-price span{font-size:12px;font-weight:400;color:#9a9890;letter-spacing:0}
+.sp-col ul{margin:0;padding-left:16px;color:#5c5b57;font-size:12.5px;line-height:1.55}
+.sp-col li{margin:2px 0}
+.sp-col.sel .sp-col-name{color:#374151}
+.sp-col.res .sp-col-name{color:#1D4ED8}
+.sp-col.pri{border-color:var(--brand);border-width:1.5px}
+.sp-col.pri .sp-col-name{color:var(--chrome)}
+.sp-col.atl .sp-col-name{color:#6D28D9}
+.sp-note{font-size:11.5px;color:#9a9890;line-height:1.5;padding:10px 12px;background:#f8f7f4;border-radius:8px;margin-top:4px}
+.sp-steps{margin:0 0 4px;padding-left:20px;font-size:12.5px;color:#1a1917;line-height:1.6}
+.sp-steps li{margin:4px 0}
+.sp-steps em{color:#480405;font-style:italic}
+.sp-list{margin:0 0 4px;padding-left:16px;font-size:12.5px;color:#1a1917;line-height:1.6}
+.sp-list li{margin:3px 0}
+.sp-list em{color:#480405;font-style:italic}
+.sp-list b{color:#1a1917}
 </style>
 </head>
 <body>
@@ -958,6 +990,7 @@ loadCatalogue();
       <div class="spec-grid" id="spec-grid">
         <div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--text2);font-size:14px">Loading specifications&hellip;</div>
       </div>
+      <div class="spec-delta" id="spec-delta"></div>
     </div>
     <div class="spec-script" id="spec-script"></div>
   </div>
@@ -1079,66 +1112,124 @@ function initSpecTab(){
   specTabReady = true;
 }
 
-// ── SALES CALL SCRIPT (accordion reference) ───────────────────────
-// Starting prices are the T1 5-seat anchors at the strategic margins.
-var SALES_SCRIPT = [
-  {t:'Starting prices', h:
-    '<span class="lbl">Phone anchors &mdash; T1 5-seat "from"</span>'+
-    '<p><b>SELECT</b> from <span class="price-tag">$7,685 inc GST</span></p>'+
-    '<p><b>RESERVE</b> from <span class="price-tag">$12,745 inc GST</span></p>'+
-    '<p><b>PRIVATE</b> from <span class="price-tag">$16,229 inc GST</span></p>'+
-    '<p><b>ATELIER</b> from <span class="price-tag">$48,269 inc GST</span></p>'+
-    '<p style="color:#9a9890;font-size:12px">Always add: &ldquo;Final pricing depends on vehicle type, seating layout, material selection, design complexity, and the condition of the existing interior.&rdquo;</p>'},
-  {t:'Call structure', h:
-    '<p>The phone call sells the consultation. It should:</p>'+
-    '<ul><li>Confirm the vehicle</li><li>Understand the customer&rsquo;s goal</li>'+
-    '<li>Identify component problem vs cabin problem</li><li>Qualify fit</li>'+
-    '<li>Explain the relevant pathway</li><li>Give starting price expectations</li>'+
-    '<li>Confirm comfort with the starting investment</li><li>Book the Interior Direction Consultation</li></ul>'+
-    '<p>It should <b>not</b> give a final quote, lock materials, or become an unpaid design session.</p>'},
-  {t:'Opening', h:
-    '<div class="quote">&ldquo;Hi [Name], it&rsquo;s [Your Name] from Chrome Mercy Studio. Thanks for your enquiry about the [Vehicle]. I wanted to give you a quick call to understand what you&rsquo;re trying to achieve with the interior and see whether one of our pathways is the right fit. Does now still work?&rdquo;</div>'},
-  {t:'Starting-price comfort check', h:
-    '<div class="quote">&ldquo;Before we book the Interior Direction Consultation, I want to make sure the starting investment is comfortable for you. [PACKAGE] starts from $[PRICE] inc GST, and final pricing depends on selections and vehicle condition. Is that within the range you were expecting for this kind of work?&rdquo;</div>'+
-    '<p>Then stop talking.</p>'},
-  {t:'SELECT — Essential Refresh', h:
-    '<div class="quote">&ldquo;SELECT is our Essential Interior Refresh. It&rsquo;s best when the main issue is the seats and the key visible insert areas. It&rsquo;s not intended to transform the entire cabin, but it can make a strong difference if those are the surfaces letting the interior down most. SELECT starts from $7,685 inc GST. The only thing I&rsquo;d check is whether the rest of the cabin will still hold up once those areas are fresh &mdash; if not, PRIVATE may make more sense.&rdquo;</div>'},
-  {t:'RESERVE — Driver&rsquo;s Touchpoint', h:
-    '<div class="quote">&ldquo;RESERVE is our Driver&rsquo;s Touchpoint Upgrade. It&rsquo;s for owners who want the areas they touch and see most while driving to feel more complete &mdash; seats, steering wheel, shifter, handbrake, console, and door armrests. RESERVE starts from $12,745 inc GST. The reason some owners move from RESERVE to PRIVATE is that PRIVATE goes further into the details that make the whole cabin feel finished &mdash; especially seatbelts and removable dash components.&rdquo;</div>'},
-  {t:'PRIVATE — Collector Cabin (hero)', h:
-    '<div class="quote">&ldquo;PRIVATE is our Collector Cabin Rebuild, and it&rsquo;s the package I&rsquo;d recommend for most serious classic, European, exotic, and prestige interiors. It covers the key surfaces that define the cabin experience &mdash; seats, console lid, door card inserts and armrests, steering wheel, shifter, handbrake, seatbelt re-webbing, and removable dash components. If you only redo one or two parts, the rest of the cabin can start to look left behind. PRIVATE helps the interior feel cohesive. It starts from $16,229 inc GST. Based on what you&rsquo;ve told me, this is where I&rsquo;d start the conversation.&rdquo;</div>'},
-  {t:'ATELIER — Complete Bespoke', h:
-    '<div class="quote">&ldquo;ATELIER is our Complete Bespoke Interior &mdash; the full cabin pathway. No major surface left behind: full seats, full centre console, full door cards, full dashboard, full headliner, steering wheel, seatbelts, shifter, handbrake, and the complete material direction considered together. Best for show cars, collector vehicles, exotic builds, and high-end restorations. ATELIER starts from $48,269 inc GST. From there the final scope depends heavily on vehicle complexity, dashboard and console work, material selection, and condition.&rdquo;</div>'},
-  {t:'Package advantage (value framing)', h:
-    '<div class="quote">&ldquo;If we do those items individually, the total is usually quite a bit higher because every component becomes its own separate job &mdash; its own setup, material allocation, patterning, finish matching, scheduling, and quality control. The package is better value because we plan the interior as one cohesive scope from the beginning, and it usually gives a better result because the materials, colours, stitching, and details are decided together.&rdquo;</div>'+
-    '<span class="lbl">Never say</span>'+
-    '<ul><li>Cheaper because of overseas manufacturing</li><li>We save on shipping</li><li>We order in bulk overseas</li><li>It&rsquo;s discounted / we can make it cheaper</li></ul>'},
-  {t:'Objection: quote over the phone', h:
-    '<div class="quote">&ldquo;I can give you the starting price and likely pathway, but I wouldn&rsquo;t want to give a final quote over the phone because the final number depends on the vehicle, condition, materials, and selections. That&rsquo;s exactly what the Interior Direction Consultation is for.&rdquo;</div>'},
-  {t:'Objection: too expensive', h:
-    '<div class="quote">&ldquo;Totally understand. A lot of people initially compare it to retrimming one part, but the package is built around the cabin feeling cohesive. With PRIVATE, for example, we&rsquo;re not just doing seats &mdash; we&rsquo;re addressing the key surfaces that define how the interior feels. Were you mainly thinking of fixing one component, or bringing the whole interior up to the level of the car?&rdquo;</div>'},
-  {t:'Objection: cheaper elsewhere', h:
-    '<div class="quote">&ldquo;That makes sense. There will always be different levels of work in this space. We&rsquo;re usually not the cheapest, and we&rsquo;re not trying to be. Our focus is considered interior direction, material selection, fit, and finish. Are you mainly looking for the lowest price, or for the interior to be done in a way that matches the car long-term?&rdquo;</div>'+
-    '<p>If lowest price: &ldquo;Then we may not be the right fit, and that&rsquo;s completely okay.&rdquo;</p>'},
-  {t:'Close', h:
-    '<div class="quote">&ldquo;Based on what you&rsquo;ve told me, I think [PACKAGE] is the right starting point. Since you&rsquo;re comfortable with the starting range, the next step would be the Interior Direction Consultation. Would you like to book that in?&rdquo;</div>'}
-];
-
+// ── SALES CALL SCRIPT (phone reference) ───────────────────────
 function renderSalesScript(){
   var el=document.getElementById('spec-script');
   if(!el || el.dataset.built) return;
-  el.innerHTML='<div class="script-hd">Sales call script</div>'+
-    SALES_SCRIPT.map(function(s,i){
-      return '<div class="acc-item'+(i===0?' open':'')+'" id="acc-'+i+'">'+
-        '<button class="acc-btn" onclick="toggleAcc('+i+')">'+s.t+'<span class="chev">&#9654;</span></button>'+
-        '<div class="acc-body">'+s.h+'</div>'+
-      '</div>';
-    }).join('');
+  el.innerHTML=
+    '<div class="script-hd">Sales call reference</div>'+
+    '<div class="script-cols">'+
+
+    // LEFT — collections
+    '<div class="script-panel">'+
+      '<div class="sp-title">Collections &amp; starting prices</div>'+
+
+      '<div class="sp-col sel">'+
+        '<div class="sp-col-name">SELECT</div>'+
+        '<div class="sp-col-price">from $7,685 <span>inc GST</span></div>'+
+        '<ul>'+
+          '<li>Front &amp; rear seats</li>'+
+          '<li>Console lid</li>'+
+          '<li>Door centre inserts</li>'+
+          '<li>Best when seats are the main issue</li>'+
+          '<li class="upsell">For every surface you touch while driving, step up to Reserve &mdash; or go straight to Private and have the cabin feel completely resolved</li>'+
+        '</ul>'+
+      '</div>'+
+
+      '<div class="sp-col res">'+
+        '<div class="sp-col-name">RESERVE</div>'+
+        '<div class="sp-col-price">from $12,745 <span>inc GST</span></div>'+
+        '<ul>'+
+          '<li>Everything in Select</li>'+
+          '<li>Steering wheel, shifter, handbrake</li>'+
+          '<li>Door pull handles</li>'+
+          '<li>All surfaces you touch while driving</li>'+
+          '<li class="upsell">For seatbelts, armrests and the dash pieces that make the cabin feel finished, Private is only a step further &mdash; and usually the smarter choice</li>'+
+        '</ul>'+
+      '</div>'+
+
+      '<div class="sp-col pri">'+
+        '<div class="sp-col-name">PRIVATE ★ hero</div>'+
+        '<div class="sp-col-price">from $16,229 <span>inc GST</span></div>'+
+        '<ul>'+
+          '<li>Everything in Reserve</li>'+
+          '<li>Door armrests</li>'+
+          '<li>Seat belt re-webbing</li>'+
+          '<li>Removable dash components</li>'+
+          '<li>Cabin feels complete, not left behind</li>'+
+          '<li class="upsell">For clients who want every surface addressed &mdash; console, full door cards, dashboard, headliner &mdash; Atelier is the complete no-compromise transformation</li>'+
+        '</ul>'+
+      '</div>'+
+
+      '<div class="sp-col atl">'+
+        '<div class="sp-col-name">ATELIER</div>'+
+        '<div class="sp-col-price">from $48,269 <span>inc GST</span></div>'+
+        '<ul>'+
+          '<li>Full cabin — no major surface left behind</li>'+
+          '<li>Full console, door cards, dashboard, headliner</li>'+
+          '<li>Show cars, exotics, full restorations</li>'+
+          '<li>Final price varies heavily with complexity</li>'+
+          '<li class="upsell">There is no further step &mdash; this is the interior built as one complete direction, beginning to end</li>'+
+        '</ul>'+
+      '</div>'+
+
+      '<div class="sp-note">Always add: &ldquo;Final pricing depends on vehicle type, seating layout, material selection, design complexity, and interior condition.&rdquo;</div>'+
+    '</div>'+
+
+    // RIGHT — call flow + objections
+    '<div class="script-panel">'+
+      '<div class="sp-title">Call structure</div>'+
+      '<ol class="sp-steps">'+
+        '<li>Open &mdash; <em>"Does now still work?"</em></li>'+
+        '<li>Vehicle &mdash; make, year, daily/weekend/resto, stage of build</li>'+
+        '<li>Interior pain &mdash; <em>"When you open the door, what feels wrong?"</em></li>'+
+        '<li>Component vs cabin &mdash; fixing one thing or bringing the whole interior up?</li>'+
+        '<li>Recommend pathway &mdash; <em>"Based on what you told me, I&rsquo;d guide you toward [PACKAGE]"</em></li>'+
+        '<li>Starting price &mdash; give the from price, explain it depends on selections</li>'+
+        '<li>Comfort check &mdash; see below, then <b>stop talking</b></li>'+
+        '<li>Explain the Interior Direction Consultation</li>'+
+        '<li>Close &mdash; <em>"Would you like to book the Interior Direction Consultation?"</em></li>'+
+      '</ol>'+
+
+      '<div class="sp-title" style="margin-top:18px">Starting price comfort check</div>'+
+      '<ul class="sp-list">'+
+        '<li>Give the from price &amp; say it depends on vehicle, selections, condition</li>'+
+        '<li><em>"Is that within the range you were expecting for this kind of work?"</em></li>'+
+        '<li>Stop talking — let them respond</li>'+
+        '<li>Yes → explain consultation &amp; book</li>'+
+        '<li>Hesitates → <em>"Is it the overall investment, the package, or not knowing the direction yet?"</em></li>'+
+        '<li>Too much → <em>"We&rsquo;re better suited to meaningful upgrades — may not be the right fit."</em></li>'+
+      '</ul>'+
+
+      '<div class="sp-title" style="margin-top:18px">Package advantage</div>'+
+      '<ul class="sp-list">'+
+        '<li>Individual items = separate jobs, each with its own setup, scheduling &amp; QC</li>'+
+        '<li>Package = one planned interior direction — better value &amp; better result</li>'+
+        '<li><b>Never say:</b> cheaper overseas / we save on shipping / bulk orders / discounted</li>'+
+        '<li><b>Say instead:</b> planned as one cohesive scope / better finish consistency</li>'+
+      '</ul>'+
+
+      '<div class="sp-title" style="margin-top:18px">Objections</div>'+
+      '<ul class="sp-list">'+
+        '<li><b>Quote over phone</b> &mdash; final price needs vehicle, condition, materials → that&rsquo;s what the consultation is for</li>'+
+        '<li><b>Too expensive</b> &mdash; are you fixing one component or bringing the whole cabin up to the car?</li>'+
+        '<li><b>Cheaper elsewhere</b> &mdash; looking for lowest price or a result that holds up long-term? (If lowest price: may not be right fit)</li>'+
+        '<li><b>Need to think</b> &mdash; what part? Package, investment, timing, or direction?</li>'+
+        '<li><b>Talk to partner</b> &mdash; can I send a short summary of what we discussed?</li>'+
+        '<li><b>Why consultation?</b> &mdash; final quote needs choices to be made properly — quoting before that means guessing</li>'+
+      '</ul>'+
+
+      '<div class="sp-title" style="margin-top:18px">Do not</div>'+
+      '<ul class="sp-list">'+
+        '<li>Book consultation before confirming comfort with starting price</li>'+
+        '<li>Give a final quote on the phone</li>'+
+        '<li>Lock materials or design direction on the call</li>'+
+        '<li>Apologise for being premium</li>'+
+        '<li>Chase poor-fit leads</li>'+
+      '</ul>'+
+    '</div>'+
+    '</div>';
   el.dataset.built='1';
-}
-function toggleAcc(i){
-  var item=document.getElementById('acc-'+i);
-  if(item) item.classList.toggle('open');
 }
 
 function specRow(collection, tier, seats){
@@ -1186,12 +1277,74 @@ function renderSpecGrid(){
     '</div>';
   }).join('');
   [0,1].forEach(function(idx){ refreshSlotBody(idx); });
+  renderDeltaCalc();
 }
 
 function updateSlot(idx){
   var nameEl=document.getElementById('sname-'+idx);
   if(nameEl) nameEl.textContent=collectionForSlot(idx);
   refreshSlotBody(idx);
+  renderDeltaCalc();
+}
+
+function renderDeltaCalc(){
+  var el=document.getElementById('spec-delta');
+  if(!el) return;
+
+  var specA=specRow(collectionForSlot(0), tierForSlot(0), seatsForSlot(0));
+  var specB=specRow(collectionForSlot(1), tierForSlot(1), seatsForSlot(1));
+  if(!specA || !specB){ el.className='spec-delta'; return; }
+
+  var priceA=Number(specA.final_inc_gst)||0;
+  var priceB=Number(specB.final_inc_gst)||0;
+  if(!priceA || !priceB){ el.className='spec-delta'; return; }
+
+  var nameA=(specA.service_name||specA.name||'Specification A');
+  var nameB=(specB.service_name||specB.name||'Specification B');
+  var diff=priceB-priceA;
+  var absDiff=Math.abs(diff);
+  var isHigher=diff>0;
+  var isSame=diff===0;
+
+  var diffLabel, diffNote, diffClass='';
+  if(isSame){
+    diffLabel='Same price';
+    diffNote='Both specifications are identically priced';
+  } else if(isHigher){
+    diffLabel='B costs more';
+    diffNote='For '+fmt0(absDiff)+' more, the client gets the '+nameB.split('\u2014')[0].trim()+' pathway';
+    diffClass='higher';
+  } else {
+    diffLabel='A costs more';
+    diffNote='For '+fmt0(absDiff)+' more, the client gets the '+nameA.split('\u2014')[0].trim()+' pathway';
+  }
+
+  el.className='spec-delta visible';
+  el.innerHTML=
+    '<div class="spec-delta-title">Price difference</div>'+
+    '<div class="spec-delta-grid">'+
+      '<div class="spec-delta-col">'+
+        '<div class="dl-label">Specification A</div>'+
+        '<div class="dl-name">'+nameA+'</div>'+
+        '<div class="dl-price">'+fmt0(priceA)+'</div>'+
+        '<div class="dl-ex">ex GST '+fmt0(priceA/1.1)+'</div>'+
+      '</div>'+
+      '<div class="spec-delta-arrow">&rarr;</div>'+
+      '<div class="spec-delta-col">'+
+        '<div class="dl-label">Specification B</div>'+
+        '<div class="dl-name">'+nameB+'</div>'+
+        '<div class="dl-price">'+fmt0(priceB)+'</div>'+
+        '<div class="dl-ex">ex GST '+fmt0(priceB/1.1)+'</div>'+
+      '</div>'+
+    '</div>'+
+    '<div style="margin-top:14px">'+
+      '<div class="spec-delta-diff '+diffClass+'">'+
+        '<div class="dd-label">'+diffLabel+'</div>'+
+        '<div class="dd-amount">'+(isSame?'—':(isHigher?'+':'\u2212')+fmt0(absDiff))+'</div>'+
+        (isSame?'':'<div class="dd-ex">ex GST '+(isSame?'—':(isHigher?'+':'\u2212')+fmt0(absDiff/1.1))+'</div>')+
+        '<div class="dd-note">'+diffNote+'</div>'+
+      '</div>'+
+    '</div>';
 }
 
 // Parse the spec's component recipe from its saved list if available;
@@ -1213,6 +1366,7 @@ function refreshSlotBody(idx){
   var totalInc = Number(spec.final_inc_gst)||0;
   var recipe = SPEC_RECIPES[spec.service_name||spec.name] || [];
 
+  var naiveTotal = 0;
   var rowsHtml;
   if(recipe.length){
     rowsHtml = recipe.map(function(c){
@@ -1220,6 +1374,7 @@ function refreshSlotBody(idx){
       var nm = item ? (item.service_name||item.name) : c.id;
       var unitInc = item ? (Number(item.final_inc_gst)||0) : 0;
       var lineInc = unitInc*c.qty;
+      naiveTotal += lineInc;
       return '<tr>'+
         '<td class="svc">'+nm+'</td>'+
         '<td class="qty-cell">'+c.qty+'</td>'+
@@ -1230,14 +1385,24 @@ function refreshSlotBody(idx){
     rowsHtml = '<tr><td class="svc" colspan="3" style="color:#9a9890">Component list unavailable</td></tr>';
   }
 
+  var saving = naiveTotal - totalInc;
   var totalHtml = fmt0(totalInc)+'<div class="ex-total">ex GST '+fmt0(totalInc/1.1)+'</div>';
+  var naiveHtml = fmt0(naiveTotal)+'<div class="ex-total">ex GST '+fmt0(naiveTotal/1.1)+'</div>';
+  var savingHtml = saving>0
+    ? '<tr class="spec-saving"><td colspan="2">Specification saving</td><td class="r">\u2212'+fmt0(saving)+'<div class="ex-total">vs individual pricing</div></td></tr>'
+    : '';
 
   bodyEl.innerHTML=
     '<table class="spec-tbl">'+
       '<thead><tr><th>Service</th><th class="r">Qty</th><th class="r">Total</th></tr></thead>'+
       '<tbody>'+rowsHtml+'</tbody>'+
-      '<tfoot><tr><td colspan="2">Specification total (inc GST)</td>'+
-      '<td class="r">'+totalHtml+'</td></tr></tfoot>'+
+      '<tfoot>'+
+        '<tr class="spec-before"><td colspan="2">If booked individually (inc GST)</td>'+
+        '<td class="r">'+naiveHtml+'</td></tr>'+
+        savingHtml+
+        '<tr><td colspan="2">Specification total (inc GST)</td>'+
+        '<td class="r">'+totalHtml+'</td></tr>'+
+      '</tfoot>'+
     '</table>';
 }
 
