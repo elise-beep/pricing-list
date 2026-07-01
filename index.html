@@ -266,6 +266,34 @@ tbody td{padding:10px 12px;vertical-align:middle;overflow:hidden;text-overflow:e
 @media(max-width:500px){.calc-tab-wrap .field-grid{grid-template-columns:1fr}.calc-tab-wrap .field.full{grid-column:1}}
 .live-error{margin:12px 20px;padding:12px 16px;border-radius:8px;font-size:14px;font-weight:500;background:#fdecea;color:#8b1a1a;border:1px solid #f5c6cb}
 .live-error.loading{background:#eef2ff;color:#3a4a8b;border-color:#c7d2fe}
+/* ── SPECIFICATIONS TAB ─────────────────────────────────────── */
+.spec-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;padding:20px 24px 40px;align-items:start}
+@media(max-width:1200px){.spec-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:700px){.spec-grid{grid-template-columns:1fr}}
+.spec-col{background:#fff;border:0.5px solid rgba(0,0,0,0.1);border-radius:12px;overflow:hidden}
+.spec-col-hd{background:var(--chrome);padding:14px 16px}
+.spec-col-hd .eyebrow{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.5);font-weight:600;margin-bottom:4px}
+.spec-col-hd h3{font-size:17px;font-weight:600;margin:0;color:#fff;letter-spacing:-.01em}
+.spec-col-hd .spec-code{font-size:10px;font-family:monospace;color:rgba(255,255,255,.45);margin-top:4px}
+.spec-filters{display:flex;gap:8px;padding:10px 14px;background:#f8f7f4;border-bottom:0.5px solid rgba(0,0,0,0.07)}
+.spec-filters select{flex:1;padding:6px 8px;font-size:13px;border:0.5px solid rgba(0,0,0,0.15);border-radius:7px;background:#fff;color:#1a1917;font-family:inherit;cursor:pointer}
+.spec-filters select:focus{outline:2px solid var(--brand);outline-offset:1px}
+.spec-tbl{width:100%;border-collapse:collapse;font-size:13px}
+.spec-tbl th{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#9a9890;padding:8px 14px;text-align:left;border-bottom:0.5px solid rgba(0,0,0,0.08);font-weight:600;background:#fafaf8}
+.spec-tbl th.r,.spec-tbl td.r{text-align:right}
+.spec-tbl td{padding:7px 14px;border-bottom:0.5px solid rgba(0,0,0,0.05);color:#1a1917;vertical-align:top;line-height:1.35}
+.spec-tbl td.svc{font-weight:500;font-size:13px}
+.spec-tbl td.cat-pill span{display:inline-block;font-size:10px;padding:1px 6px;border-radius:4px;border:0.5px solid rgba(0,0,0,0.1);color:#6b6860;background:#f0ede8;margin-top:2px}
+.spec-tbl tr:last-child td{border-bottom:0}
+.spec-tbl tr.sub-row td{border-top:1px solid rgba(0,0,0,0.08);color:#6b6860;font-size:12px;padding-top:9px;background:#fafaf8}
+.spec-tbl tr.adj-row td{color:#6b6860;font-size:12px;background:#fafaf8}
+.spec-tbl tr.adj-row td.r{color:#0a5c3e}
+.spec-tbl tr.adj-row.pos td.r{color:#854f0b}
+.spec-tbl tr.total-row td{font-weight:700;font-size:14px;border-top:1.5px solid rgba(0,0,0,0.1);background:#f0ede8;color:#1a1917;padding:10px 14px}
+.spec-tbl tr.total-row td.r{font-size:17px;color:var(--chrome);letter-spacing:-.01em}
+.spec-tbl .ex-price{font-size:11px;color:#9a9890;font-weight:400;margin-top:1px}
+.spec-missing{padding:16px 14px;font-size:13px;color:#9a9890;text-align:center}
+.spec-loading{padding:24px 14px;font-size:13px;color:#9a9890;text-align:center}
 </style>
 </head>
 <body>
@@ -291,6 +319,7 @@ tbody td{padding:10px 12px;vertical-align:middle;overflow:hidden;text-overflow:e
   <button class="tab-btn active" onclick="switchTab('pricelist')" id="tab-pricelist">Price List</button>
   <button class="tab-btn" onclick="switchTab('calculator')" id="tab-calculator">Services &amp; Product Calculator</button>
   <button class="tab-btn" onclick="switchTab('shipping')" id="tab-shipping">Shipping Reconciliation</button>
+  <button class="tab-btn" onclick="switchTab('specifications')" id="tab-specifications">Specifications</button>
 </nav>
 <div id="live-error" class="live-error" style="display:none"></div>
 
@@ -632,6 +661,7 @@ var SUBNAME = {TRN:&quot;Transcal&quot;, CMS:&quot;In-house&quot;};
 var cart = [];
 var SPECS = [];
 var catalogueReady = false;
+var SPEC_FREIGHT_MULT = 1.5;  // fallback; overwritten by Settings on load
 
 async function loadCatalogue(){
   var box=document.getElementById(&#x27;catbox&#x27;);
@@ -652,6 +682,14 @@ async function loadCatalogue(){
     box.innerHTML=&#x27;&lt;div class=&quot;empty&quot;&gt;Live prices are unavailable (&#x27;+e.message+&#x27;). Nothing is shown to avoid stale pricing &amp;mdash; check the Apps Script is published, then refresh.&lt;/div&gt;&#x27;;
     return;
   }
+  // Fetch settings to get the spec freight multiplier (and any future settings)
+  try{
+    var sres=await fetch(APPS_SCRIPT_URL+&#x27;?action=settings&amp;t=&#x27;+Date.now());
+    var sjson=await sres.json();
+    if(sjson.status===&#x27;ok&#x27; &amp;&amp; sjson.settings &amp;&amp; sjson.settings[&#x27;Spec Freight Multiplier&#x27;]){
+      SPEC_FREIGHT_MULT = Number(sjson.settings[&#x27;Spec Freight Multiplier&#x27;]) || 1.5;
+    }
+  }catch(e){ /* keep default */ }
   render(false);
   loadSpecifications();
 }
@@ -661,8 +699,9 @@ function grossed(it){return it.margin&gt;=1?0:it.freight/(1-it.margin);}
 function fmt(n){return &#x27;$&#x27;+n.toLocaleString(&#x27;en-AU&#x27;,{minimumFractionDigits:2,maximumFractionDigits:2});}
 function fmt0(n){return &#x27;$&#x27;+Math.round(n).toLocaleString(&#x27;en-AU&#x27;);}
 
-function compute(cartArg){
+function compute(cartArg, freightMult){
   var src = cartArg || cart;
+  var mult = (freightMult != null) ? freightMult : 1;
   var lines=src.map(function(c){var it=BYID[c.id]; if(!it) return null;
     var g=grossed(it); return {it:it,qty:c.qty,g:g,base:(g&gt;0?it.quote_ex-g:it.quote_ex),adjEx:it.quote_ex*c.qty,freightBaked:0,keptEx:0,droppedEx:0};}).filter(Boolean);
   var naiveEx=0,naiveInc=0;
@@ -675,8 +714,8 @@ function compute(cartArg){
     var fb=groups[k].filter(function(L){return L.g&gt;0;});
     if(fb.length===0) return;
     var units=fb.reduce(function(a,L){return a+L.qty;},0);
-    var kept=Math.max.apply(null,fb.map(function(L){return L.g;}));
-    var maxLine=null; fb.forEach(function(L){if(!maxLine &amp;&amp; L.g===kept) maxLine=L;});
+    var kept=Math.max.apply(null,fb.map(function(L){return L.g;})) * mult;
+    var maxLine=null; fb.forEach(function(L){if(!maxLine &amp;&amp; L.g*mult===kept) maxLine=L;});
     var baked=fb.reduce(function(a,L){return a+L.g*L.qty;},0);
     var sav=baked-kept; savingEx+=sav; shipBefore+=baked; shipAfter+=kept;
     var sumBase=fb.reduce(function(a,L){return a+L.base*L.qty;},0);
@@ -856,7 +895,7 @@ function renderSpecifications(){
 
   box.innerHTML = SPECS.map(function(s){
     var missing = s.components.filter(function(c){return !BYID[c.id];}).length;
-    var r = catalogueReady ? compute(s.components.map(function(c){return {id:c.id,qty:c.qty};})) : null;
+    var r = catalogueReady ? compute(s.components.map(function(c){return {id:c.id,qty:c.qty};}), SPEC_FREIGHT_MULT) : null;
     var priceHtml = r
       ? &#x27;&lt;div class=&quot;price-main&quot;&gt;&#x27;+fmt0(r.totalInc)+&#x27;&lt;/div&gt;&lt;div class=&quot;price-ex&quot;&gt;ex GST &#x27;+exFmt(r.totalInc)+&#x27;&lt;/div&gt;&#x27;
       : &#x27;&lt;div class=&quot;price-main&quot;&gt;&amp;mdash;&lt;/div&gt;&#x27;;
@@ -878,7 +917,7 @@ function renderSpecifications(){
 window.addEventListener(&#x27;message&#x27;, function(ev){
   if(!ev.data || ev.data.type!==&#x27;cm_get_spec_prices&#x27;) return;
   var prices = catalogueReady ? SPECS.map(function(s){
-    var r = compute(s.components.map(function(c){return {id:c.id,qty:c.qty};}));
+    var r = compute(s.components.map(function(c){return {id:c.id,qty:c.qty};}), SPEC_FREIGHT_MULT);
     return {code:s.code, name:s.name, totalInc:r.totalInc, totalEx:r.totalInc/1.1};
   }) : [];
   ev.source.postMessage({type:&#x27;cm_spec_prices&#x27;, data:prices}, &#x27;*&#x27;);
@@ -889,6 +928,21 @@ loadCatalogue();
 &lt;/body&gt;
 &lt;/html&gt;"></iframe>
 </div>
+
+<div class="tab-pane" id="pane-specifications">
+  <div style="padding:20px 24px 12px;border-bottom:0.5px solid rgba(0,0,0,0.08);display:flex;align-items:baseline;gap:16px;justify-content:space-between;flex-wrap:wrap">
+    <div>
+      <div style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--brand);font-weight:600;margin-bottom:3px">Chrome Mercy Studio</div>
+      <h2 style="font-size:20px;font-weight:600;margin:0;letter-spacing:-.01em;color:var(--text)">Specifications</h2>
+      <div style="font-size:13px;color:var(--text2);margin-top:3px">Classic leather throughout. Prices recalculate live from catalogue — freight ×1.5 multiplier applied.</div>
+    </div>
+    <div id="spec-status" style="font-size:12px;color:var(--text2)"></div>
+  </div>
+  <div class="spec-grid" id="spec-grid">
+    <div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--text2);font-size:14px">Loading specifications&hellip;</div>
+  </div>
+</div>
+
 <script>
 // ── CATALOGUE DATA (v15 — single price per service) ──────────────
 let CATALOGUE = [];
@@ -979,7 +1033,150 @@ function switchTab(tab) {
   document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
   document.getElementById('pane-'+tab).classList.add('active');
   document.getElementById('tab-'+tab).classList.add('active');
+  if(tab === 'specifications') initSpecTab();
 }
+
+// ── SPECIFICATIONS TAB ────────────────────────────────────────────
+var SPEC_LIST = [];
+var SPEC_PRICES = {};    // {code: totalInc} from iframe
+var specTabReady = false;
+
+function fmt0(n){ return '$'+Math.round(n||0).toLocaleString('en-AU'); }
+
+var COLLECTIONS = ['Select','Reserve','Private','Atelier'];
+var COL_ID = {Select:'select',Reserve:'reserve',Private:'private',Atelier:'atelier'};
+
+async function initSpecTab(){
+  if(specTabReady) { renderSpecGrid(); return; }
+  document.getElementById('spec-status').textContent = 'Loading\u2026';
+  // Load spec list from Apps Script
+  try{
+    var res = await fetch(APPS_SCRIPT_URL+'?action=list_specifications&t='+Date.now());
+    var json = await res.json();
+    SPEC_LIST = (json.status==='ok' && json.specifications) ? json.specifications : [];
+  }catch(e){ SPEC_LIST=[]; }
+  // Render column shells immediately so user sees content
+  renderSpecGrid();
+  document.getElementById('spec-status').textContent = 'Fetching live prices\u2026';
+  // Get reconciled totals from iframe (has 1.5× multiplier already applied)
+  try{
+    var prices = await getSpecPricesFromIframe(6000);
+    SPEC_PRICES = {};
+    prices.forEach(function(s){ SPEC_PRICES[s.code] = s.totalInc; });
+  }catch(e){ SPEC_PRICES={}; }
+  specTabReady = true;
+  renderSpecGrid();
+  document.getElementById('spec-status').textContent = SPEC_LIST.length+' specifications loaded';
+}
+
+function getSpecPricesFromIframe(timeoutMs){
+  return new Promise(function(resolve){
+    var frame = document.getElementById('shipping-frame');
+    if(!frame||!frame.contentWindow){ resolve([]); return; }
+    var done = false;
+    function onMsg(ev){
+      if(ev.data && ev.data.type==='cm_spec_prices'){
+        done=true; window.removeEventListener('message',onMsg); resolve(ev.data.data||[]);
+      }
+    }
+    window.addEventListener('message',onMsg);
+    frame.contentWindow.postMessage({type:'cm_get_spec_prices'},'*');
+    setTimeout(function(){ if(!done){ window.removeEventListener('message',onMsg); resolve([]); } }, timeoutMs||6000);
+  });
+}
+
+function specByName(name){
+  return SPEC_LIST.filter(function(s){ return s.name===name; })[0]||null;
+}
+
+function renderSpecGrid(){
+  var grid = document.getElementById('spec-grid');
+  grid.innerHTML = COLLECTIONS.map(function(col){
+    var cid = COL_ID[col];
+    return '<div class="spec-col" id="spcol-'+cid+'">'+
+      '<div class="spec-col-hd">'+
+        '<div class="eyebrow">Collection</div>'+
+        '<h3>'+col+'</h3>'+
+        '<div class="spec-code" id="scode-'+cid+'"></div>'+
+      '</div>'+
+      '<div class="spec-filters">'+
+        '<select id="stier-'+cid+'" onchange="updateSpecCol(\''+cid+'\')">'+
+          '<option value="1" selected>Tier 1</option>'+
+          '<option value="2">Tier 2</option>'+
+          '<option value="3">Tier 3</option>'+
+          '<option value="4">Tier 4</option>'+
+        '</select>'+
+        '<select id="sseats-'+cid+'" onchange="updateSpecCol(\''+cid+'\')">'+
+          '<option value="2">2 Seat</option>'+
+          '<option value="5" selected>5 Seat</option>'+
+          '<option value="7">7 Seat</option>'+
+        '</select>'+
+      '</div>'+
+      '<div id="sbody-'+cid+'"><div class="spec-loading">Loading\u2026</div></div>'+
+    '</div>';
+  }).join('');
+  // Render each column body
+  COLLECTIONS.forEach(function(col){ updateSpecCol(COL_ID[col]); });
+}
+
+function updateSpecCol(cid){
+  var col = COLLECTIONS.filter(function(c){ return COL_ID[c]===cid; })[0];
+  var tier  = document.getElementById('stier-'+cid)  ? document.getElementById('stier-'+cid).value  : '1';
+  var seats = document.getElementById('sseats-'+cid) ? document.getElementById('sseats-'+cid).value : '5';
+  var specName = col+' \u2014 '+seats+' Seat \u2014 T'+tier;
+  var spec = specByName(specName);
+  var codeEl = document.getElementById('scode-'+cid);
+  var bodyEl = document.getElementById('sbody-'+cid);
+
+  if(!spec){
+    if(codeEl) codeEl.textContent='';
+    if(bodyEl) bodyEl.innerHTML='<div class="spec-missing">Specification not found</div>';
+    return;
+  }
+  if(codeEl) codeEl.textContent=spec.code;
+
+  // Build component rows using main CATALOGUE
+  var naiveTotal = 0;
+  var rowsHtml = spec.components.map(function(c){
+    var item = CATALOGUE.find(function(r){ return r.id===c.id; });
+    if(!item) return '<tr><td class="svc" colspan="4" style="color:#9a9890;font-style:italic">'+c.id+' (not in catalogue)</td></tr>';
+    var unitInc = Number(item.final_inc_gst)||0;
+    var lineInc = unitInc * c.qty;
+    var unitEx  = Math.round(unitInc/1.1);
+    naiveTotal += lineInc;
+    var catBadge = item.category ? '<div class="cat-pill"><span>'+item.category+'</span></div>' : '';
+    return '<tr>'+
+      '<td><div class="svc">'+(item.service_name||item.name||c.id)+'</div>'+catBadge+'</td>'+
+      '<td class="r">'+c.qty+'</td>'+
+      '<td class="r">'+fmt0(unitInc)+'<div class="ex-price">'+fmt0(unitEx)+' ex</div></td>'+
+      '<td class="r">'+fmt0(lineInc)+'</td>'+
+    '</tr>';
+  }).join('');
+
+  var totalInc = SPEC_PRICES[spec.code];
+  var freightAdj = (totalInc != null) ? (totalInc - naiveTotal) : null;
+  var isPos = freightAdj != null && freightAdj > 0;
+
+  var footHtml =
+    '<tr class="sub-row"><td colspan="3">Components subtotal (inc GST)</td><td class="r">'+fmt0(naiveTotal)+'</td></tr>'+
+    (freightAdj != null
+      ? '<tr class="adj-row'+(isPos?' pos':'')+'"><td colspan="3">Freight reconciliation (×1.5 multiplier)</td><td class="r">'+(freightAdj>=0?'+':'')+fmt0(freightAdj)+'</td></tr>'
+      : '<tr class="adj-row"><td colspan="3">Freight reconciliation</td><td class="r" style="color:#9a9890">Loading\u2026</td></tr>')+
+    '<tr class="total-row"><td colspan="3">Specification total (inc GST)</td><td class="r">'+(totalInc!=null ? fmt0(totalInc) : '<span style="color:#9a9890;font-size:13px">Loading\u2026</span>')+'</td></tr>';
+
+  bodyEl.innerHTML =
+    '<table class="spec-tbl">'+
+      '<thead><tr>'+
+        '<th>Service</th>'+
+        '<th class="r">Qty</th>'+
+        '<th class="r">Each</th>'+
+        '<th class="r">Total</th>'+
+      '</tr></thead>'+
+      '<tbody>'+rowsHtml+'</tbody>'+
+      '<tfoot>'+footHtml+'</tfoot>'+
+    '</table>';
+}
+
 
 // ── ADMIN ────────────────────────────────────────────────────────
 function toggleAdmin() {
@@ -1308,25 +1505,6 @@ async function saveToSheet(id) {
 }
 
 // ── EXPORTS ──────────────────────────────────────────────────────
-// Asks the reconciliation iframe for live specification totals. The
-// freight-reconciliation math only exists in that iframe — this avoids
-// duplicating it here and risking the two drifting apart.
-function getSpecPricesFromIframe(timeoutMs){
-  return new Promise(function(resolve){
-    var frame = document.getElementById('shipping-frame');
-    if(!frame || !frame.contentWindow){ resolve([]); return; }
-    var done=false;
-    function onMsg(ev){
-      if(ev.data && ev.data.type==='cm_spec_prices'){
-        done=true; window.removeEventListener('message', onMsg); resolve(ev.data.data||[]);
-      }
-    }
-    window.addEventListener('message', onMsg);
-    frame.contentWindow.postMessage({type:'cm_get_spec_prices'}, '*');
-    setTimeout(function(){ if(!done){ window.removeEventListener('message', onMsg); resolve([]); } }, timeoutMs||4000);
-  });
-}
-
 async function exportXeroCSV() {
   if(!CATALOGUE.length){ alert('Live prices aren\u2019t loaded \u2014 nothing to export. Refresh once the spreadsheet is reachable.'); return; }
   var headers=['ItemCode','ItemName','PurchasesDescription','PurchasesUnitPrice','PurchasesAccount','PurchasesTaxRate','SalesDescription','SalesUnitPrice','SalesAccount','SalesTaxRate','InventoryAssetAccount','CostOfGoodsSoldAccount'];
