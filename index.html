@@ -267,7 +267,9 @@ tbody td{padding:10px 12px;vertical-align:middle;overflow:hidden;text-overflow:e
 .live-error{margin:12px 20px;padding:12px 16px;border-radius:8px;font-size:14px;font-weight:500;background:#fdecea;color:#8b1a1a;border:1px solid #f5c6cb}
 .live-error.loading{background:#eef2ff;color:#3a4a8b;border-color:#c7d2fe}
 /* ── SPECIFICATIONS TAB ─────────────────────────────────────── */
-.spec-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;padding:20px 24px 40px;align-items:start}
+.spec-layout{display:grid;grid-template-columns:1fr 380px;gap:20px;padding:20px 24px 40px;align-items:start}
+@media(max-width:1100px){.spec-layout{grid-template-columns:1fr}}
+.spec-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
 @media(max-width:800px){.spec-grid{grid-template-columns:1fr}}
 .spec-col{background:#fff;border:0.5px solid rgba(0,0,0,0.1);border-radius:12px;overflow:hidden}
 .spec-col-hd{background:var(--chrome);padding:16px 18px}
@@ -291,6 +293,22 @@ tbody td{padding:10px 12px;vertical-align:middle;overflow:hidden;text-overflow:e
 .spec-tbl tfoot .ex-total{font-size:11px;color:#9a9890;font-weight:400;margin-top:2px}
 .spec-missing{padding:32px 16px;font-size:13px;color:#9a9890;text-align:center}
 .spec-loading-msg{padding:24px 16px;font-size:13px;color:#9a9890;text-align:center}
+/* Sales script accordion */
+.spec-script{position:sticky;top:16px}
+.script-hd{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--brand);font-weight:600;margin-bottom:12px}
+.acc-item{background:#fff;border:0.5px solid rgba(0,0,0,0.1);border-radius:10px;margin-bottom:8px;overflow:hidden}
+.acc-btn{width:100%;text-align:left;padding:12px 14px;font-size:13px;font-weight:600;color:#1a1917;background:#fff;border:none;cursor:pointer;font-family:inherit;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.acc-btn:hover{background:#faf9f6}
+.acc-btn .chev{color:#9a9890;transition:transform .15s;font-size:11px}
+.acc-item.open .acc-btn .chev{transform:rotate(90deg)}
+.acc-body{display:none;padding:0 14px 14px;font-size:13px;line-height:1.6;color:#4a4844}
+.acc-item.open .acc-body{display:block}
+.acc-body p{margin:8px 0}
+.acc-body .quote{background:#f5f2ec;border-left:2px solid var(--brand);border-radius:0 7px 7px 0;padding:9px 11px;margin:8px 0;font-style:italic;color:#3a3834}
+.acc-body .price-tag{display:inline-block;background:#f0ede8;border-radius:6px;padding:2px 8px;font-weight:600;color:var(--chrome);font-family:monospace;font-size:12px}
+.acc-body ul{margin:8px 0;padding-left:18px}
+.acc-body li{margin:4px 0}
+.acc-body .lbl{font-weight:600;color:#1a1917;font-size:12px;text-transform:uppercase;letter-spacing:.04em;margin-top:12px;display:block}
 </style>
 </head>
 <body>
@@ -648,18 +666,18 @@ tbody td{padding:10px 12px;vertical-align:middle;overflow:hidden;text-overflow:e
 
     &lt;div class=&quot;card&quot;&gt;
       &lt;div class=&quot;ch&quot;&gt;&lt;h2&gt;Quote&lt;/h2&gt;&lt;div style=&quot;display:flex;align-items:center;gap:10px&quot;&gt;&lt;span class=&quot;sub&quot; id=&quot;count&quot; style=&quot;font-size:12px&quot;&gt;&lt;/span&gt;
-        &lt;button id=&quot;saveSpecBtn&quot; class=&quot;resetbtn&quot; onclick=&quot;saveAsSpecification()&quot; disabled&gt;Save as specification&lt;/button&gt;
+        &lt;button id=&quot;saveReconBtn&quot; class=&quot;resetbtn&quot; onclick=&quot;saveReconJob()&quot; disabled&gt;Save bundle&lt;/button&gt;
         &lt;button id=&quot;resetBtn&quot; class=&quot;resetbtn&quot; onclick=&quot;resetCart()&quot;&gt;Reset&lt;/button&gt;&lt;/div&gt;&lt;/div&gt;
       &lt;div id=&quot;quote&quot;&gt;&lt;/div&gt;
     &lt;/div&gt;
   &lt;/div&gt;
 
   &lt;div class=&quot;card&quot; style=&quot;margin-top:16px&quot;&gt;
-    &lt;div class=&quot;ch&quot;&gt;&lt;h2&gt;Saved specifications&lt;/h2&gt;&lt;span class=&quot;sub&quot; id=&quot;specCount&quot; style=&quot;font-size:12px&quot;&gt;&lt;/span&gt;&lt;/div&gt;
-    &lt;div id=&quot;specbox&quot;&gt;&lt;div class=&quot;empty&quot;&gt;No saved specifications yet.&lt;/div&gt;&lt;/div&gt;
+    &lt;div class=&quot;ch&quot;&gt;&lt;h2&gt;Saved bundles&lt;/h2&gt;&lt;span class=&quot;sub&quot; id=&quot;reconCount&quot; style=&quot;font-size:12px&quot;&gt;&lt;/span&gt;&lt;/div&gt;
+    &lt;div id=&quot;reconbox&quot;&gt;&lt;div class=&quot;empty&quot;&gt;No saved bundles yet.&lt;/div&gt;&lt;/div&gt;
   &lt;/div&gt;
 
-  &lt;div class=&quot;foot&quot;&gt;Catalogue prices are pulled live from the spreadsheet. Saved specifications store only their component list &amp;mdash; prices shown always reflect current catalogue data, recalculated fresh each time.&lt;/div&gt;
+  &lt;div class=&quot;foot&quot;&gt;Catalogue prices are pulled live from the spreadsheet. Saved bundles store only their item list &amp;mdash; reload one any time to rebuild the quote from current prices.&lt;/div&gt;
 &lt;/div&gt;
 
 &lt;script&gt;
@@ -668,7 +686,7 @@ var CAT = [];
 var BYID = {};
 var SUBNAME = {TRN:&quot;Transcal&quot;, CMS:&quot;In-house&quot;};
 var cart = [];
-var SPECS = [];
+var RECON_HISTORY = [];
 var catalogueReady = false;
 var SPEC_FREIGHT_MULT = 1.5;  // fallback; overwritten by Settings on load
 
@@ -700,7 +718,7 @@ async function loadCatalogue(){
     }
   }catch(e){ /* keep default */ }
   render(false);
-  loadSpecifications();
+  loadReconHistory();
 }
 
 function psych(x){var r=Math.round(x/5)*5; if(r%10===0) r-=1; return r;}
@@ -851,109 +869,74 @@ function renderQuote(flash){
   el.innerHTML = freightBlock + totalsBlock + rows;
 }
 
-function render(flash){renderCatalogue();renderQuote(flash);updateSaveSpecBtn();}
+function render(flash){renderCatalogue();renderQuote(flash);updateSaveReconBtn();}
 document.getElementById(&#x27;search&#x27;).addEventListener(&#x27;input&#x27;,renderCatalogue);
 
-function updateSaveSpecBtn(){
-  var btn=document.getElementById(&#x27;saveSpecBtn&#x27;);
+function updateSaveReconBtn(){
+  var btn=document.getElementById(&#x27;saveReconBtn&#x27;);
   if(btn) btn.disabled=!cart.length||!catalogueReady;
 }
 
-// ── SAVED SPECIFICATIONS ────────────────────────────────────────
-async function loadSpecifications(){
+// ── RECONCILIATION HISTORY ──────────────────────────────────────
+// Ad-hoc bundles staff build here can be saved and reloaded later.
+// Same append-row pattern as the calculator&#x27;s job history.
+async function loadReconHistory(){
   try{
-    var res=await fetch(APPS_SCRIPT_URL+&#x27;?action=list_specifications&amp;t=&#x27;+Date.now());
+    var res=await fetch(APPS_SCRIPT_URL+&#x27;?action=recon_history&amp;t=&#x27;+Date.now());
     var json=await res.json();
-    SPECS = (json.status===&#x27;ok&#x27; &amp;&amp; json.specifications) ? json.specifications : [];
-  }catch(e){ SPECS=[]; }
-  renderSpecifications();
+    RECON_HISTORY = (json.status===&#x27;ok&#x27; &amp;&amp; json.jobs) ? json.jobs : [];
+  }catch(e){ RECON_HISTORY=[]; }
+  renderReconHistory();
 }
 
-function nextSpecCode(){
-  var max=0;
-  SPECS.forEach(function(s){
-    var m=/^ZSPEC-(\d+)$/i.exec(s.code||&#x27;&#x27;);
-    if(m) max=Math.max(max, parseInt(m[1],10));
-  });
-  return &#x27;ZSPEC-&#x27;+String(max+1).padStart(3,&#x27;0&#x27;);
-}
-
-async function saveAsSpecification(){
+async function saveReconJob(){
   if(!cart.length) return;
-  var name=prompt(&#x27;Name this specification:&#x27;);
+  var name=prompt(&#x27;Name this reconciliation bundle:&#x27;);
   if(!name || !name.trim()) return;
-  var code=nextSpecCode();
-  var btn=document.getElementById(&#x27;saveSpecBtn&#x27;);
+  var btn=document.getElementById(&#x27;saveReconBtn&#x27;);
   btn.disabled=true; btn.textContent=&#x27;Saving\u2026&#x27;;
+  var r=compute(null, SPEC_FREIGHT_MULT);
   try{
     await fetch(APPS_SCRIPT_URL,{method:&#x27;POST&#x27;,headers:{&#x27;Content-Type&#x27;:&#x27;text/plain;charset=utf-8&#x27;},
-      body:JSON.stringify({action:&#x27;save_specification&#x27;,code:code,name:name.trim(),
+      body:JSON.stringify({action:&#x27;save_recon_job&#x27;,
+        name:name.trim(),
+        date:new Date().toISOString().slice(0,10),
+        total_inc:r.totalInc,
         components:cart.map(function(c){return {id:c.id,qty:c.qty};})})});
-    await loadSpecifications();
+    await loadReconHistory();
   }catch(e){ alert(&#x27;Could not save \u2014 check connection&#x27;); }
-  btn.disabled=false; btn.textContent=&#x27;Save as specification&#x27;; updateSaveSpecBtn();
+  btn.disabled=false; btn.textContent=&#x27;Save bundle&#x27;; updateSaveReconBtn();
 }
 
-async function renameSpecification(code){
-  var spec=SPECS.filter(function(s){return s.code===code;})[0];
-  if(!spec) return;
-  var name=prompt(&#x27;Rename specification:&#x27;, spec.name);
-  if(!name || !name.trim() || name.trim()===spec.name) return;
-  await fetch(APPS_SCRIPT_URL,{method:&#x27;POST&#x27;,headers:{&#x27;Content-Type&#x27;:&#x27;text/plain;charset=utf-8&#x27;},
-    body:JSON.stringify({action:&#x27;save_specification&#x27;,code:code,name:name.trim(),components:spec.components})});
-  await loadSpecifications();
-}
-
-async function deleteSpecificationUI(code){
-  if(!confirm(&#x27;Delete this saved specification? This cannot be undone.&#x27;)) return;
-  await fetch(APPS_SCRIPT_URL,{method:&#x27;POST&#x27;,headers:{&#x27;Content-Type&#x27;:&#x27;text/plain;charset=utf-8&#x27;},
-    body:JSON.stringify({action:&#x27;delete_specification&#x27;,code:code})});
-  await loadSpecifications();
-}
-
-function loadSpecIntoCart(code){
-  var spec=SPECS.filter(function(s){return s.code===code;})[0];
-  if(!spec) return;
-  cart = spec.components.filter(function(c){return BYID[c.id];}).map(function(c){return {id:c.id,qty:c.qty};});
+function loadReconIntoCart(idx){
+  var job=RECON_HISTORY[idx];
+  if(!job || !job.components) return;
+  cart = job.components.filter(function(c){return BYID[c.id];}).map(function(c){return {id:c.id,qty:c.qty};});
   render(true);
   window.scrollTo(0,0);
 }
 
-function renderSpecifications(){
-  var box=document.getElementById(&#x27;specbox&#x27;);
-  var cnt=document.getElementById(&#x27;specCount&#x27;);
-  if(cnt) cnt.textContent = SPECS.length ? SPECS.length+&#x27; saved&#x27; : &#x27;&#x27;;
-  if(!SPECS.length){ box.innerHTML=&#x27;&lt;div class=&quot;empty&quot;&gt;No saved specifications yet \u2014 build a quote and save it.&lt;/div&gt;&#x27;; return; }
+function renderReconHistory(){
+  var box=document.getElementById(&#x27;reconbox&#x27;);
+  var cnt=document.getElementById(&#x27;reconCount&#x27;);
+  if(!box) return;
+  if(cnt) cnt.textContent = RECON_HISTORY.length ? RECON_HISTORY.length+&#x27; saved&#x27; : &#x27;&#x27;;
+  if(!RECON_HISTORY.length){ box.innerHTML=&#x27;&lt;div class=&quot;empty&quot;&gt;No saved bundles yet \u2014 build a quote and save it.&lt;/div&gt;&#x27;; return; }
 
-  box.innerHTML = SPECS.map(function(s){
-    var missing = s.components.filter(function(c){return !BYID[c.id];}).length;
-    var r = catalogueReady ? compute(s.components.map(function(c){return {id:c.id,qty:c.qty};}), SPEC_FREIGHT_MULT) : null;
-    var priceHtml = r
-      ? &#x27;&lt;div class=&quot;price-main&quot;&gt;&#x27;+fmt0(r.totalInc)+&#x27;&lt;/div&gt;&lt;div class=&quot;price-ex&quot;&gt;ex GST &#x27;+exFmt(r.totalInc)+&#x27;&lt;/div&gt;&#x27;
+  box.innerHTML = RECON_HISTORY.map(function(job, idx){
+    var n = (job.components||[]).length;
+    var missing = (job.components||[]).filter(function(c){return !BYID[c.id];}).length;
+    var priceHtml = job.total_inc
+      ? &#x27;&lt;div class=&quot;price-main&quot;&gt;&#x27;+fmt0(Number(job.total_inc))+&#x27;&lt;/div&gt;&lt;div class=&quot;price-ex&quot;&gt;as saved&lt;/div&gt;&#x27;
       : &#x27;&lt;div class=&quot;price-main&quot;&gt;&amp;mdash;&lt;/div&gt;&#x27;;
-    return &#x27;&lt;div class=&quot;specrow&quot;&gt;&lt;div&gt;&lt;div class=&quot;nm&quot;&gt;&#x27;+s.name+&#x27;&lt;/div&gt;&#x27;+
-      &#x27;&lt;div class=&quot;meta&quot;&gt;&lt;span class=&quot;code&quot;&gt;&#x27;+s.code+&#x27;&lt;/span&gt; &amp;middot; &#x27;+s.components.length+&#x27; component&#x27;+(s.components.length===1?&#x27;&#x27;:&#x27;s&#x27;)+&#x27;&lt;/div&gt;&#x27;+
-      (missing&gt;0?&#x27;&lt;div class=&quot;warn&quot;&gt;&#x27;+missing+&#x27; component&#x27;+(missing===1?&#x27;&#x27;:&#x27;s&#x27;)+&#x27; no longer in catalogue&lt;/div&gt;&#x27;:&#x27;&#x27;)+
+    return &#x27;&lt;div class=&quot;specrow&quot;&gt;&lt;div&gt;&lt;div class=&quot;nm&quot;&gt;&#x27;+(job.name||&#x27;Untitled&#x27;)+&#x27;&lt;/div&gt;&#x27;+
+      &#x27;&lt;div class=&quot;meta&quot;&gt;&lt;span class=&quot;code&quot;&gt;&#x27;+(job.date||&#x27;&#x27;)+&#x27;&lt;/span&gt; &amp;middot; &#x27;+n+&#x27; item&#x27;+(n===1?&#x27;&#x27;:&#x27;s&#x27;)+&#x27;&lt;/div&gt;&#x27;+
+      (missing&gt;0?&#x27;&lt;div class=&quot;warn&quot;&gt;&#x27;+missing+&#x27; item&#x27;+(missing===1?&#x27;&#x27;:&#x27;s&#x27;)+&#x27; no longer in catalogue&lt;/div&gt;&#x27;:&#x27;&#x27;)+
       &#x27;&lt;/div&gt;&#x27;+
       &#x27;&lt;div class=&quot;pricecol&quot;&gt;&#x27;+priceHtml+&#x27;&lt;/div&gt;&#x27;+
-      &#x27;&lt;div style=&quot;display:flex;gap:6px&quot;&gt;&lt;button class=&quot;specbtn&quot; onclick=&quot;loadSpecIntoCart(\&#x27;&#x27;+s.code+&#x27;\&#x27;)&quot;&gt;Load&lt;/button&gt;&#x27;+
-      &#x27;&lt;button class=&quot;specbtn&quot; onclick=&quot;renameSpecification(\&#x27;&#x27;+s.code+&#x27;\&#x27;)&quot;&gt;Rename&lt;/button&gt;&#x27;+
-      &#x27;&lt;button class=&quot;specbtn del&quot; onclick=&quot;deleteSpecificationUI(\&#x27;&#x27;+s.code+&#x27;\&#x27;)&quot;&gt;Delete&lt;/button&gt;&lt;/div&gt;&lt;/div&gt;&#x27;;
+      &#x27;&lt;div style=&quot;display:flex;gap:6px&quot;&gt;&lt;button class=&quot;specbtn&quot; onclick=&quot;loadReconIntoCart(&#x27;+idx+&#x27;)&quot;&gt;Load&lt;/button&gt;&lt;/div&gt;&lt;/div&gt;&#x27;;
   }).join(&#x27;&#x27;);
 }
-
-// ── XERO EXPORT BRIDGE ──────────────────────────────────────────
-// The parent portal&#x27;s Xero export asks for live specification totals
-// via postMessage, since the freight-reconciliation math only lives
-// here. We never duplicate that logic in the parent.
-window.addEventListener(&#x27;message&#x27;, function(ev){
-  if(!ev.data || ev.data.type!==&#x27;cm_get_spec_prices&#x27;) return;
-  var prices = catalogueReady ? SPECS.map(function(s){
-    var r = compute(s.components.map(function(c){return {id:c.id,qty:c.qty};}), SPEC_FREIGHT_MULT);
-    return {code:s.code, name:s.name, totalInc:r.totalInc, totalEx:r.totalInc/1.1};
-  }) : [];
-  ev.source.postMessage({type:&#x27;cm_spec_prices&#x27;, data:prices}, &#x27;*&#x27;);
-});
 
 loadCatalogue();
 &lt;/script&gt;
@@ -966,12 +949,17 @@ loadCatalogue();
     <div>
       <div style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--brand);font-weight:600;margin-bottom:3px">Chrome Mercy Studio</div>
       <h2 style="font-size:20px;font-weight:600;margin:0;letter-spacing:-.01em;color:var(--text)">Specifications</h2>
-      <div style="font-size:13px;color:var(--text2);margin-top:3px">Select any two specifications to compare side by side.</div>
+      <div style="font-size:13px;color:var(--text2);margin-top:3px">Compare specifications and reference the sales call script.</div>
     </div>
     <div id="spec-status" style="font-size:12px;color:var(--text2)"></div>
   </div>
-  <div class="spec-grid" id="spec-grid">
-    <div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--text2);font-size:14px">Loading specifications&hellip;</div>
+  <div class="spec-layout">
+    <div class="spec-main">
+      <div class="spec-grid" id="spec-grid">
+        <div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--text2);font-size:14px">Loading specifications&hellip;</div>
+      </div>
+    </div>
+    <div class="spec-script" id="spec-script"></div>
   </div>
 </div>
 
@@ -1068,81 +1056,113 @@ function switchTab(tab) {
   if(tab === 'specifications') initSpecTab();
 }
 
+var SPEC_RECIPES = {"Select — 2 Seat — T1": [{"id": "INT_166", "qty": 1}, {"id": "INT_005", "qty": 1}, {"id": "INT_019", "qty": 2}], "Select — 2 Seat — T2": [{"id": "INT_176", "qty": 1}, {"id": "INT_005", "qty": 1}, {"id": "INT_019", "qty": 2}], "Select — 2 Seat — T3": [{"id": "INT_186", "qty": 1}, {"id": "INT_005", "qty": 1}, {"id": "INT_019", "qty": 2}], "Select — 2 Seat — T4": [{"id": "INT_196", "qty": 1}, {"id": "INT_005", "qty": 1}, {"id": "INT_019", "qty": 2}], "Select — 5 Seat — T1": [{"id": "INT_206", "qty": 1}, {"id": "INT_005", "qty": 1}, {"id": "INT_019", "qty": 4}], "Select — 5 Seat — T2": [{"id": "INT_216", "qty": 1}, {"id": "INT_005", "qty": 1}, {"id": "INT_019", "qty": 4}], "Select — 5 Seat — T3": [{"id": "INT_226", "qty": 1}, {"id": "INT_005", "qty": 1}, {"id": "INT_019", "qty": 4}], "Select — 5 Seat — T4": [{"id": "INT_236", "qty": 1}, {"id": "INT_005", "qty": 1}, {"id": "INT_019", "qty": 4}], "Select — 7 Seat — T1": [{"id": "INT_246", "qty": 1}, {"id": "INT_005", "qty": 1}, {"id": "INT_019", "qty": 4}], "Select — 7 Seat — T2": [{"id": "INT_256", "qty": 1}, {"id": "INT_005", "qty": 1}, {"id": "INT_019", "qty": 4}], "Select — 7 Seat — T3": [{"id": "INT_266", "qty": 1}, {"id": "INT_005", "qty": 1}, {"id": "INT_019", "qty": 4}], "Select — 7 Seat — T4": [{"id": "INT_276", "qty": 1}, {"id": "INT_005", "qty": 1}, {"id": "INT_019", "qty": 4}], "Reserve — 2 Seat — T1": [{"id": "INT_166", "qty": 1}, {"id": "INT_005", "qty": 1}, {"id": "INT_019", "qty": 2}, {"id": "INT_026", "qty": 2}, {"id": "INT_008", "qty": 1}, {"id": "INT_010", "qty": 1}, {"id": "INT_006", "qty": 1}, {"id": "INT_007", "qty": 1}, {"id": "INT_311", "qty": 1}], "Reserve — 2 Seat — T2": [{"id": "INT_176", "qty": 1}, {"id": "INT_005", "qty": 1}, {"id": "INT_019", "qty": 2}, {"id": "INT_026", "qty": 2}, {"id": "INT_008", "qty": 1}, {"id": "INT_010", "qty": 1}, {"id": "INT_006", "qty": 1}, {"id": "INT_007", "qty": 1}, {"id": "INT_311", "qty": 1}], "Reserve — 2 Seat — T3": [{"id": "INT_186", "qty": 1}, {"id": "INT_005", "qty": 1}, {"id": "INT_019", "qty": 2}, {"id": "INT_026", "qty": 2}, {"id": "INT_008", "qty": 1}, {"id": "INT_010", "qty": 1}, {"id": "INT_006", "qty": 1}, {"id": "INT_007", "qty": 1}, {"id": "INT_311", "qty": 1}], "Reserve — 2 Seat — T4": [{"id": "INT_196", "qty": 1}, {"id": "INT_005", "qty": 1}, {"id": "INT_019", "qty": 2}, {"id": "INT_026", "qty": 2}, {"id": "INT_008", "qty": 1}, {"id": "INT_010", "qty": 1}, {"id": "INT_006", "qty": 1}, {"id": "INT_007", "qty": 1}, {"id": "INT_311", "qty": 1}], "Reserve — 5 Seat — T1": [{"id": "INT_206", "qty": 1}, {"id": "INT_005", "qty": 1}, {"id": "INT_019", "qty": 4}, {"id": "INT_026", "qty": 4}, {"id": "INT_008", "qty": 1}, {"id": "INT_010", "qty": 1}, {"id": "INT_006", "qty": 1}, {"id": "INT_007", "qty": 1}, {"id": "INT_311", "qty": 1}], "Reserve — 5 Seat — T2": [{"id": "INT_216", "qty": 1}, {"id": "INT_005", "qty": 1}, {"id": "INT_019", "qty": 4}, {"id": "INT_026", "qty": 4}, {"id": "INT_008", "qty": 1}, {"id": "INT_010", "qty": 1}, {"id": "INT_006", "qty": 1}, {"id": "INT_007", "qty": 1}, {"id": "INT_311", "qty": 1}], "Reserve — 5 Seat — T3": [{"id": "INT_226", "qty": 1}, {"id": "INT_005", "qty": 1}, {"id": "INT_019", "qty": 4}, {"id": "INT_026", "qty": 4}, {"id": "INT_008", "qty": 1}, {"id": "INT_010", "qty": 1}, {"id": "INT_006", "qty": 1}, {"id": "INT_007", "qty": 1}, {"id": "INT_311", "qty": 1}], "Reserve — 5 Seat — T4": [{"id": "INT_236", "qty": 1}, {"id": "INT_005", "qty": 1}, {"id": "INT_019", "qty": 4}, {"id": "INT_026", "qty": 4}, {"id": "INT_008", "qty": 1}, {"id": "INT_010", "qty": 1}, {"id": "INT_006", "qty": 1}, {"id": "INT_007", "qty": 1}, {"id": "INT_311", "qty": 1}], "Reserve — 7 Seat — T1": [{"id": "INT_246", "qty": 1}, {"id": "INT_005", "qty": 1}, {"id": "INT_019", "qty": 4}, {"id": "INT_026", "qty": 4}, {"id": "INT_008", "qty": 1}, {"id": "INT_010", "qty": 1}, {"id": "INT_006", "qty": 1}, {"id": "INT_007", "qty": 1}, {"id": "INT_311", "qty": 1}], "Reserve — 7 Seat — T2": [{"id": "INT_256", "qty": 1}, {"id": "INT_005", "qty": 1}, {"id": "INT_019", "qty": 4}, {"id": "INT_026", "qty": 4}, {"id": "INT_008", "qty": 1}, {"id": "INT_010", "qty": 1}, {"id": "INT_006", "qty": 1}, {"id": "INT_007", "qty": 1}, {"id": "INT_311", "qty": 1}], "Reserve — 7 Seat — T3": [{"id": "INT_266", "qty": 1}, {"id": "INT_005", "qty": 1}, {"id": "INT_019", "qty": 4}, {"id": "INT_026", "qty": 4}, {"id": "INT_008", "qty": 1}, {"id": "INT_010", "qty": 1}, {"id": "INT_006", "qty": 1}, {"id": "INT_007", "qty": 1}, {"id": "INT_311", "qty": 1}], "Reserve — 7 Seat — T4": [{"id": "INT_276", "qty": 1}, {"id": "INT_005", "qty": 1}, {"id": "INT_019", "qty": 4}, {"id": "INT_026", "qty": 4}, {"id": "INT_008", "qty": 1}, {"id": "INT_010", "qty": 1}, {"id": "INT_006", "qty": 1}, {"id": "INT_007", "qty": 1}, {"id": "INT_311", "qty": 1}], "Private — 2 Seat — T1": [{"id": "INT_166", "qty": 1}, {"id": "INT_005", "qty": 1}, {"id": "INT_019", "qty": 2}, {"id": "INT_026", "qty": 2}, {"id": "INT_027", "qty": 2}, {"id": "INT_008", "qty": 1}, {"id": "INT_010", "qty": 1}, {"id": "INT_006", "qty": 1}, {"id": "INT_007", "qty": 1}, {"id": "INT_311", "qty": 1}, {"id": "INT_107", "qty": 2}, {"id": "INT_040", "qty": 1}, {"id": "INT_043", "qty": 1}, {"id": "INT_044", "qty": 1}], "Private — 2 Seat — T2": [{"id": "INT_176", "qty": 1}, {"id": "INT_005", "qty": 1}, {"id": "INT_019", "qty": 2}, {"id": "INT_026", "qty": 2}, {"id": "INT_027", "qty": 2}, {"id": "INT_008", "qty": 1}, {"id": "INT_010", "qty": 1}, {"id": "INT_006", "qty": 1}, {"id": "INT_007", "qty": 1}, {"id": "INT_311", "qty": 1}, {"id": "INT_107", "qty": 2}, {"id": "INT_040", "qty": 1}, {"id": "INT_043", "qty": 1}, {"id": "INT_044", "qty": 1}], "Private — 2 Seat — T3": [{"id": "INT_186", "qty": 1}, {"id": "INT_005", "qty": 1}, {"id": "INT_019", "qty": 2}, {"id": "INT_026", "qty": 2}, {"id": "INT_027", "qty": 2}, {"id": "INT_008", "qty": 1}, {"id": "INT_010", "qty": 1}, {"id": "INT_006", "qty": 1}, {"id": "INT_007", "qty": 1}, {"id": "INT_311", "qty": 1}, {"id": "INT_107", "qty": 2}, {"id": "INT_040", "qty": 1}, {"id": "INT_043", "qty": 1}, {"id": "INT_044", "qty": 1}], "Private — 2 Seat — T4": [{"id": "INT_196", "qty": 1}, {"id": "INT_005", "qty": 1}, {"id": "INT_019", "qty": 2}, {"id": "INT_026", "qty": 2}, {"id": "INT_027", "qty": 2}, {"id": "INT_008", "qty": 1}, {"id": "INT_010", "qty": 1}, {"id": "INT_006", "qty": 1}, {"id": "INT_007", "qty": 1}, {"id": "INT_311", "qty": 1}, {"id": "INT_107", "qty": 2}, {"id": "INT_040", "qty": 1}, {"id": "INT_043", "qty": 1}, {"id": "INT_044", "qty": 1}], "Private — 5 Seat — T1": [{"id": "INT_206", "qty": 1}, {"id": "INT_005", "qty": 1}, {"id": "INT_019", "qty": 4}, {"id": "INT_026", "qty": 4}, {"id": "INT_027", "qty": 4}, {"id": "INT_008", "qty": 1}, {"id": "INT_010", "qty": 1}, {"id": "INT_006", "qty": 1}, {"id": "INT_007", "qty": 1}, {"id": "INT_311", "qty": 1}, {"id": "INT_107", "qty": 5}, {"id": "INT_040", "qty": 1}, {"id": "INT_043", "qty": 1}, {"id": "INT_044", "qty": 1}], "Private — 5 Seat — T2": [{"id": "INT_216", "qty": 1}, {"id": "INT_005", "qty": 1}, {"id": "INT_019", "qty": 4}, {"id": "INT_026", "qty": 4}, {"id": "INT_027", "qty": 4}, {"id": "INT_008", "qty": 1}, {"id": "INT_010", "qty": 1}, {"id": "INT_006", "qty": 1}, {"id": "INT_007", "qty": 1}, {"id": "INT_311", "qty": 1}, {"id": "INT_107", "qty": 5}, {"id": "INT_040", "qty": 1}, {"id": "INT_043", "qty": 1}, {"id": "INT_044", "qty": 1}], "Private — 5 Seat — T3": [{"id": "INT_226", "qty": 1}, {"id": "INT_005", "qty": 1}, {"id": "INT_019", "qty": 4}, {"id": "INT_026", "qty": 4}, {"id": "INT_027", "qty": 4}, {"id": "INT_008", "qty": 1}, {"id": "INT_010", "qty": 1}, {"id": "INT_006", "qty": 1}, {"id": "INT_007", "qty": 1}, {"id": "INT_311", "qty": 1}, {"id": "INT_107", "qty": 5}, {"id": "INT_040", "qty": 1}, {"id": "INT_043", "qty": 1}, {"id": "INT_044", "qty": 1}], "Private — 5 Seat — T4": [{"id": "INT_236", "qty": 1}, {"id": "INT_005", "qty": 1}, {"id": "INT_019", "qty": 4}, {"id": "INT_026", "qty": 4}, {"id": "INT_027", "qty": 4}, {"id": "INT_008", "qty": 1}, {"id": "INT_010", "qty": 1}, {"id": "INT_006", "qty": 1}, {"id": "INT_007", "qty": 1}, {"id": "INT_311", "qty": 1}, {"id": "INT_107", "qty": 5}, {"id": "INT_040", "qty": 1}, {"id": "INT_043", "qty": 1}, {"id": "INT_044", "qty": 1}], "Private — 7 Seat — T1": [{"id": "INT_246", "qty": 1}, {"id": "INT_005", "qty": 1}, {"id": "INT_019", "qty": 4}, {"id": "INT_026", "qty": 4}, {"id": "INT_027", "qty": 4}, {"id": "INT_008", "qty": 1}, {"id": "INT_010", "qty": 1}, {"id": "INT_006", "qty": 1}, {"id": "INT_007", "qty": 1}, {"id": "INT_311", "qty": 1}, {"id": "INT_107", "qty": 7}, {"id": "INT_040", "qty": 1}, {"id": "INT_043", "qty": 1}, {"id": "INT_044", "qty": 1}], "Private — 7 Seat — T2": [{"id": "INT_256", "qty": 1}, {"id": "INT_005", "qty": 1}, {"id": "INT_019", "qty": 4}, {"id": "INT_026", "qty": 4}, {"id": "INT_027", "qty": 4}, {"id": "INT_008", "qty": 1}, {"id": "INT_010", "qty": 1}, {"id": "INT_006", "qty": 1}, {"id": "INT_007", "qty": 1}, {"id": "INT_311", "qty": 1}, {"id": "INT_107", "qty": 7}, {"id": "INT_040", "qty": 1}, {"id": "INT_043", "qty": 1}, {"id": "INT_044", "qty": 1}], "Private — 7 Seat — T3": [{"id": "INT_266", "qty": 1}, {"id": "INT_005", "qty": 1}, {"id": "INT_019", "qty": 4}, {"id": "INT_026", "qty": 4}, {"id": "INT_027", "qty": 4}, {"id": "INT_008", "qty": 1}, {"id": "INT_010", "qty": 1}, {"id": "INT_006", "qty": 1}, {"id": "INT_007", "qty": 1}, {"id": "INT_311", "qty": 1}, {"id": "INT_107", "qty": 7}, {"id": "INT_040", "qty": 1}, {"id": "INT_043", "qty": 1}, {"id": "INT_044", "qty": 1}], "Private — 7 Seat — T4": [{"id": "INT_276", "qty": 1}, {"id": "INT_005", "qty": 1}, {"id": "INT_019", "qty": 4}, {"id": "INT_026", "qty": 4}, {"id": "INT_027", "qty": 4}, {"id": "INT_008", "qty": 1}, {"id": "INT_010", "qty": 1}, {"id": "INT_006", "qty": 1}, {"id": "INT_007", "qty": 1}, {"id": "INT_311", "qty": 1}, {"id": "INT_107", "qty": 7}, {"id": "INT_040", "qty": 1}, {"id": "INT_043", "qty": 1}, {"id": "INT_044", "qty": 1}], "Atelier — 2 Seat — T1": [{"id": "INT_166", "qty": 1}, {"id": "INT_002", "qty": 1}, {"id": "INT_011", "qty": 2}, {"id": "INT_036", "qty": 1}, {"id": "INT_028", "qty": 1}, {"id": "INT_032", "qty": 1}, {"id": "INT_008", "qty": 1}, {"id": "INT_010", "qty": 1}, {"id": "INT_006", "qty": 1}, {"id": "INT_007", "qty": 1}, {"id": "INT_311", "qty": 1}, {"id": "INT_107", "qty": 2}, {"id": "INT_097", "qty": 1}, {"id": "INT_333", "qty": 2}, {"id": "INT_086", "qty": 2}, {"id": "INT_089", "qty": 2}, {"id": "INT_090", "qty": 2}, {"id": "INT_076", "qty": 1}, {"id": "INT_066", "qty": 1}, {"id": "INT_106", "qty": 4}], "Atelier — 2 Seat — T2": [{"id": "INT_176", "qty": 1}, {"id": "INT_002", "qty": 1}, {"id": "INT_011", "qty": 2}, {"id": "INT_037", "qty": 1}, {"id": "INT_029", "qty": 1}, {"id": "INT_033", "qty": 1}, {"id": "INT_008", "qty": 1}, {"id": "INT_010", "qty": 1}, {"id": "INT_006", "qty": 1}, {"id": "INT_007", "qty": 1}, {"id": "INT_311", "qty": 1}, {"id": "INT_107", "qty": 2}, {"id": "INT_097", "qty": 1}, {"id": "INT_333", "qty": 2}, {"id": "INT_086", "qty": 2}, {"id": "INT_089", "qty": 2}, {"id": "INT_090", "qty": 2}, {"id": "INT_076", "qty": 1}, {"id": "INT_066", "qty": 1}, {"id": "INT_106", "qty": 4}], "Atelier — 2 Seat — T3": [{"id": "INT_186", "qty": 1}, {"id": "INT_002", "qty": 1}, {"id": "INT_011", "qty": 2}, {"id": "INT_038", "qty": 1}, {"id": "INT_030", "qty": 1}, {"id": "INT_034", "qty": 1}, {"id": "INT_008", "qty": 1}, {"id": "INT_010", "qty": 1}, {"id": "INT_006", "qty": 1}, {"id": "INT_007", "qty": 1}, {"id": "INT_311", "qty": 1}, {"id": "INT_107", "qty": 2}, {"id": "INT_097", "qty": 1}, {"id": "INT_333", "qty": 2}, {"id": "INT_086", "qty": 2}, {"id": "INT_089", "qty": 2}, {"id": "INT_090", "qty": 2}, {"id": "INT_076", "qty": 1}, {"id": "INT_066", "qty": 1}, {"id": "INT_106", "qty": 4}], "Atelier — 2 Seat — T4": [{"id": "INT_196", "qty": 1}, {"id": "INT_002", "qty": 1}, {"id": "INT_011", "qty": 2}, {"id": "INT_039", "qty": 1}, {"id": "INT_031", "qty": 1}, {"id": "INT_035", "qty": 1}, {"id": "INT_008", "qty": 1}, {"id": "INT_010", "qty": 1}, {"id": "INT_006", "qty": 1}, {"id": "INT_007", "qty": 1}, {"id": "INT_311", "qty": 1}, {"id": "INT_107", "qty": 2}, {"id": "INT_097", "qty": 1}, {"id": "INT_333", "qty": 2}, {"id": "INT_086", "qty": 2}, {"id": "INT_089", "qty": 2}, {"id": "INT_090", "qty": 2}, {"id": "INT_076", "qty": 1}, {"id": "INT_066", "qty": 1}, {"id": "INT_106", "qty": 4}], "Atelier — 5 Seat — T1": [{"id": "INT_206", "qty": 1}, {"id": "INT_002", "qty": 1}, {"id": "INT_011", "qty": 4}, {"id": "INT_036", "qty": 1}, {"id": "INT_028", "qty": 1}, {"id": "INT_032", "qty": 1}, {"id": "INT_008", "qty": 1}, {"id": "INT_010", "qty": 1}, {"id": "INT_006", "qty": 1}, {"id": "INT_007", "qty": 1}, {"id": "INT_311", "qty": 1}, {"id": "INT_107", "qty": 5}, {"id": "INT_097", "qty": 1}, {"id": "INT_333", "qty": 2}, {"id": "INT_086", "qty": 2}, {"id": "INT_089", "qty": 2}, {"id": "INT_090", "qty": 2}, {"id": "INT_076", "qty": 1}, {"id": "INT_066", "qty": 1}, {"id": "INT_106", "qty": 4}], "Atelier — 5 Seat — T2": [{"id": "INT_216", "qty": 1}, {"id": "INT_002", "qty": 1}, {"id": "INT_011", "qty": 4}, {"id": "INT_037", "qty": 1}, {"id": "INT_029", "qty": 1}, {"id": "INT_033", "qty": 1}, {"id": "INT_008", "qty": 1}, {"id": "INT_010", "qty": 1}, {"id": "INT_006", "qty": 1}, {"id": "INT_007", "qty": 1}, {"id": "INT_311", "qty": 1}, {"id": "INT_107", "qty": 5}, {"id": "INT_097", "qty": 1}, {"id": "INT_333", "qty": 2}, {"id": "INT_086", "qty": 2}, {"id": "INT_089", "qty": 2}, {"id": "INT_090", "qty": 2}, {"id": "INT_076", "qty": 1}, {"id": "INT_066", "qty": 1}, {"id": "INT_106", "qty": 4}], "Atelier — 5 Seat — T3": [{"id": "INT_226", "qty": 1}, {"id": "INT_002", "qty": 1}, {"id": "INT_011", "qty": 4}, {"id": "INT_038", "qty": 1}, {"id": "INT_030", "qty": 1}, {"id": "INT_034", "qty": 1}, {"id": "INT_008", "qty": 1}, {"id": "INT_010", "qty": 1}, {"id": "INT_006", "qty": 1}, {"id": "INT_007", "qty": 1}, {"id": "INT_311", "qty": 1}, {"id": "INT_107", "qty": 5}, {"id": "INT_097", "qty": 1}, {"id": "INT_333", "qty": 2}, {"id": "INT_086", "qty": 2}, {"id": "INT_089", "qty": 2}, {"id": "INT_090", "qty": 2}, {"id": "INT_076", "qty": 1}, {"id": "INT_066", "qty": 1}, {"id": "INT_106", "qty": 4}], "Atelier — 5 Seat — T4": [{"id": "INT_236", "qty": 1}, {"id": "INT_002", "qty": 1}, {"id": "INT_011", "qty": 4}, {"id": "INT_039", "qty": 1}, {"id": "INT_031", "qty": 1}, {"id": "INT_035", "qty": 1}, {"id": "INT_008", "qty": 1}, {"id": "INT_010", "qty": 1}, {"id": "INT_006", "qty": 1}, {"id": "INT_007", "qty": 1}, {"id": "INT_311", "qty": 1}, {"id": "INT_107", "qty": 5}, {"id": "INT_097", "qty": 1}, {"id": "INT_333", "qty": 2}, {"id": "INT_086", "qty": 2}, {"id": "INT_089", "qty": 2}, {"id": "INT_090", "qty": 2}, {"id": "INT_076", "qty": 1}, {"id": "INT_066", "qty": 1}, {"id": "INT_106", "qty": 4}], "Atelier — 7 Seat — T1": [{"id": "INT_246", "qty": 1}, {"id": "INT_002", "qty": 1}, {"id": "INT_011", "qty": 4}, {"id": "INT_036", "qty": 1}, {"id": "INT_028", "qty": 1}, {"id": "INT_032", "qty": 1}, {"id": "INT_008", "qty": 1}, {"id": "INT_010", "qty": 1}, {"id": "INT_006", "qty": 1}, {"id": "INT_007", "qty": 1}, {"id": "INT_311", "qty": 1}, {"id": "INT_107", "qty": 7}, {"id": "INT_097", "qty": 1}, {"id": "INT_333", "qty": 2}, {"id": "INT_086", "qty": 2}, {"id": "INT_089", "qty": 2}, {"id": "INT_090", "qty": 2}, {"id": "INT_076", "qty": 1}, {"id": "INT_066", "qty": 1}, {"id": "INT_106", "qty": 4}], "Atelier — 7 Seat — T2": [{"id": "INT_256", "qty": 1}, {"id": "INT_002", "qty": 1}, {"id": "INT_011", "qty": 4}, {"id": "INT_037", "qty": 1}, {"id": "INT_029", "qty": 1}, {"id": "INT_033", "qty": 1}, {"id": "INT_008", "qty": 1}, {"id": "INT_010", "qty": 1}, {"id": "INT_006", "qty": 1}, {"id": "INT_007", "qty": 1}, {"id": "INT_311", "qty": 1}, {"id": "INT_107", "qty": 7}, {"id": "INT_097", "qty": 1}, {"id": "INT_333", "qty": 2}, {"id": "INT_086", "qty": 2}, {"id": "INT_089", "qty": 2}, {"id": "INT_090", "qty": 2}, {"id": "INT_076", "qty": 1}, {"id": "INT_066", "qty": 1}, {"id": "INT_106", "qty": 4}], "Atelier — 7 Seat — T3": [{"id": "INT_266", "qty": 1}, {"id": "INT_002", "qty": 1}, {"id": "INT_011", "qty": 4}, {"id": "INT_038", "qty": 1}, {"id": "INT_030", "qty": 1}, {"id": "INT_034", "qty": 1}, {"id": "INT_008", "qty": 1}, {"id": "INT_010", "qty": 1}, {"id": "INT_006", "qty": 1}, {"id": "INT_007", "qty": 1}, {"id": "INT_311", "qty": 1}, {"id": "INT_107", "qty": 7}, {"id": "INT_097", "qty": 1}, {"id": "INT_333", "qty": 2}, {"id": "INT_086", "qty": 2}, {"id": "INT_089", "qty": 2}, {"id": "INT_090", "qty": 2}, {"id": "INT_076", "qty": 1}, {"id": "INT_066", "qty": 1}, {"id": "INT_106", "qty": 4}], "Atelier — 7 Seat — T4": [{"id": "INT_276", "qty": 1}, {"id": "INT_002", "qty": 1}, {"id": "INT_011", "qty": 4}, {"id": "INT_039", "qty": 1}, {"id": "INT_031", "qty": 1}, {"id": "INT_035", "qty": 1}, {"id": "INT_008", "qty": 1}, {"id": "INT_010", "qty": 1}, {"id": "INT_006", "qty": 1}, {"id": "INT_007", "qty": 1}, {"id": "INT_311", "qty": 1}, {"id": "INT_107", "qty": 7}, {"id": "INT_097", "qty": 1}, {"id": "INT_333", "qty": 2}, {"id": "INT_086", "qty": 2}, {"id": "INT_089", "qty": 2}, {"id": "INT_090", "qty": 2}, {"id": "INT_076", "qty": 1}, {"id": "INT_066", "qty": 1}, {"id": "INT_106", "qty": 4}]};
+
 // ── SPECIFICATIONS TAB ────────────────────────────────────────────
-var SPEC_LIST      = [];
-var SPEC_PRICES    = {};  // {code: totalInc} from iframe
-var specTabReady   = false;
+// Specs are ordinary Catalogue rows (category 'Specifications', ZSPEC- codes).
+// This tab reads them straight from CATALOGUE — no iframe, no async fetch.
+var specTabReady = false;
 
 function fmt0(n){ return '$'+Math.round(n||0).toLocaleString('en-AU'); }
 
 var COLLECTIONS = ['Select','Reserve','Private','Atelier'];
-
-// Each comparison slot has its own state
 var SLOT_DEFAULTS = [
   {collection:'Select',  tier:'1', seats:'5'},
   {collection:'Reserve', tier:'1', seats:'5'}
 ];
 
-async function initSpecTab(){
-  if(specTabReady){ renderSpecGrid(); return; }
-  document.getElementById('spec-status').textContent = 'Loading\u2026';
-  try{
-    var res = await fetch(APPS_SCRIPT_URL+'?action=list_specifications&t='+Date.now());
-    var json = await res.json();
-    SPEC_LIST = (json.status==='ok' && json.specifications) ? json.specifications : [];
-  }catch(e){ SPEC_LIST=[]; }
+function initSpecTab(){
+  document.getElementById('spec-status').textContent =
+    CATALOGUE.filter(function(r){return r.category==='Specifications';}).length + ' specifications';
   renderSpecGrid();
-  document.getElementById('spec-status').textContent = 'Fetching live prices\u2026';
-  try{
-    var prices = await getSpecPricesFromIframe(7000);
-    SPEC_PRICES = {};
-    prices.forEach(function(s){ SPEC_PRICES[s.code] = s.totalInc; });
-  }catch(e){ SPEC_PRICES={}; }
+  renderSalesScript();
   specTabReady = true;
-  // Re-render body of each slot with prices now available
-  [0,1].forEach(function(idx){ refreshSlotBody(idx); });
-  document.getElementById('spec-status').textContent = SPEC_LIST.length+' specifications';
 }
 
-function getSpecPricesFromIframe(timeoutMs){
-  return new Promise(function(resolve){
-    var frame = document.getElementById('shipping-frame');
-    if(!frame||!frame.contentWindow){ resolve([]); return; }
-    var done = false;
-    function onMsg(ev){
-      if(ev.data && ev.data.type==='cm_spec_prices'){
-        done=true; window.removeEventListener('message',onMsg); resolve(ev.data.data||[]);
-      }
-    }
-    window.addEventListener('message',onMsg);
-    frame.contentWindow.postMessage({type:'cm_get_spec_prices'},'*');
-    setTimeout(function(){ if(!done){ window.removeEventListener('message',onMsg); resolve([]); } }, timeoutMs||7000);
-  });
+// ── SALES CALL SCRIPT (accordion reference) ───────────────────────
+// Starting prices are the T1 5-seat anchors at the strategic margins.
+var SALES_SCRIPT = [
+  {t:'Starting prices', h:
+    '<span class="lbl">Phone anchors &mdash; T1 5-seat "from"</span>'+
+    '<p><b>SELECT</b> from <span class="price-tag">$7,685 inc GST</span></p>'+
+    '<p><b>RESERVE</b> from <span class="price-tag">$12,745 inc GST</span></p>'+
+    '<p><b>PRIVATE</b> from <span class="price-tag">$16,229 inc GST</span></p>'+
+    '<p><b>ATELIER</b> from <span class="price-tag">$48,269 inc GST</span></p>'+
+    '<p style="color:#9a9890;font-size:12px">Always add: &ldquo;Final pricing depends on vehicle type, seating layout, material selection, design complexity, and the condition of the existing interior.&rdquo;</p>'},
+  {t:'Call structure', h:
+    '<p>The phone call sells the consultation. It should:</p>'+
+    '<ul><li>Confirm the vehicle</li><li>Understand the customer&rsquo;s goal</li>'+
+    '<li>Identify component problem vs cabin problem</li><li>Qualify fit</li>'+
+    '<li>Explain the relevant pathway</li><li>Give starting price expectations</li>'+
+    '<li>Confirm comfort with the starting investment</li><li>Book the Interior Direction Consultation</li></ul>'+
+    '<p>It should <b>not</b> give a final quote, lock materials, or become an unpaid design session.</p>'},
+  {t:'Opening', h:
+    '<div class="quote">&ldquo;Hi [Name], it&rsquo;s [Your Name] from Chrome Mercy Studio. Thanks for your enquiry about the [Vehicle]. I wanted to give you a quick call to understand what you&rsquo;re trying to achieve with the interior and see whether one of our pathways is the right fit. Does now still work?&rdquo;</div>'},
+  {t:'Starting-price comfort check', h:
+    '<div class="quote">&ldquo;Before we book the Interior Direction Consultation, I want to make sure the starting investment is comfortable for you. [PACKAGE] starts from $[PRICE] inc GST, and final pricing depends on selections and vehicle condition. Is that within the range you were expecting for this kind of work?&rdquo;</div>'+
+    '<p>Then stop talking.</p>'},
+  {t:'SELECT — Essential Refresh', h:
+    '<div class="quote">&ldquo;SELECT is our Essential Interior Refresh. It&rsquo;s best when the main issue is the seats and the key visible insert areas. It&rsquo;s not intended to transform the entire cabin, but it can make a strong difference if those are the surfaces letting the interior down most. SELECT starts from $7,685 inc GST. The only thing I&rsquo;d check is whether the rest of the cabin will still hold up once those areas are fresh &mdash; if not, PRIVATE may make more sense.&rdquo;</div>'},
+  {t:'RESERVE — Driver&rsquo;s Touchpoint', h:
+    '<div class="quote">&ldquo;RESERVE is our Driver&rsquo;s Touchpoint Upgrade. It&rsquo;s for owners who want the areas they touch and see most while driving to feel more complete &mdash; seats, steering wheel, shifter, handbrake, console, and door armrests. RESERVE starts from $12,745 inc GST. The reason some owners move from RESERVE to PRIVATE is that PRIVATE goes further into the details that make the whole cabin feel finished &mdash; especially seatbelts and removable dash components.&rdquo;</div>'},
+  {t:'PRIVATE — Collector Cabin (hero)', h:
+    '<div class="quote">&ldquo;PRIVATE is our Collector Cabin Rebuild, and it&rsquo;s the package I&rsquo;d recommend for most serious classic, European, exotic, and prestige interiors. It covers the key surfaces that define the cabin experience &mdash; seats, console lid, door card inserts and armrests, steering wheel, shifter, handbrake, seatbelt re-webbing, and removable dash components. If you only redo one or two parts, the rest of the cabin can start to look left behind. PRIVATE helps the interior feel cohesive. It starts from $16,229 inc GST. Based on what you&rsquo;ve told me, this is where I&rsquo;d start the conversation.&rdquo;</div>'},
+  {t:'ATELIER — Complete Bespoke', h:
+    '<div class="quote">&ldquo;ATELIER is our Complete Bespoke Interior &mdash; the full cabin pathway. No major surface left behind: full seats, full centre console, full door cards, full dashboard, full headliner, steering wheel, seatbelts, shifter, handbrake, and the complete material direction considered together. Best for show cars, collector vehicles, exotic builds, and high-end restorations. ATELIER starts from $48,269 inc GST. From there the final scope depends heavily on vehicle complexity, dashboard and console work, material selection, and condition.&rdquo;</div>'},
+  {t:'Package advantage (value framing)', h:
+    '<div class="quote">&ldquo;If we do those items individually, the total is usually quite a bit higher because every component becomes its own separate job &mdash; its own setup, material allocation, patterning, finish matching, scheduling, and quality control. The package is better value because we plan the interior as one cohesive scope from the beginning, and it usually gives a better result because the materials, colours, stitching, and details are decided together.&rdquo;</div>'+
+    '<span class="lbl">Never say</span>'+
+    '<ul><li>Cheaper because of overseas manufacturing</li><li>We save on shipping</li><li>We order in bulk overseas</li><li>It&rsquo;s discounted / we can make it cheaper</li></ul>'},
+  {t:'Objection: quote over the phone', h:
+    '<div class="quote">&ldquo;I can give you the starting price and likely pathway, but I wouldn&rsquo;t want to give a final quote over the phone because the final number depends on the vehicle, condition, materials, and selections. That&rsquo;s exactly what the Interior Direction Consultation is for.&rdquo;</div>'},
+  {t:'Objection: too expensive', h:
+    '<div class="quote">&ldquo;Totally understand. A lot of people initially compare it to retrimming one part, but the package is built around the cabin feeling cohesive. With PRIVATE, for example, we&rsquo;re not just doing seats &mdash; we&rsquo;re addressing the key surfaces that define how the interior feels. Were you mainly thinking of fixing one component, or bringing the whole interior up to the level of the car?&rdquo;</div>'},
+  {t:'Objection: cheaper elsewhere', h:
+    '<div class="quote">&ldquo;That makes sense. There will always be different levels of work in this space. We&rsquo;re usually not the cheapest, and we&rsquo;re not trying to be. Our focus is considered interior direction, material selection, fit, and finish. Are you mainly looking for the lowest price, or for the interior to be done in a way that matches the car long-term?&rdquo;</div>'+
+    '<p>If lowest price: &ldquo;Then we may not be the right fit, and that&rsquo;s completely okay.&rdquo;</p>'},
+  {t:'Close', h:
+    '<div class="quote">&ldquo;Based on what you&rsquo;ve told me, I think [PACKAGE] is the right starting point. Since you&rsquo;re comfortable with the starting range, the next step would be the Interior Direction Consultation. Would you like to book that in?&rdquo;</div>'}
+];
+
+function renderSalesScript(){
+  var el=document.getElementById('spec-script');
+  if(!el || el.dataset.built) return;
+  el.innerHTML='<div class="script-hd">Sales call script</div>'+
+    SALES_SCRIPT.map(function(s,i){
+      return '<div class="acc-item'+(i===0?' open':'')+'" id="acc-'+i+'">'+
+        '<button class="acc-btn" onclick="toggleAcc('+i+')">'+s.t+'<span class="chev">&#9654;</span></button>'+
+        '<div class="acc-body">'+s.h+'</div>'+
+      '</div>';
+    }).join('');
+  el.dataset.built='1';
+}
+function toggleAcc(i){
+  var item=document.getElementById('acc-'+i);
+  if(item) item.classList.toggle('open');
 }
 
-function specByFilters(collection, tier, seats){
+function specRow(collection, tier, seats){
   var name = collection+' \u2014 '+seats+' Seat \u2014 T'+tier;
-  return SPEC_LIST.filter(function(s){ return s.name===name; })[0]||null;
+  return CATALOGUE.filter(function(r){
+    return r.category==='Specifications' && (r.service_name===name || r.name===name);
+  })[0] || null;
 }
 
 function collectionForSlot(idx){
-  var el = document.getElementById('scol-'+idx);
-  return el ? el.value : SLOT_DEFAULTS[idx].collection;
+  var el=document.getElementById('scol-'+idx);   return el?el.value:SLOT_DEFAULTS[idx].collection;
 }
 function tierForSlot(idx){
-  var el = document.getElementById('stier-'+idx);
-  return el ? el.value : SLOT_DEFAULTS[idx].tier;
+  var el=document.getElementById('stier-'+idx);  return el?el.value:SLOT_DEFAULTS[idx].tier;
 }
 function seatsForSlot(idx){
-  var el = document.getElementById('sseats-'+idx);
-  return el ? el.value : SLOT_DEFAULTS[idx].seats;
+  var el=document.getElementById('sseats-'+idx); return el?el.value:SLOT_DEFAULTS[idx].seats;
 }
 
 function renderSpecGrid(){
-  var grid = document.getElementById('spec-grid');
-  grid.innerHTML = [0,1].map(function(idx){
-    var d = SLOT_DEFAULTS[idx];
-    var collOpts = COLLECTIONS.map(function(c){
+  var grid=document.getElementById('spec-grid');
+  grid.innerHTML=[0,1].map(function(idx){
+    var d=SLOT_DEFAULTS[idx];
+    var collOpts=COLLECTIONS.map(function(c){
       return '<option value="'+c+'"'+(c===d.collection?' selected':'')+'>'+c+'</option>';
     }).join('');
     return '<div class="spec-col">'+
@@ -1154,14 +1174,11 @@ function renderSpecGrid(){
       '<div class="spec-filters">'+
         '<select id="scol-'+idx+'" onchange="updateSlot('+idx+')">'+collOpts+'</select>'+
         '<select id="stier-'+idx+'" onchange="updateSlot('+idx+')">'+
-          '<option value="1" selected>Tier 1</option>'+
-          '<option value="2">Tier 2</option>'+
-          '<option value="3">Tier 3</option>'+
-          '<option value="4">Tier 4</option>'+
+          '<option value="1" selected>Tier 1</option><option value="2">Tier 2</option>'+
+          '<option value="3">Tier 3</option><option value="4">Tier 4</option>'+
         '</select>'+
         '<select id="sseats-'+idx+'" onchange="updateSlot('+idx+')">'+
-          '<option value="2">2 Seat</option>'+
-          '<option value="5" selected>5 Seat</option>'+
+          '<option value="2">2 Seat</option><option value="5" selected>5 Seat</option>'+
           '<option value="7">7 Seat</option>'+
         '</select>'+
       '</div>'+
@@ -1172,61 +1189,55 @@ function renderSpecGrid(){
 }
 
 function updateSlot(idx){
-  var col = collectionForSlot(idx);
-  var nameEl = document.getElementById('sname-'+idx);
-  if(nameEl) nameEl.textContent = col;
+  var nameEl=document.getElementById('sname-'+idx);
+  if(nameEl) nameEl.textContent=collectionForSlot(idx);
   refreshSlotBody(idx);
 }
 
+// Parse the spec's component recipe from its saved list if available;
+// otherwise fall back to just showing the spec's own price. Component
+// detail comes from the Saved Specifications data embedded at load.
 function refreshSlotBody(idx){
-  var collection = collectionForSlot(idx);
-  var tier       = tierForSlot(idx);
-  var seats      = seatsForSlot(idx);
-  var spec       = specByFilters(collection, tier, seats);
-  var codeEl     = document.getElementById('scode-'+idx);
-  var bodyEl     = document.getElementById('sbody-'+idx);
+  var collection=collectionForSlot(idx), tier=tierForSlot(idx), seats=seatsForSlot(idx);
+  var spec=specRow(collection,tier,seats);
+  var codeEl=document.getElementById('scode-'+idx);
+  var bodyEl=document.getElementById('sbody-'+idx);
 
   if(!spec){
     if(codeEl) codeEl.textContent='';
     if(bodyEl) bodyEl.innerHTML='<div class="spec-missing">Specification not found</div>';
     return;
   }
-  if(codeEl) codeEl.textContent = spec.code;
+  if(codeEl) codeEl.textContent=spec.id||spec.sku||'';
 
-  // Component rows — use CATALOGUE for names and standalone prices
-  var rowsHtml = spec.components.map(function(c){
-    var item = CATALOGUE.find(function(r){ return r.id===c.id; });
-    if(!item) return '<tr><td class="svc" colspan="3" style="color:#9a9890;font-style:italic">'+c.id+' (not in catalogue)</td></tr>';
-    var unitInc = Number(item.final_inc_gst)||0;
-    var lineInc = unitInc * c.qty;
-    var unitEx  = Math.round(unitInc/1.1);
-    return '<tr>'+
-      '<td class="svc">'+(item.service_name||item.name||c.id)+'</td>'+
-      '<td class="qty-cell">'+c.qty+'</td>'+
-      '<td class="price-cell">'+fmt0(lineInc)+
-        '<div class="px">'+fmt0(unitEx)+' ex ea</div>'+
-      '</td>'+
-    '</tr>';
-  }).join('');
+  var totalInc = Number(spec.final_inc_gst)||0;
+  var recipe = SPEC_RECIPES[spec.service_name||spec.name] || [];
 
-  // Total from iframe (includes 1.5× freight multiplier)
-  var totalInc = SPEC_PRICES[spec.code];
-  var totalHtml = totalInc != null
-    ? fmt0(totalInc)+'<div class="ex-total">ex GST '+fmt0(totalInc/1.1)+'</div>'
-    : '<span style="color:#9a9890;font-size:13px;font-weight:400">Loading\u2026</span>';
+  var rowsHtml;
+  if(recipe.length){
+    rowsHtml = recipe.map(function(c){
+      var item=CATALOGUE.find(function(r){return r.id===c.id || r.sku===c.id;});
+      var nm = item ? (item.service_name||item.name) : c.id;
+      var unitInc = item ? (Number(item.final_inc_gst)||0) : 0;
+      var lineInc = unitInc*c.qty;
+      return '<tr>'+
+        '<td class="svc">'+nm+'</td>'+
+        '<td class="qty-cell">'+c.qty+'</td>'+
+        '<td class="price-cell">'+fmt0(lineInc)+'<div class="px">'+fmt0(unitInc/1.1)+' ex ea</div></td>'+
+      '</tr>';
+    }).join('');
+  } else {
+    rowsHtml = '<tr><td class="svc" colspan="3" style="color:#9a9890">Component list unavailable</td></tr>';
+  }
 
-  bodyEl.innerHTML =
+  var totalHtml = fmt0(totalInc)+'<div class="ex-total">ex GST '+fmt0(totalInc/1.1)+'</div>';
+
+  bodyEl.innerHTML=
     '<table class="spec-tbl">'+
-      '<thead><tr>'+
-        '<th>Service</th>'+
-        '<th class="r">Qty</th>'+
-        '<th class="r">Total</th>'+
-      '</tr></thead>'+
+      '<thead><tr><th>Service</th><th class="r">Qty</th><th class="r">Total</th></tr></thead>'+
       '<tbody>'+rowsHtml+'</tbody>'+
-      '<tfoot><tr>'+
-        '<td colspan="2">Specification total (inc GST)</td>'+
-        '<td class="r">'+totalHtml+'</td>'+
-      '</tr></tfoot>'+
+      '<tfoot><tr><td colspan="2">Specification total (inc GST)</td>'+
+      '<td class="r">'+totalHtml+'</td></tr></tfoot>'+
     '</table>';
 }
 
@@ -1278,6 +1289,8 @@ function handleFilter(el) {
 function buildSidebar() {
   var catSet={}, tierSet={}, vehSet={};
   CATALOGUE.forEach(function(d) {
+    // Specifications are shown on their own tab, not the price list
+    if(d.category === 'Specifications') return;
     catSet[d.category]     = (catSet[d.category]||0)+1;
     tierSet[d.tier]        = (tierSet[d.tier]||0)+1;
     // For vehicle type counts, only count non-Tier-A rows
@@ -1327,6 +1340,9 @@ function clearFilter(type) {
 function applyFilters() {
   var q = (document.getElementById('search').value||'').toLowerCase().trim();
   var items = CATALOGUE.filter(function(item) {
+    // Specifications live on their own tab, never on the price list
+    if(item.category === 'Specifications') return false;
+
     // Category filter
     if(filters.cat.length && filters.cat.indexOf(item.category) === -1) return false;
 
@@ -1558,10 +1574,12 @@ async function saveToSheet(id) {
 }
 
 // ── EXPORTS ──────────────────────────────────────────────────────
-async function exportXeroCSV() {
+function exportXeroCSV() {
   if(!CATALOGUE.length){ alert('Live prices aren\u2019t loaded \u2014 nothing to export. Refresh once the spreadsheet is reachable.'); return; }
   var headers=['ItemCode','ItemName','PurchasesDescription','PurchasesUnitPrice','PurchasesAccount','PurchasesTaxRate','SalesDescription','SalesUnitPrice','SalesAccount','SalesTaxRate','InventoryAssetAccount','CostOfGoodsSoldAccount'];
   var rows=[headers];
+  // Specifications are ordinary catalogue rows now (ZSPEC- codes), so they
+  // export here automatically alongside everything else — no separate pass.
   CATALOGUE.forEach(function(item){
     var d=edited[item.id]||item;
     var exRounded = edited[item.id] ? (calcPrice(d).incGst/1.1)
@@ -1569,13 +1587,6 @@ async function exportXeroCSV() {
     var unit = exRounded>0 ? (Math.round(exRounded*100)/100).toFixed(2) : '';
     var name = ((item.category||'')+' - '+(item.sub_category||'')+' - '+(item.name||'')).slice(0,50);
     rows.push([(item.sku||item.id), name, '', '', '', '', item.customer_description||'', unit, '200', 'GST on Income', '', '']);
-  });
-  // Saved specifications — one bundled line each, priced live, sorted after
-  // catalogue rows by virtue of the Z-prefixed code.
-  var specPrices = await getSpecPricesFromIframe();
-  specPrices.forEach(function(s){
-    var unit = s.totalEx>0 ? (Math.round(s.totalEx*100)/100).toFixed(2) : '';
-    rows.push([s.code, s.name.slice(0,50), '', '', '', '', '', unit, '200', 'GST on Income', '', '']);
   });
   var csv = '\ufeff' + rows.map(function(r){
     return r.map(function(c){ return '"'+String(c==null?'':c).replace(/"/g,'""')+'"'; }).join(',');
