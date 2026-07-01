@@ -788,7 +788,7 @@ function renderCatalogue(){
 }
 
 function renderQuote(flash){
-  var r=compute();
+  var r=compute(null, SPEC_FREIGHT_MULT);
   document.getElementById(&#x27;count&#x27;).textContent=r.lines.length?(r.lines.reduce(function(a,L){return a+L.qty;},0)+&#x27; piece(s)&#x27;):&#x27;&#x27;;
   var rb=document.getElementById(&#x27;resetBtn&#x27;); if(rb) rb.disabled=!r.lines.length;
   var el=document.getElementById(&#x27;quote&#x27;);
@@ -816,7 +816,6 @@ function renderQuote(flash){
   // Freight breakdown — only shown when freight is present
   var freightBlock = &#x27;&#x27;;
   if(r.shipBefore &gt; 0){
-    var afterCC = r.shipAfter * 1.02;
     freightBlock =
       &#x27;&lt;div class=&quot;sect&quot;&gt;&lt;div class=&quot;lbl&quot;&gt;Freight breakdown &amp;mdash; ex GST&lt;/div&gt;&#x27;+
         &#x27;&lt;div class=&quot;frow per-piece&quot;&gt;&#x27;+
@@ -830,10 +829,6 @@ function renderQuote(flash){
         &#x27;&lt;div class=&quot;frow highlight&quot;&gt;&#x27;+
           &#x27;&lt;span class=&quot;fl&quot;&gt;&amp;times; 1.5 multiplier applied&lt;/span&gt;&#x27;+
           &#x27;&lt;span class=&quot;fr&quot;&gt;&#x27;+fmt0(r.shipAfter)+&#x27;&lt;/span&gt;&#x27;+
-        &#x27;&lt;/div&gt;&#x27;+
-        &#x27;&lt;div class=&quot;frow&quot;&gt;&#x27;+
-          &#x27;&lt;span class=&quot;fl&quot;&gt;&amp;times; 1.02 processing fee&lt;/span&gt;&#x27;+
-          &#x27;&lt;span class=&quot;fr&quot;&gt;&#x27;+fmt0(afterCC)+&#x27;&lt;/span&gt;&#x27;+
         &#x27;&lt;/div&gt;&#x27;+
       &#x27;&lt;/div&gt;&#x27;;
   }
