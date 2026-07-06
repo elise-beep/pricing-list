@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Consultation — Chrome Mercy Studio</title>
+<style>
+  :root{
+    --bg:#f5f4f1;--surface:#ffffff;--surface2:#f0efe9;--border:#e2dfd8;
+    --text:#111110;--text2:#5c5b57;--text3:#9a9894;
+    --brand:#a7141e;--brand-light:#fce8e8;--brand-border:#c0686b;
+    --green:#0a5c3e;--green-bg:#e8f5ef;
+    --amber:#7a5000;--amber-bg:#fef8e8;--amber-border:#d97706;
+    --steel:#3d6478;--steel-bg:#eef4f7;
+    --radius:8px;--radius-lg:12px;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:20px 20px 80px}
+  .wrap{max-width:1180px;margin:0 auto}
+  .mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+  .head{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:16px}
+  .eyebrow{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--brand);font-weight:600}
+  h1{font-size:20px;font-weight:600;letter-spacing:-.01em;margin:0;color:var(--text)}
+  .sub{color:var(--text2);font-size:13px;margin-top:3px}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:14px;box-shadow:0 1px 2px rgba(0,0,0,0.03)}
+  .card>.ch{padding:12px 15px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:var(--surface)}
+  .ch h2{font-size:13px;font-weight:700;margin:0;letter-spacing:.02em;color:var(--text)}
+  .ch .secno{color:var(--brand);margin-right:6px}
+  .grid{display:grid;grid-template-columns:1.35fr .85fr;gap:14px;align-items:start}
+  @media(max-width:900px){.grid{grid-template-columns:1fr}}
+  .frm{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;padding:14px}
+  .frm label{display:block;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--text2);margin-bottom:4px;font-weight:600}
+  .frm input,.frm select,.search{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);
+    border-radius:var(--radius);padding:8px 10px;font-size:14px;font-family:inherit}
+  .frm input:focus,.frm select:focus,.search:focus{outline:2px solid var(--brand);outline-offset:1px;border-color:transparent}
+  .colls{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;padding:14px}
+  .coll{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;text-align:left;font-family:inherit}
+  .coll:hover{border-color:var(--brand-border)}
+  .coll.sel{border-color:var(--brand);background:var(--brand-light)}
+  .coll .cn{font-size:15px;font-weight:700;color:var(--text)}
+  .coll .cp{font-family:var(--mono);font-size:18px;margin-top:5px;color:var(--text)}
+  .coll .cf{font-size:11px;color:var(--text2);margin-top:2px}
+  .bl{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center;padding:10px 15px;border-bottom:1px solid var(--border)}
+  .bl:last-child{border-bottom:0}
+  .bl .nm{font-size:14px;color:var(--text)}
+  .bl .meta{font-size:11px;color:var(--text2);margin-top:2px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .key{font-family:var(--mono);font-size:10px;color:var(--steel)}
+  .bl .lp{text-align:right;font-family:var(--mono);font-size:14px;min-width:88px}
+  .bl.swapped{background:var(--steel-bg)}
+  .bl.removed .nm{color:var(--text3);text-decoration:line-through}
+  .bl.removed{background:var(--amber-bg)}
+  .badge{font-size:10px;letter-spacing:.05em;padding:1px 7px;border-radius:5px;border:1px solid var(--border);color:var(--text2);background:var(--surface)}
+  .badge.sw{color:var(--steel);border-color:var(--steel)}
+  .badge.rm{color:var(--amber);border-color:var(--amber-border)}
+  .badge.disc{color:var(--green);border-color:var(--green);background:var(--green-bg)}
+  .ib{background:var(--surface);border:1px solid var(--border);color:var(--text2);cursor:pointer;font-size:12px;
+    padding:5px 10px;border-radius:7px;font-family:inherit;white-space:nowrap}
+  .ib:hover{border-color:var(--brand);color:var(--brand)}
+  .ib.undo:hover{border-color:var(--steel);color:var(--steel)}
+  .actions{display:flex;gap:6px}
+  .swaprow{grid-column:1/-1;display:flex;gap:8px;align-items:center;padding-top:4px}
+  .swaprow select{flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:7px 9px;font-size:13px}
+  .qty{display:flex;align-items:center;border:1px solid var(--border);border-radius:7px;overflow:hidden;background:var(--surface)}
+  .qty button{width:26px;height:26px;background:var(--surface2);border:0;color:var(--text);font-size:15px;cursor:pointer;line-height:1}
+  .qty button:hover{background:var(--brand-light);color:var(--brand)}
+  .qty span{min-width:28px;text-align:center;font-family:var(--mono);font-size:13px}
+  .led{font-size:13.5px;padding:14px}
+  .led .r{display:flex;justify-content:space-between;padding:3px 0}
+  .led .r .mono{font-size:13.5px}
+  .led .r.ind{padding-left:14px;color:var(--text2)}
+  .led .r .sw{color:var(--steel)} .led .r .rm{color:var(--amber)} .led .r .disc{color:var(--green)}
+  .led .div{height:1px;background:var(--border);margin:8px 0}
+  .led .tot{font-weight:700;font-size:15px}
+  .led .tot .mono{font-size:19px;color:var(--brand)}
+  .catbox{max-height:320px;overflow:auto}
+  .crow{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:8px 15px;border-bottom:1px solid var(--border);cursor:pointer}
+  .crow:hover{background:var(--surface2)}
+  .crow .add{font-size:12px;color:var(--text);background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:4px 10px}
+  .crow:hover .add{border-color:var(--brand);color:var(--brand)}
+  .empty{padding:22px 15px;text-align:center;color:var(--text3);font-size:13px}
+  .btn{background:var(--brand);border:0;color:#fff;font-weight:600;border-radius:var(--radius);padding:10px 16px;font-size:14px;cursor:pointer;font-family:inherit}
+  .btn:hover{filter:brightness(1.1)}
+  .btn.ghost{background:var(--surface);color:var(--text);border:1px solid var(--border);font-weight:500}
+  .btn.ghost:hover{border-color:var(--brand);color:var(--brand);filter:none}
+  .note{font-size:12.5px;color:var(--text2);line-height:1.55;margin:11px 15px;padding:10px 11px;
+    background:var(--amber-bg);border:1px solid var(--amber-border);border-left-width:3px;border-radius:0 8px 8px 0}
+  .status{font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:5px;border:1px solid var(--border)}
+  .status.quoted{color:var(--steel)} .status.booked{color:var(--green);border-color:var(--green)}
+  .status.completed{color:var(--amber)} .status.lost{color:var(--brand)}
+  .savedrow{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:10px 15px;border-bottom:1px solid var(--border)}
+  .live{font-size:11px;color:var(--text3)}
+  .live.on{color:var(--green)}
+  .subhead{padding:10px 15px 4px;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--text2);font-weight:700}
+  .foot{color:var(--text3);font-size:11.5px;margin-top:12px;text-align:center}
+  :focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+</style>
+</head>
+<body>
+<div id="overlay" style="display:none;position:fixed;inset:0;background:rgba(245,244,241,.95);z-index:50;align-items:center;justify-content:center;padding:24px">
+  <div style="max-width:460px;text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px 26px;box-shadow:0 4px 20px rgba(0,0,0,.08)">
+    <div id="ovSpin" style="width:26px;height:26px;border:3px solid var(--border);border-top-color:var(--brand);border-radius:50%;margin:0 auto 14px;animation:sp 1s linear infinite"></div>
+    <div id="ovMsg" style="font-size:14px;line-height:1.6;color:var(--text)"></div>
+  </div>
+</div>
+<style>@keyframes sp{to{transform:rotate(360deg)}}</style>
+<div class="wrap">
+  <div class="head">
+    <div>
+      <div class="eyebrow">Chrome Mercy Studio</div>
+      <h1>Design Consultation</h1>
+      <div class="sub">Anchor at the specification. Every variance is a named swap or exclusion &mdash; never a re-quote.</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <span class="live" id="liveTag">connecting&hellip;</span>
+      <button class="btn ghost" onclick="toggleSaved()">Saved consultations</button>
+    </div>
+  </div>
+
+  <div class="card" id="savedCard" style="display:none">
+    <div class="ch"><h2>Saved consultations</h2><span class="sub" id="savedCount"></span></div>
+    <div id="savedList"><div class="empty">Loading&hellip;</div></div>
+  </div>
+
+  <div class="card">
+    <div class="ch"><h2><span class="secno">1</span>Client details</h2></div>
+    <div class="frm">
+      <div><label>Date of consultation</label><input type="date" id="fDate"></div>
+      <div><label>First name</label><input id="fFirst" autocomplete="off" placeholder="e.g. Jamie"></div>
+      <div><label>Last name</label><input id="fLast" autocomplete="off" placeholder="e.g. Smith"></div>
+      <div><label>Phone</label><input id="fPhone" autocomplete="off" placeholder="e.g. 0412 345 678"></div>
+      <div><label>Email</label><input id="fEmail" autocomplete="off" placeholder="e.g. jamie@email.com"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ch"><h2><span class="secno">2</span>Vehicle</h2></div>
+    <div class="frm">
+      <div><label>Rego / VIN</label><input id="fRego" autocomplete="off" placeholder="e.g. ABC-123"></div>
+      <div><label>Make</label><input id="fMake" autocomplete="off" placeholder="e.g. BMW"></div>
+      <div><label>Model</label><input id="fModel" autocomplete="off" placeholder="e.g. E92 M3"></div>
+      <div><label>Year</label><input id="fYear" autocomplete="off" placeholder="e.g. 2021"></div>
+      <div><label>Seats</label><select id="fSeats" onchange="onContextChange()"><option value="2">2 seat</option><option value="5" selected>5 seat</option><option value="7">7 seat</option></select></div>
+      <div><label>Vehicle tier</label><select id="fTier" onchange="onContextChange()">
+        <option value="T1">T1 &mdash; Basic</option><option value="T2">T2 &mdash; European</option>
+        <option value="T3">T3 &mdash; Complex / Classic</option><option value="T4">T4 &mdash; Exotic / Showcar</option>
+      </select></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ch"><h2><span class="secno">3</span>Design notes</h2></div>
+    <div class="frm">
+      <div style="grid-column:1/-1"><label>Design consultation notes</label><input id="fNotes" autocomplete="off" placeholder="Timeline, budget, contact preferences&hellip;"></div>
+      <div style="grid-column:1/-1"><label>Design selection notes</label><input id="fDesign" autocomplete="off" placeholder="Leather grade, colourway, stitching, trim&hellip;"></div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div>
+      <div class="card">
+        <div class="ch"><h2><span class="secno">4</span>Specification</h2><span class="sub" id="buildHint"></span></div>
+        <div class="colls" id="colls"></div>
+        <div class="subhead">The build &mdash; swap or exclude to fit the vehicle</div>
+        <div id="build"><div class="empty">Choose a specification to load its build.</div></div>
+        <div class="subhead">Design &amp; material add-ons</div>
+        <div class="catbox" id="addonBox"></div>
+        <div id="addonCart"></div>
+      </div>
+
+      <div class="card">
+        <div class="ch"><h2><span class="secno">5</span>Service add-ons</h2><span class="sub">10% collection-client rate &mdash; added after the build</span></div>
+        <div style="padding:12px 15px 6px"><input class="search" id="svcSearch" placeholder="Search services to add&hellip;" autocomplete="off"></div>
+        <div class="catbox" id="svcBox"></div>
+        <div id="svcCart"></div>
+        <div class="note" id="discNote" style="display:none">Service add-ons carry the <b>10% collection-client rate</b>, Transcal or in-house alike, at sticker price with no shipping adjustment. Design &amp; material add-ons and package swaps are engineered prices &mdash; never discounted.</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="ch"><h2>Quote</h2><button class="ib" onclick="resetBuild()">Reset build</button></div>
+        <div class="led" id="ledger"><div class="empty">Nothing quoted yet.</div></div>
+        <div style="display:flex;gap:8px;padding:0 15px 15px">
+          <button class="btn" style="flex:1" onclick="saveConsult()">Save consultation</button>
+        </div>
+      </div>
+      <div class="note" style="margin:0 0 16px">Exclusions render as credits against the sealed build. If a car is collecting more than two exclusions, it&rsquo;s drifting toward a <b>commission</b> &mdash; quote it as one.</div>
+    </div>
+  </div>
+
+  <div class="foot">All references use internal keys &mdash; SKU renames never break a saved quote. Live pricing only &mdash; if the sheet is unreachable, quoting is blocked.</div>
+</div>
+
+<script>
+
+// ================= CONFIG =================
+// Paste the Apps Script web-app /exec URL. This portal is LIVE-ONLY:
+// no baked prices, no fallback. If the sheet is unreachable, quoting
+// is blocked rather than served from stale data.
+var API_URL = 'https://script.google.com/macros/s/AKfycbxA778Rcd3dy9Yvi1QG8wMUYL1Ua-dpd1DEztfxh9AjAoxrgbdlrqJYmHrKMtzMt542wg/exec';
+
+// ================= LIVE DATA (loaded on start) =================
+var CATALOGUE = [];
+var RECIPES = [];
+var SETTINGS = { hourly: 271.8181818, cc: 0.02, gst: 0.10, mult: 1.5, defMarkup: 0.15 };
+var BYKEY = {};
+var COLLECTIONS = ['Select','Reserve','Private','Atelier'];
+var BUNDLE_DISC = 0.10;
+
+// ================= STATE =================
+var state = {
+  id: null, collection: null, spec: null,   // spec = {key, code, name, anchorEx, anchorInc}
+  lines: [],       // {from, to(null=removed|key=swap|same=base), qty, baseQty}
+  extras: [],      // {id, qty, kind:'addon'|'service'}
+  status: 'quoted'
+};
+
+function psych(x){var r=Math.round(x/5)*5; if(r%10===0) r-=1; return r;}
+function fmt0(n){return '$'+Math.round(n).toLocaleString('en-AU');}
+function fmt(n){var s=n<0?'\u2212':''; return s+'$'+Math.abs(n).toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function seatsTier(){return {seats:document.getElementById('fSeats').value, tier:document.getElementById('fTier').value};}
+
+function specFor(coll){
+  var st = seatsTier();
+  var name = coll+' \u2014 '+st.seats+' Seat \u2014 '+st.tier;
+  var rec = RECIPES.filter(function(r){return r.name===name;})[0];
+  var row = CATALOGUE.filter(function(d){return d.name===name && d.cat==='Specifications';})[0];
+  if(!rec || !row) return null;
+  return {recipe:rec, row:row};
+}
+
+// ================= COLLECTION PICKER =================
+function renderColls(){
+  var el = document.getElementById('colls');
+  el.innerHTML = COLLECTIONS.map(function(c){
+    var s = specFor(c);
+    var sel = state.collection===c ? ' sel':'';
+    var price = s ? fmt0(s.row.inc) : '\u2014';
+    return '<button class="coll'+sel+'" onclick="pickColl(\''+c+'\')">'+
+      '<div class="cn">'+c+'</div><div class="cp mono">'+price+'</div>'+
+      '<div class="cf">starting from &middot; inc GST</div></button>';
+  }).join('');
+}
+
+function pickColl(c){
+  var s = specFor(c);
+  if(!s) return;
+  state.collection = c;
+  state.spec = {key:s.row.k, code:s.row.sku, name:s.row.name, anchorEx:s.row.qex, anchorInc:s.row.inc,
+                margin:s.row.margin, subcoMk:(s.row.subco_mk||SETTINGS.defMarkup)};
+  state.lines = s.recipe.components.map(function(cm){
+    return {from:cm.id, to:cm.id, qty:cm.qty, baseQty:cm.qty};
+  });
+  renderAll();
+}
+
+function onContextChange(){
+  if(state.collection) pickColl(state.collection); else renderColls();
+}
+
+// ================= BUILD SHEET =================
+function swapOptions(fromKey){
+  var it = BYKEY[fromKey]; if(!it) return [];
+  return CATALOGUE.filter(function(d){
+    return d.cat===it.cat && d.cat!=='Specifications' && d.k!==fromKey;
+  });
+}
+
+function renderBuild(){
+  var el = document.getElementById('build');
+  document.getElementById('buildHint').textContent = state.spec ? state.spec.name : '';
+  if(!state.lines.length){ el.innerHTML='<div class="empty">Choose a collection to load its build.</div>'; return; }
+  el.innerHTML = state.lines.map(function(L,i){
+    var from = BYKEY[L.from]; if(!from) return '';
+    var cls='bl', badges='', priceHtml, swapUI='';
+    var dEx = state.spec ? lineDeltaEx(L) : 0;
+    if(L.to===null){
+      cls+=' removed';
+      badges='<span class="badge rm">excluded</span>';
+      priceHtml='<span class="mono" style="color:var(--tan)">'+fmt(dEx)+'</span>';
+    } else if(L.to!==L.from){
+      cls+=' swapped';
+      badges='<span class="badge sw">'+from.name+' \u2192 upgraded</span>';
+      priceHtml='<span class="mono" style="color:var(--steel)">'+(dEx>=0?'+':'')+fmt(dEx)+'</span>';
+    } else if(L.qty!==L.baseQty){
+      cls+=' swapped';
+      badges='<span class="badge sw">qty '+L.qty+' (base '+L.baseQty+')</span>';
+      priceHtml='<span class="mono" style="color:var(--steel)">'+(dEx>=0?'+':'')+fmt(dEx)+'</span>';
+    } else {
+      priceHtml='<span class="mono" style="color:var(--dim);font-size:12px">included</span>';
+    }
+    var disp = (L.to&&L.to!==L.from)?BYKEY[L.to]:from;
+    var actions = L.to===null || L.to!==L.from
+      ? '<button class="ib undo" onclick="undoLine('+i+')">Undo</button>'
+      : '<button class="ib" onclick="openSwap('+i+')">Swap</button><button class="ib" onclick="removeLine('+i+')">Exclude</button>';
+    if(L.swapOpen && L.to===L.from){
+      var m=state.spec.margin, mk=state.spec.subcoMk;
+      function costEx(o){return o.l_hrs*SETTINGS.hourly + (o.subco*(1+mk)+o.mat+o.sup)/(1-m);}
+      var fromEx=costEx(from);
+      var opts = swapOptions(L.from).map(function(o){
+        var d=(costEx(o)-fromEx)*L.qty;
+        return '<option value="'+o.k+'">'+o.name+' ('+o.tier+') \u2014 '+(d>=0?'+':'\u2212')+fmt0(Math.abs(d))+'</option>';
+      }).join('');
+      swapUI='<div class="swaprow"><select id="swapSel'+i+'"><option value="">Choose replacement\u2026</option>'+opts+'</select>'+
+        '<button class="ib" onclick="applySwap('+i+')">Apply</button>'+
+        '<button class="ib undo" onclick="closeSwap('+i+')">Cancel</button></div>';
+    }
+    return '<div class="'+cls+'"><div><div class="nm">'+disp.name+'</div>'+
+      '<div class="meta"><span class="key">'+L.from+(L.to&&L.to!==L.from?' \u2192 '+L.to:'')+'</span>'+
+      '<span>'+from.cat+'</span>'+badges+'</div>'+swapUI+'</div>'+
+      '<div class="qty"><button aria-label="Less" onclick="chLineQty('+i+',-1)">\u2212</button><span>'+L.qty+'</span>'+
+      '<button aria-label="More" onclick="chLineQty('+i+',1)">+</button></div>'+
+      '<div style="display:flex;align-items:center;gap:8px"><div class="lp">'+priceHtml+'</div>'+
+      '<div class="actions">'+actions+'</div></div></div>';
+  }).join('');
+}
+
+function openSwap(i){state.lines[i].swapOpen=true; renderAll();}
+function closeSwap(i){state.lines[i].swapOpen=false; renderAll();}
+function applySwap(i){
+  var v=document.getElementById('swapSel'+i).value;
+  if(v){ state.lines[i].to=v; state.lines[i].swapOpen=false; renderAll(); }
+}
+function removeLine(i){state.lines[i].to=null; renderAll();}
+function undoLine(i){var L=state.lines[i]; L.to=L.from; L.qty=L.baseQty; L.swapOpen=false; renderAll();}
+function chLineQty(i,d){var L=state.lines[i]; if(L.to===null)return; L.qty=Math.max(1,L.qty+d); renderAll();}
+function resetBuild(){ if(state.collection) pickColl(state.collection); }
+
+// ================= EXTRAS (add-ons + services) =================
+function isAddon(d){return d.cat==='Specifications' && (d.sub_cat==='Material Add-On'||d.sub_cat==='Design Add-On');}
+function addonMatchesSeats(d){
+  var s=seatsTier().seats+' Seat';
+  return d.name.indexOf(s)>=0 || d.name.indexOf('Seat')<0;
+}
+function renderSvc(){
+  // Section 4: design & material add-ons for this seat count
+  var addons = CATALOGUE.filter(function(d){ return isAddon(d) && addonMatchesSeats(d); });
+  document.getElementById('addonBox').innerHTML = addons.map(function(d){
+    return '<div class="crow" onclick="addExtra(\''+d.k+'\')"><div><div class="nm" style="font-size:13.5px">'+d.name+'</div>'+
+      '<div class="meta"><span class="key">'+d.k+'</span><span class="badge sw">'+(d.sub_cat||'add-on')+'</span></div></div>'+
+      '<div style="text-align:right"><div class="mono" style="font-size:13px">'+fmt0(d.inc)+'</div>'+
+      '<div class="add" style="margin-top:3px">Add</div></div></div>';
+  }).join('') || '<div class="empty">No add-ons for this seat count.</div>';
+  // Section 5: standard services, search-driven
+  var q=(document.getElementById('svcSearch').value||'').toLowerCase().trim();
+  var rows = !q ? [] : CATALOGUE.filter(function(d){
+    if(d.cat==='Specifications') return false;
+    return (d.k+' '+d.sku+' '+d.name+' '+(d.desc||'')+' '+d.cat).toLowerCase().indexOf(q)>=0;
+  }).slice(0,60);
+  document.getElementById('svcBox').innerHTML = rows.map(function(d){
+    return '<div class="crow" onclick="addExtra(\''+d.k+'\')"><div><div class="nm" style="font-size:13.5px">'+d.name+'</div>'+
+      '<div class="meta"><span class="key">'+d.k+'</span><span>'+d.cat+'</span><span class="badge disc">\u221210%</span></div></div>'+
+      '<div style="text-align:right"><div class="mono" style="font-size:13px">'+fmt0(d.inc)+'</div>'+
+      '<div class="add" style="margin-top:3px">Add</div></div></div>';
+  }).join('') || '<div class="empty">'+(q?'No matches.':'Search to add standard services.')+'</div>';
+}
+function addExtra(k){
+  var f=state.extras.filter(function(e){return e.id===k;})[0];
+  if(f) f.qty++;
+  else state.extras.push({id:k,qty:1,kind:isAddon(BYKEY[k])?'addon':'service'});
+  renderAll();
+}
+function chExtraQty(i,d){var e=state.extras[i]; e.qty+=d; if(e.qty<=0) state.extras.splice(i,1); renderAll();}
+function renderExtras(){
+  function rowHtml(e,i,disc){
+    var d=BYKEY[e.id]; if(!d) return '';
+    return '<div class="bl"><div><div class="nm">'+d.name+'</div>'+
+      '<div class="meta"><span class="key">'+e.id+'</span><span>'+(d.sub_cat||d.cat)+'</span>'+disc+'</div></div>'+
+      '<div class="qty"><button onclick="chExtraQty('+i+',-1)">\u2212</button><span>'+e.qty+'</span>'+
+      '<button onclick="chExtraQty('+i+',1)">+</button></div>'+
+      '<div class="lp mono">'+fmt0(d.inc*e.qty)+'</div></div>';
+  }
+  var a='', s='';
+  state.extras.forEach(function(e,i){
+    if(e.kind==='addon') a += rowHtml(e,i,'');
+    else s += rowHtml(e,i,'<span class="badge disc">\u221210%</span>');
+  });
+  document.getElementById('addonCart').innerHTML = a;
+  document.getElementById('svcCart').innerHTML = s;
+  document.getElementById('discNote').style.display =
+    state.extras.some(function(e){return e.kind==='service';}) ? '' : 'none';
+}
+
+// ================= QUOTE =================
+// The package is recomputed live using the sheet's own spec chain:
+//   inputs   = aggregate of the MODIFIED component list (post swap/exclude/qty)
+//   freight  = Spec Freight Multiplier x highest component freight in the build
+//   quote_ex = labour_hrs x hourly + (subco x (1+markup) + materials + supplies + freight) / (1 - spec margin)
+// Extras sit outside the package pool at sticker price -10%; their built-in
+// freight is untouched (batching savings on real shipping stay as margin).
+function activeKeyQty(L){
+  if(L.to===null) return null;
+  return { key: (L.to!==L.from ? L.to : L.from), qty: L.qty };
+}
+function packageChain(lines, spec){
+  var totL=0, totM=0, totN=0, totP=0, maxF=0;
+  lines.forEach(function(L){
+    var a=activeKeyQty(L); if(!a) return;
+    var it=BYKEY[a.key]; if(!it) return;
+    totL += it.l_hrs*a.qty; totM += it.mat*a.qty;
+    totN += it.subco*a.qty; totP += it.sup*a.qty;
+    if(it.freight>maxF) maxF=it.freight;
+  });
+  var Q = maxF*SETTINGS.mult;
+  var R = totL*SETTINGS.hourly;
+  var S = totN*(1+spec.subcoMk);
+  var m = spec.margin;
+  var V = (m>=1) ? R : R + (S+totM+totP+Q)/(1-m);
+  return {V:V, R:R, S:S, M:totM, P:totP, Q:Q, maxF:maxF};
+}
+function baseLines(){
+  return state.lines.map(function(L){ return {from:L.from, to:L.from, qty:L.baseQty, baseQty:L.baseQty}; });
+}
+function lineDeltaEx(L){
+  // per-line delta at SPEC margin (freight handled separately as a pool)
+  var m=state.spec.margin, mk=state.spec.subcoMk;
+  function part(key,qty){
+    var it=BYKEY[key]; if(!it) return 0;
+    return it.l_hrs*qty*SETTINGS.hourly + (it.subco*(1+mk)+it.mat+it.sup)*qty/(1-m);
+  }
+  var before = part(L.from, L.baseQty);
+  var after  = (L.to===null) ? 0 : part((L.to!==L.from?L.to:L.from), L.qty);
+  return after - before;
+}
+function compute(){
+  if(!state.spec) return null;
+  var base = packageChain(baseLines(), state.spec);
+  var mod  = packageChain(state.lines, state.spec);
+  var freightDelta = (mod.Q - base.Q)/(1-state.spec.margin);
+  var swaps=[], removals=[];
+  state.lines.forEach(function(L){
+    if(L.to===null) removals.push({L:L, d:lineDeltaEx(L)});
+    else if(L.to!==L.from) swaps.push({L:L, d:lineDeltaEx(L)});
+    else if(L.qty!==L.baseQty) swaps.push({L:L, d:lineDeltaEx(L), qtyOnly:true});
+  });
+  var addonEx=0, svcEx=0, extraDisc=0;
+  state.extras.forEach(function(e){
+    var d=BYKEY[e.id]; if(!d) return;
+    var ex=d.qex*e.qty;
+    if(e.kind==='addon') addonEx+=ex;               // package add-ons: engineered deltas, never discounted
+    else { svcEx+=ex; extraDisc += ex*BUNDLE_DISC; } // standard services only: 10%, TRN or in-house alike
+  });
+  var subEx = mod.V + addonEx + svcEx - extraDisc;
+  var withFee = subEx*(1+SETTINGS.cc);
+  var totalInc = psych(withFee*(1+SETTINGS.gst));
+  var gst = totalInc - totalInc/(1+SETTINGS.gst);
+  return {anchorEx:base.V, packageEx:mod.V, base:base, mod:mod,
+          swaps:swaps, removals:removals, freightDelta:freightDelta,
+          addonEx:addonEx, svcEx:svcEx, extraDisc:extraDisc,
+          subEx:subEx, fee:withFee-subEx, gst:gst, totalInc:totalInc};
+}
+
+function renderLedger(){
+  var el=document.getElementById('ledger');
+  var r=compute();
+  if(!r){ el.innerHTML='<div class="empty">Choose a collection to start the quote.</div>'; return; }
+  var h='<div class="r"><span>'+state.spec.name+'</span><span class="mono">'+fmt(r.anchorEx)+'</span></div>';
+  r.swaps.forEach(function(s){
+    var from=BYKEY[s.L.from], to=s.qtyOnly?from:BYKEY[s.L.to];
+    var lbl=s.qtyOnly?(from.name+' \u00d7'+s.L.qty+' (base \u00d7'+s.L.baseQty+')')
+                     :(to.name+' (upgrade)');
+    h+='<div class="r ind"><span class="sw">'+lbl+'</span><span class="mono sw">'+(s.d>=0?'+':'')+fmt(s.d)+'</span></div>';
+  });
+  r.removals.forEach(function(s){
+    var from=BYKEY[s.L.from];
+    h+='<div class="r ind"><span class="rm">excl. '+from.name+' \u00d7'+s.L.baseQty+'</span><span class="mono rm">'+fmt(s.d)+'</span></div>';
+  });
+  if(Math.abs(r.freightDelta)>0.005){
+    h+='<div class="r ind"><span class="sw">shipping recalibrated ('+SETTINGS.mult+'\u00d7 '+fmt0(r.mod.maxF)+' max)</span><span class="mono sw">'+(r.freightDelta>=0?'+':'')+fmt(r.freightDelta)+'</span></div>';
+  }
+  h+='<div class="r"><span>Build subtotal</span><span class="mono">'+fmt(r.packageEx)+'</span></div>';
+  if(r.addonEx>0) h+='<div class="r"><span>Add-ons</span><span class="mono">'+fmt(r.addonEx)+'</span></div>';
+  if(r.svcEx>0) h+='<div class="r"><span>Services</span><span class="mono">'+fmt(r.svcEx)+'</span></div>';
+  if(r.extraDisc>0) h+='<div class="r ind"><span class="disc">collection-client rate \u221210%</span><span class="mono disc">'+fmt(-r.extraDisc)+'</span></div>';
+  h+='<div class="div"></div>';
+  h+='<div class="r"><span>Subtotal ex GST</span><span class="mono">'+fmt(r.subEx)+'</span></div>';
+  h+='<div class="r"><span>Card fee '+Math.round(SETTINGS.cc*100)+'%</span><span class="mono">'+fmt(r.fee)+'</span></div>';
+  h+='<div class="r"><span>GST</span><span class="mono">'+fmt(r.gst)+'</span></div>';
+  h+='<div class="div"></div>';
+  h+='<div class="r tot"><span>Total inc GST</span><span class="mono">'+fmt0(r.totalInc)+'</span></div>';
+  el.innerHTML=h;
+}
+
+function renderAll(){renderColls();renderBuild();renderSvc();renderExtras();renderLedger();}
+
+// ================= SAVE / LOAD =================
+function buildPayload(){
+  var r=compute(); if(!r) return null;
+  return {
+    client:{date:val('fDate'),first:val('fFirst'),last:val('fLast'),
+            phone:val('fPhone'),email:val('fEmail'),rego:val('fRego'),
+            make:val('fMake'),model:val('fModel'),year:val('fYear'),
+            notes:val('fNotes'),design_notes:val('fDesign'),
+            seats:val('fSeats'),tier:val('fTier')},
+    package:{key:state.spec.key,code:state.spec.code,name:state.spec.name,
+             anchor_ex:state.spec.anchorEx,anchor_inc:state.spec.anchorInc},
+    swaps: state.lines.filter(function(L){return L.to!==L.from;}).map(function(L){
+      return {from:L.from,to:L.to,qty:L.qty,delta_ex:Math.round(lineDeltaEx(L)*100)/100};
+    }),
+    qty_changes: state.lines.filter(function(L){return L.to===L.from && L.qty!==L.baseQty;}).map(function(L){
+      return {id:L.from,qty:L.qty,base_qty:L.baseQty};
+    }),
+    extras: state.extras.map(function(e){
+      var d=BYKEY[e.id];
+      return {id:e.id,qty:e.qty,kind:e.kind,quote_ex:d?Math.round(d.qex*e.qty*100)/100:0};
+    }),
+    totals:{sub_ex:r.subEx,cc_fee:r.fee,gst:r.gst,inc:r.totalInc},
+    status:state.status, quoted_at:new Date().toISOString()
+  };
+}
+function val(id){return document.getElementById(id).value||'';}
+
+function saveConsult(){
+  var p=buildPayload();
+  if(!p){alert('Choose a collection first.');return;}
+  if(!API_URL){alert('Set API_URL at the top of this file to save consultations to the sheet.');return;}
+  var body={action:'save_consultation',
+    client:(p.client.first+' '+p.client.last).trim(),
+    contact:p.client.phone||p.client.email,
+    vehicle:(p.client.year+' '+p.client.make+' '+p.client.model).trim(),
+    seats:p.client.seats,tier:p.client.tier,
+    package:p.package.name,total_inc:p.totals.inc,status:p.status,payload:p};
+  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)})
+    .then(function(r){return r.json();})
+    .then(function(j){ if(j.status==='ok'){state.id=j.id; alert('Saved \u2014 quote '+fmt0(p.totals.inc));} else alert('Save failed: '+j.message); })
+    .catch(function(e){alert('Save failed: '+e.message);});
+}
+
+function toggleSaved(){
+  var c=document.getElementById('savedCard');
+  c.style.display = c.style.display==='none'?'':'none';
+  if(c.style.display!=='none') loadSaved();
+}
+function loadSaved(){
+  if(!API_URL) return;
+  fetch(API_URL+'?action=consultations').then(function(r){return r.json();}).then(function(j){
+    if(j.status!=='ok') return;
+    document.getElementById('savedCount').textContent=j.consultations.length+' saved';
+    document.getElementById('savedList').innerHTML = j.consultations.map(function(cn){
+      return '<div class="savedrow"><div><div class="nm" style="font-size:13.5px">'+cn.client+' \u2014 '+cn.vehicle+'</div>'+
+        '<div class="meta" style="font-size:11px;color:var(--mut)">'+cn.package+' &middot; '+fmt0(cn.total_inc)+'</div></div>'+
+        '<span class="status '+cn.status+'">'+cn.status+'</span>'+
+        '<div class="actions">'+
+        (cn.status==='quoted'?'<button class="ib" onclick="convert(\''+cn.id+'\')">Convert to booked</button>':'')+
+        '</div></div>';
+    }).join('') || '<div class="empty">No saved consultations yet.</div>';
+  }).catch(function(){});
+}
+function convert(id){
+  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body:JSON.stringify({action:'update_consultation_status',id:id,new_status:'booked'})})
+    .then(function(r){return r.json();}).then(function(){loadSaved();});
+}
+
+// ================= LIVE-ONLY BOOTSTRAP =================
+function setOverlay(msg, spinning){
+  var ov = document.getElementById('overlay');
+  document.getElementById('ovMsg').innerHTML = msg;
+  document.getElementById('ovSpin').style.display = spinning ? '' : 'none';
+  ov.style.display = msg ? 'flex' : 'none';
+}
+function initLive(){
+  if(!API_URL){
+    setOverlay('<b>Portal not configured.</b><br>Set API_URL at the top of this file to the Apps Script /exec URL. This portal quotes from live sheet prices only.', false);
+    return;
+  }
+  setOverlay('Loading live prices from the sheet\u2026', true);
+  Promise.all([
+    fetch(API_URL+'?action=catalogue').then(function(r){return r.json();}),
+    fetch(API_URL+'?action=list_specifications').then(function(r){return r.json();}),
+    fetch(API_URL+'?action=settings').then(function(r){return r.json();})
+  ]).then(function(res){
+    var catj = res[0], specj = res[1], setj = res[2];
+    if(catj.status!=='ok' || specj.status!=='ok') throw new Error((catj.message||'')+' '+(specj.message||''));
+    if(setj.status==='ok' && setj.settings){
+      var sg = setj.settings;
+      SETTINGS.hourly = Number(sg['Hourly Rate (ex GST)']) || SETTINGS.hourly;
+      SETTINGS.cc     = Number(sg['Credit Card Processing Fee']) || SETTINGS.cc;
+      SETTINGS.gst    = Number(sg['GST Rate']) || SETTINGS.gst;
+      SETTINGS.mult   = Number(sg['Spec Freight Multiplier']) || SETTINGS.mult;
+      SETTINGS.defMarkup = Number(sg['Default Subco Markup %']) || SETTINGS.defMarkup;
+    }
+    CATALOGUE = catj.rows.map(function(row){
+      return { k: String(row.id).trim(), sku: row.sku, cat: row.category, sub_cat: row.sub_category,
+               name: row.service_name, desc: row.customer_description, tier: row.tier,
+               sub: row.subcontractor, qex: Number(row.quote_ex)||0,
+               inc: Number(row.final_inc_gst)||0, freight: Number(row.freight)||0,
+               // component cost inputs for the live spec chain
+               l_hrs: Number(row.labour_hrs)||0, mat: Number(row.materials)||0,
+               subco: Number(row.subco_cost)||0, sup: Number(row.supplies)||0,
+               margin: Number(row.margin_pct)||0, subco_mk: Number(row.subco_markup)||0 };
+    });
+    BYKEY = {}; CATALOGUE.forEach(function(d){ BYKEY[d.k] = d; });
+    RECIPES = specj.specs || [];
+    var lt=document.getElementById('liveTag');
+    lt.textContent='live \u00b7 '+CATALOGUE.length+' items \u00b7 '+RECIPES.length+' recipes';
+    lt.className='live on';
+    setOverlay('', false);
+    renderAll();
+  }).catch(function(e){
+    setOverlay('<b>Live pricing unavailable.</b><br>Could not reach the pricing sheet ('+ (e.message||'network error') +').<br>Quoting is blocked until the connection is restored \u2014 this portal never quotes from stale data.<br><br><button class="btn" onclick="initLive()">Retry</button>', false);
+  });
+}
+
+document.getElementById('svcSearch').addEventListener('input',renderSvc);
+(function(){var d=document.getElementById('fDate'); if(d&&!d.value) d.value=new Date().toISOString().slice(0,10);})();
+initLive();
+
+</script>
+</body>
+</html>

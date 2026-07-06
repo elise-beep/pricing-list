@@ -1,0 +1,1574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chrome Mercy Studio — Portal</title>
+<style>
+/* ── PORTAL GLOBALS ── */
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f5f4f1;--surface:#ffffff;--surface2:#f0efe9;--border:#e2dfd8;
+  --text:#111110;--text2:#5c5b57;--text3:#9a9894;
+  --chrome:#480405;--chrome-light:#340403;
+  --brand:#a7141e;--brand-light:#fce8e8;--brand-border:#c0686b;
+  --green:#0a5c3e;--green-bg:#e8f5ef;
+  --amber:#7a5000;--amber-bg:#fef8e8;--amber-border:#d97706;
+  --red:#8b1a1a;--red-bg:#fdf0f0;
+  --gold:#a7141e;--gold-light:#fce8e8;--gold-border:#c0686b;
+  --radius:8px;--radius-lg:12px;
+}
+
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:14px;min-height:100vh}
+
+/* ── PORTAL HEADER ── */
+.portal-header{background:var(--chrome);height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:200;border-bottom:1px solid #333}
+.portal-brand{display:flex;align-items:center;gap:10px}
+.portal-brand img{width:40px;height:40px;object-fit:contain}
+.portal-brand-text{display:flex;flex-direction:column;line-height:1.1}
+.portal-brand-name{font-size:15px;font-weight:700;color:#fff;letter-spacing:0.02em}
+.portal-brand-sub{font-size:10px;color:#999;text-transform:uppercase;letter-spacing:0.1em}
+.portal-header-right{display:flex;align-items:center;gap:8px}
+
+/* ── TAB NAV ── */
+.tab-nav{background:var(--chrome-light);border-bottom:1px solid #222;padding:0 24px;display:flex;gap:2px}
+.tab-btn{padding:12px 18px;font-size:13px;font-weight:500;color:#999;background:transparent;border:none;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;font-family:inherit;white-space:nowrap}
+.tab-btn:hover{color:#ccc}
+.tab-btn.active{color:#fff;border-bottom-color:var(--brand)}
+
+/* ── TAB CONTENT ── */
+.tab-pane{display:none}
+.tab-pane.active{display:block}
+
+/* ── TOOLBAR ── */
+.toolbar{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 24px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.export-label{font-size:12px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-right:2px}
+.export-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-weight:500}
+.export-btn:hover{background:var(--border)}
+.toolbar-sep{width:1px;height:20px;background:var(--border);margin:0 4px}
+
+/* ── SYNC BADGE ── */
+.sync-badge{font-size:11px;padding:2px 10px;border-radius:20px;margin-right:4px}
+.sync-ok{background:rgba(10,92,62,0.3);color:#6ee7b7}
+.sync-err{background:rgba(139,26,26,0.3);color:#fca5a5}
+.sync-loading{background:rgba(255,255,255,0.15);color:#ccc}
+.save-btn{background:#0a5c3e;color:#fff;border:none;padding:6px 14px;border-radius:6px;font-size:12px;cursor:pointer;font-weight:600;margin-left:4px}
+.save-btn:hover{opacity:0.9}
+.save-btn:disabled{opacity:0.5;cursor:not-allowed}
+
+/* ── LAYOUT ── */
+.main{display:flex;min-height:calc(100vh - 60px - 45px)}
+
+/* ── SIDEBAR ── */
+.sidebar{width:210px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);padding:16px 14px;position:sticky;top:105px;height:calc(100vh - 105px);overflow-y:auto}
+.filter-group{margin-bottom:18px}
+.filter-heading{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
+.filter-clear{font-size:11px;color:var(--text3);cursor:pointer;font-weight:400;text-transform:none;letter-spacing:0}
+.filter-clear:hover{color:var(--text)}
+.filter-item{display:flex;align-items:center;gap:7px;padding:3px 0;cursor:pointer}
+.filter-item input[type=checkbox]{accent-color:var(--chrome);width:13px;height:13px;cursor:pointer;flex-shrink:0}
+.filter-item label{font-size:12px;color:var(--text);cursor:pointer;flex:1;line-height:1.3}
+.filter-item .fc{font-size:10px;color:var(--text3)}
+.sidebar-divider{border:none;border-top:1px solid var(--border);margin:14px 0}
+.rate-display{background:var(--gold-light);border:1px solid var(--gold-border);border-radius:var(--radius);padding:10px;margin-top:4px}
+.rate-display .rd-label{font-size:10px;color:var(--amber);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px}
+.rate-display .rd-val{font-size:16px;font-weight:700;color:var(--chrome)}
+.rate-display .rd-note{font-size:10px;color:var(--amber);margin-top:2px}
+
+/* ── CONTENT ── */
+.content{flex:1;padding:20px 20px;min-width:0}
+.search-row{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.search-wrap{position:relative;flex:1}
+.search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:14px;pointer-events:none}
+.search-input{width:100%;height:38px;padding:0 12px 0 34px;border:1px solid var(--border);border-radius:var(--radius);font-size:14px;background:var(--surface);color:var(--text)}
+.search-input:focus{outline:none;border-color:var(--chrome);box-shadow:0 0 0 2px rgba(28,28,26,0.08)}
+.result-info{font-size:13px;color:var(--text2);white-space:nowrap}
+
+/* ── TABLE ── */
+.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+table{width:100%;border-collapse:collapse;table-layout:fixed}
+thead th{background:var(--chrome);color:#ccc;padding:10px 12px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;cursor:pointer;user-select:none;border-bottom:1px solid #333}
+thead th:hover{color:#fff}
+thead th.sort-asc::after{content:' ↑';color:var(--gold)}
+thead th.sort-desc::after{content:' ↓';color:var(--gold)}
+.col-cat{width:130px}.col-tier{width:90px}
+.col-name{width:auto}
+.col-price{width:140px;text-align:right!important}
+.col-action{width:130px;text-align:right!important}
+tbody tr{border-bottom:1px solid var(--border);transition:background 0.1s}
+tbody tr.row-alt{background:var(--surface2)}
+tbody tr:hover{background:var(--brand-light) !important}
+tbody tr:last-child{border-bottom:none}
+tbody td{padding:10px 12px;vertical-align:middle;overflow:hidden;text-overflow:ellipsis}
+.td-cat{font-size:11px}
+.td-sku{font-size:10px;color:var(--text3);font-family:monospace;white-space:nowrap}
+.td-subcat{font-size:11px;color:var(--text3);white-space:nowrap}
+.td-name .n{font-weight:500;color:var(--text);line-height:1.35;white-space:normal}
+.td-name .s{font-size:11px;color:var(--text3);margin-top:1px}
+.td-price-cell{text-align:right}
+.price-main{font-weight:700;font-size:14px;color:var(--text)}
+.price-ex{font-size:11px;color:var(--text3);margin-top:1px}
+.td-action-cell{text-align:right}
+
+/* ── BADGES ── */
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500;white-space:nowrap}
+.b-t1{background:#dbeafe;color:#1e40af}
+.b-t2{background:var(--green-bg);color:var(--green)}
+.b-t3{background:var(--amber-bg);color:var(--amber)}
+.b-t4{background:var(--red-bg);color:var(--red)}
+.b-ta{background:var(--surface2);color:var(--text2);border:1px solid var(--border)}
+/* category badges by short code */
+.b-con{background:#EDE9FE;color:#7C3AED;border:none}
+.b-dsh{background:#DBEAFE;color:#1D4ED8;border:none}
+.b-dsn{background:#E0F2FE;color:#0369A1;border:none}
+.b-dcr{background:#CCFBF1;color:#0F766E;border:none}
+.b-flr{background:#DCFCE7;color:#15803D;border:none}
+.b-ctl{background:#FEF3C7;color:#B45309;border:none}
+.b-log{background:#FFEDD5;color:#C2410C;border:none}
+.b-bik{background:#FCE7F3;color:#9D174D;border:none}
+.b-pil{background:#EDE9FE;color:#6D28D9;border:none}
+.b-pwc{background:#CFFAFE;color:#0E7490;border:none}
+.b-rof{background:#DBEAFE;color:#1E40AF;border:none}
+.b-snd{background:#F3F4F6;color:#374151;border:none}
+.b-stw{background:#FEE2E2;color:#991B1B;border:none}
+.b-mat{background:#D1FAE5;color:#065F46;border:none}
+.b-cus{background:#F9FAFB;color:#6B7280;border:none}
+.b-svs{background:#FAE8FF;color:#86198F;border:none}
+.b-sea{background:#FCE8E8;color:#480405;border:none}
+.b-sao{background:#FEF2F2;color:#7F1D1D;border:none}
+.b-sbt{background:#FFF7ED;color:#C2410C;border:none}
+
+/* ── EXPAND BUTTON ── */
+.exp-btn{background:transparent;border:1px solid var(--border);color:var(--text2);padding:4px 10px;border-radius:5px;font-size:11px;cursor:pointer;white-space:nowrap;transition:all 0.1s}
+.exp-btn:hover{background:var(--surface2);border-color:var(--text3);color:var(--text)}
+.exp-btn.open{background:var(--chrome);color:#fff;border-color:var(--chrome)}
+
+/* ── DETAIL ROW ── */
+.detail-row td{padding:0!important;background:var(--bg)!important}
+.detail-inner{padding:16px 16px 16px 16px;border-left:3px solid var(--gold)}
+.breakdown-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-bottom:12px}
+.bc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px}
+.bc-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px}
+.bc-val{font-size:15px;font-weight:700;color:var(--text)}
+.bc-sub{font-size:10px;color:var(--text3);margin-top:1px}
+.bc.hl{border-color:var(--gold-border);background:var(--gold-light)}
+.bc.warn{border-color:#d97706;background:#fef3c7;}
+.bc.warn .bc-val{color:#92400e;}
+.bc.hl .bc-val{color:var(--chrome)}
+.bc.hl .bc-label{color:var(--amber)}
+.detail-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.meta-pill{font-size:11px;color:var(--text2);background:var(--surface);border:1px solid var(--border);padding:3px 10px;border-radius:20px}
+
+/* ── ADMIN EDIT ── */
+.edit-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-bottom:10px}
+.ef label{display:block;font-size:10px;color:var(--amber);font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px}
+.ef input{width:100%;height:32px;padding:0 8px;border:1px solid var(--amber-border);border-radius:5px;font-size:13px;background:#fff;color:var(--text)}
+.ef input:focus{outline:none;border-color:var(--gold)}
+.recalc-row{display:flex;align-items:center;gap:10px}
+.recalc-btn{background:var(--chrome);color:#fff;border:none;padding:7px 16px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer}
+.recalc-btn:hover{background:var(--chrome-light)}
+.recalc-note{font-size:11px;color:var(--amber)}
+
+/* ── MODAL ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:500;display:none;align-items:center;justify-content:center}
+.overlay.open{display:flex}
+.modal{background:var(--surface);border-radius:var(--radius-lg);padding:28px;width:380px;box-shadow:0 24px 48px rgba(0,0,0,0.25)}
+.modal-logo{background:transparent;padding:0;width:44px;height:44px;margin-bottom:14px}
+.modal-logo img{width:44px;height:44px;object-fit:contain}
+.modal h3{font-size:17px;font-weight:700;margin-bottom:4px}
+.modal p{font-size:13px;color:var(--text2);margin-bottom:18px}
+.modal input{width:100%;height:40px;padding:0 12px;border:1px solid var(--border);border-radius:var(--radius);font-size:14px;margin-bottom:10px;color:var(--text);background:var(--surface)}
+.modal input:focus{outline:none;border-color:var(--chrome)}
+.modal-err{font-size:12px;color:#8b1a1a;margin-bottom:10px;display:none}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end}
+.btn-cancel{background:none;border:1px solid var(--border);padding:8px 16px;border-radius:6px;cursor:pointer;font-size:13px;color:var(--text)}
+.btn-confirm{background:var(--chrome);color:#fff;border:none;padding:8px 18px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600}
+.btn-confirm:hover{background:var(--chrome-light)}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:60px 20px}
+.empty h3{font-size:15px;color:var(--text2);margin-bottom:6px}
+.empty p{font-size:13px;color:var(--text3)}
+
+@media(max-width:800px){.sidebar{display:none}}
+
+/* ── CALCULATOR ── */
+.calc-tab-wrap{max-width:760px;margin:0 auto;padding:2rem 1.5rem}
+.calc-tab-wrap h2{font-size:20px;font-weight:500;color:var(--text);margin-bottom:4px}
+.calc-tab-wrap .sub{font-size:14px;color:var(--text2);margin-bottom:1.5rem}
+.calc-tab-wrap .toggle-wrap{display:flex;background:#fff;border:0.5px solid rgba(0,0,0,0.1);border-radius:12px;padding:6px;margin-bottom:1rem;gap:6px}
+.calc-tab-wrap .toggle-btn{flex:1;padding:10px;font-size:14px;font-weight:500;cursor:pointer;border-radius:8px;border:none;background:transparent;color:#6b6860;font-family:inherit;transition:all 0.15s}
+.calc-tab-wrap .toggle-btn.active{background:#e6f1fb;color:#185FA5}
+.calc-tab-wrap .section{background:#fff;border:0.5px solid rgba(0,0,0,0.1);border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1rem}
+.calc-tab-wrap .sec-title{font-size:11px;font-weight:500;color:#9a9890;text-transform:uppercase;letter-spacing:0.08em;margin:0 0 14px}
+.calc-tab-wrap .field-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 20px}
+.calc-tab-wrap .field{display:flex;flex-direction:column;gap:4px}
+.calc-tab-wrap .field.full{grid-column:1/-1}
+.calc-tab-wrap .field label{font-size:13px;color:#6b6860}
+.calc-tab-wrap .field input[type="number"],
+.calc-tab-wrap .field input[type="text"],
+.calc-tab-wrap .field input[type="date"],
+.calc-tab-wrap .field textarea{padding:7px 10px;font-size:15px;border:0.5px solid rgba(0,0,0,0.18);border-radius:8px;background:#f0ede8;color:#1a1917;width:100%;font-family:inherit}
+.calc-tab-wrap .field textarea{font-size:14px;resize:vertical;min-height:60px}
+.calc-tab-wrap .field input:focus,.calc-tab-wrap .field textarea:focus{outline:none;border-color:#85b7eb}
+.calc-tab-wrap .field select{padding:7px 32px 7px 10px;font-size:15px;border:0.5px solid rgba(0,0,0,0.18);border-radius:8px;background-color:#f0ede8;color:#1a1917;width:100%;font-family:inherit;cursor:pointer;-webkit-appearance:none;-moz-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%236b6860' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+.calc-tab-wrap .field select:focus{outline:none;border-color:#85b7eb}
+.calc-tab-wrap .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:1rem}
+.calc-tab-wrap .metric{background:#f0ede8;border-radius:8px;padding:12px 14px;border:0.5px solid rgba(0,0,0,0.1)}
+.calc-tab-wrap .metric.hi{border:1.5px solid #85b7eb;background:#e6f1fb}
+.calc-tab-wrap .metric.success{border:1.5px solid #5dcaa5;background:#e1f5ee}
+.calc-tab-wrap .metric.warning{border:1.5px solid #ef9f27;background:#faeeda}
+.calc-tab-wrap .metric-label{font-size:11px;color:#9a9890;margin:0 0 4px;text-transform:uppercase;letter-spacing:0.05em}
+.calc-tab-wrap .metric-value{font-size:22px;font-weight:500;color:#1a1917}
+.calc-tab-wrap .metric.hi .metric-value{color:#185FA5}
+.calc-tab-wrap .metric.success .metric-value{color:#0f6e56}
+.calc-tab-wrap .metric.warning .metric-value{color:#854f0b}
+.calc-tab-wrap .metric-sub{font-size:11px;color:#9a9890;margin-top:2px}
+.calc-tab-wrap .competitor-box{background:#f0ede8;border:0.5px solid rgba(0,0,0,0.1);border-radius:8px;padding:12px 14px;margin-top:10px}
+.calc-tab-wrap .competitor-box .comp-label{font-size:11px;color:#9a9890;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px}
+.calc-tab-wrap .comp-result{font-size:13px;color:#6b6860;line-height:2;margin-top:10px}
+.calc-tab-wrap .comp-result b{color:#1a1917;font-weight:500}
+.calc-tab-wrap .comp-result .good{color:#0f6e56;font-weight:500}
+.calc-tab-wrap .comp-result .warn{color:#854f0b;font-weight:500}
+.calc-tab-wrap .comp-result .bad{color:#a32d2d;font-weight:500}
+.calc-tab-wrap .bd{font-size:13px;color:#6b6860;line-height:2.1}
+.calc-tab-wrap .bd b{color:#1a1917;font-weight:500}
+.calc-tab-wrap .bd hr{border:none;border-top:0.5px solid rgba(0,0,0,0.1);margin:6px 0}
+.calc-tab-wrap .btn{font-size:13px;padding:7px 16px;cursor:pointer;border-radius:8px;border:0.5px solid rgba(0,0,0,0.18);background:#f0ede8;color:#1a1917;font-family:inherit}
+.calc-tab-wrap .btn.primary{background:#480405;color:#fff;border-color:#340403;margin-top:10px}
+.calc-tab-wrap .btn:disabled{opacity:0.5;cursor:not-allowed}
+.calc-tab-wrap .toast{display:none;font-size:13px;padding:8px 12px;border-radius:8px;margin-top:10px}
+.calc-tab-wrap .toast.success{display:block;background:#e1f5ee;color:#0f6e56}
+.calc-tab-wrap .toast.error{display:block;background:#fcebeb;color:#a32d2d}
+.calc-tab-wrap .history-empty{font-size:13px;color:#9a9890;padding:4px 0}
+.calc-tab-wrap .history-loading{font-size:13px;color:#9a9890;padding:4px 0}
+.calc-tab-wrap .job-card{border:0.5px solid rgba(0,0,0,0.1);border-radius:8px;padding:10px 12px;margin-bottom:8px;background:#f0ede8}
+.calc-tab-wrap .job-card-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;gap:8px}
+.calc-tab-wrap .job-name{font-size:14px;font-weight:500;color:#1a1917}
+.calc-tab-wrap .job-price{font-size:14px;font-weight:500;color:#185FA5;white-space:nowrap}
+.calc-tab-wrap .job-desc{font-size:12px;color:#6b6860;margin-bottom:6px}
+.calc-tab-wrap .job-meta{font-size:12px;color:#9a9890;display:flex;flex-wrap:wrap;gap:8px}
+.calc-tab-wrap .job-actions{display:flex;gap:6px;margin-top:8px}
+.calc-tab-wrap .type-badge{font-size:11px;padding:2px 8px;border-radius:99px;font-weight:500}
+.calc-tab-wrap .type-service{background:#e6f1fb;color:#185FA5}
+.calc-tab-wrap .type-product{background:#faeeda;color:#854f0b}
+.calc-tab-wrap .btn-sm{font-size:12px;padding:4px 10px;cursor:pointer;border-radius:8px;border:0.5px solid rgba(0,0,0,0.18);background:transparent;color:#6b6860;font-family:inherit}
+.calc-tab-wrap .btn-sm:hover{background:#fff;color:#1a1917}
+.calc-tab-wrap .hidden{display:none}
+@media(max-width:500px){.calc-tab-wrap .field-grid{grid-template-columns:1fr}.calc-tab-wrap .field.full{grid-column:1}}
+.live-error{margin:12px 20px;padding:12px 16px;border-radius:8px;font-size:14px;font-weight:500;background:#fdecea;color:#8b1a1a;border:1px solid #f5c6cb}
+.live-error.loading{background:#eef2ff;color:#3a4a8b;border-color:#c7d2fe}
+/* ── SPECIFICATIONS TAB ─────────────────────────────────────── */
+.spec-layout{display:flex;flex-direction:column;gap:0;padding:20px 24px 40px}
+.spec-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+@media(max-width:800px){.spec-grid{grid-template-columns:1fr}}
+.spec-col{background:#fff;border:0.5px solid rgba(0,0,0,0.1);border-radius:12px;overflow:hidden}
+.spec-col-hd{background:var(--chrome);padding:16px 18px}
+.spec-col-hd .eyebrow{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.5);font-weight:600;margin-bottom:6px}
+.spec-col-hd h3{font-size:18px;font-weight:600;margin:0;color:#fff;letter-spacing:-.01em}
+.spec-col-hd .spec-code{font-size:10px;font-family:monospace;color:rgba(255,255,255,.4);margin-top:4px;letter-spacing:.04em}
+.spec-filters{display:flex;gap:8px;padding:12px 16px;background:#f8f7f4;border-bottom:0.5px solid rgba(0,0,0,0.07);flex-wrap:wrap}
+.spec-filters select{flex:1;min-width:90px;padding:7px 10px;font-size:13px;border:0.5px solid rgba(0,0,0,0.15);border-radius:7px;background:#fff;color:#1a1917;font-family:inherit;cursor:pointer}
+.spec-filters select:focus{outline:2px solid var(--brand);outline-offset:1px}
+.spec-tbl{width:100%;border-collapse:collapse;font-size:13px}
+.spec-tbl th{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#9a9890;padding:9px 16px;text-align:left;border-bottom:0.5px solid rgba(0,0,0,0.08);font-weight:600;background:#fafaf8}
+.spec-tbl th.r,.spec-tbl td.r{text-align:right}
+.spec-tbl td{padding:8px 16px;border-bottom:0.5px solid rgba(0,0,0,0.05);color:#1a1917;vertical-align:middle;line-height:1.35}
+.spec-tbl td.svc{font-weight:500}
+.spec-tbl td.qty-cell{color:#6b6860;font-size:13px;text-align:right}
+.spec-tbl td.price-cell{text-align:right;white-space:nowrap}
+.spec-tbl td.price-cell .px{font-size:11px;color:#9a9890;margin-top:1px}
+.spec-tbl tr:last-child td{border-bottom:0}
+.spec-tbl tfoot tr td{padding:8px 16px;font-size:13px;font-weight:500}
+.spec-tbl tfoot tr td.r{text-align:right}
+.spec-tbl .ex-total{font-size:11px;font-weight:400;margin-top:2px;opacity:.75}
+/* Row 1: If booked individually — pastel red */
+.spec-tbl tr.spec-before td{background:#fde8e8;color:#9b1c1c;border-top:2px solid rgba(0,0,0,0.06);font-size:15px;font-weight:600;padding:11px 16px}
+.spec-tbl tr.spec-before td.r{color:#9b1c1c;font-size:16px;font-weight:700}
+/* Row 2: Specification saving — pastel green */
+.spec-tbl tr.spec-saving td{background:#d1fae5;color:#065f46;border-top:none;font-size:15px;font-weight:600;padding:11px 16px}
+.spec-tbl tr.spec-saving td.r{color:#065f46;font-size:16px;font-weight:700}
+/* Row 3: Specification total — pastel blue */
+.spec-tbl tr.spec-total-row td{background:#dbeafe;color:#1e3a8a;border-top:none;font-size:15px;font-weight:600;padding:11px 16px}
+.spec-tbl tr.spec-total-row td.r{color:#1D4ED8;font-size:16px;font-weight:700}
+.spec-missing{padding:32px 16px;font-size:13px;color:#9a9890;text-align:center}
+.spec-loading-msg{padding:24px 16px;font-size:13px;color:#9a9890;text-align:center}
+.sp-col li.upsell{color:var(--chrome);font-style:italic;margin-top:6px;list-style:none;margin-left:-4px;padding-left:0}
+.sp-col li.upsell::before{content:'\2192\00a0';font-style:normal}
+/* Price difference calculator */
+.spec-delta{margin-top:16px;background:#fff;border:0.5px solid rgba(0,0,0,0.1);border-radius:12px;padding:16px 20px;display:none}
+.spec-delta.visible{display:block}
+.spec-delta-title{font-size:10px;text-transform:uppercase;letter-spacing:.1em;font-weight:700;color:#9a9890;margin-bottom:12px}
+.spec-delta-grid{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px}
+.spec-delta-col{text-align:center}
+.spec-delta-col .dl-label{font-size:11px;color:#9a9890;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+.spec-delta-col .dl-name{font-size:13px;font-weight:600;color:#1a1917;margin-bottom:2px}
+.spec-delta-col .dl-price{font-size:22px;font-weight:700;color:var(--chrome);letter-spacing:-.01em}
+.spec-delta-col .dl-ex{font-size:11px;color:#9a9890;margin-top:2px}
+.spec-delta-arrow{text-align:center;color:#9a9890}
+.spec-delta-diff{text-align:center;padding:12px 20px;background:#f0faf5;border-radius:10px;border:1px solid rgba(10,92,62,.15)}
+.spec-delta-diff .dd-label{font-size:11px;color:#6b6860;margin-bottom:4px}
+.spec-delta-diff .dd-amount{font-size:24px;font-weight:700;color:#0a5c3e;letter-spacing:-.01em}
+.spec-delta-diff .dd-ex{font-size:11px;color:#9a9890;margin-top:2px}
+.spec-delta-diff .dd-note{font-size:12px;color:#5c5b57;margin-top:6px;line-height:1.4}
+.spec-delta-diff.higher .dd-amount{color:var(--chrome)}
+/* Sales script two-column reference */
+.spec-script{margin-top:28px}
+.script-hd{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--brand);font-weight:600;margin-bottom:14px}
+.script-cols{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+@media(max-width:900px){.script-cols{grid-template-columns:1fr}}
+.script-panel{display:flex;flex-direction:column;gap:0}
+.sp-title{font-size:10px;text-transform:uppercase;letter-spacing:.1em;font-weight:700;color:#9a9890;margin:0 0 8px;padding-bottom:6px;border-bottom:1px solid rgba(0,0,0,0.08)}
+.sp-col{background:#fff;border:0.5px solid rgba(0,0,0,0.1);border-radius:10px;padding:12px 14px;margin-bottom:8px}
+.sp-col-name{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px}
+.sp-col-price{font-size:18px;font-weight:700;color:var(--chrome);letter-spacing:-.01em;margin-bottom:8px}
+.sp-col-price span{font-size:12px;font-weight:400;color:#9a9890;letter-spacing:0}
+.sp-col ul{margin:0;padding-left:16px;color:#5c5b57;font-size:12.5px;line-height:1.55}
+.sp-col li{margin:2px 0}
+.sp-col.sel .sp-col-name{color:#374151}
+.sp-col.res .sp-col-name{color:#1D4ED8}
+.sp-col.pri{border-color:var(--brand);border-width:1.5px}
+.sp-col.pri .sp-col-name{color:var(--chrome)}
+.sp-col.atl .sp-col-name{color:#6D28D9}
+.sp-note{font-size:11.5px;color:#9a9890;line-height:1.5;padding:10px 12px;background:#f8f7f4;border-radius:8px;margin-top:4px}
+.sp-steps{margin:0 0 4px;padding-left:20px;font-size:12.5px;color:#1a1917;line-height:1.6}
+.sp-steps li{margin:4px 0}
+.sp-steps em{color:#480405;font-style:italic}
+.sp-list{margin:0 0 4px;padding-left:16px;font-size:12.5px;color:#1a1917;line-height:1.6}
+.sp-list li{margin:3px 0}
+.sp-list em{color:#480405;font-style:italic}
+.sp-list b{color:#1a1917}
+
+/* ── CONSULTATION / QUOTE BUILDER TAB ──────────────────────────── */
+.consult-wrap{padding:20px 24px 60px}
+.consult-grid{display:grid;grid-template-columns:1fr 360px;gap:20px;align-items:start}
+@media(max-width:980px){.consult-grid{grid-template-columns:1fr}}
+.cf-section{background:#fff;border:0.5px solid rgba(0,0,0,0.1);border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1rem}
+.cf-sec-title{font-size:11px;font-weight:600;color:#9a9890;text-transform:uppercase;letter-spacing:0.08em;margin:0 0 14px}
+.cf-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 20px}
+.cf-grid-3{grid-template-columns:1.3fr 1fr 1fr}
+.cf-grid-4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:560px){.cf-grid,.cf-grid-3,.cf-grid-4{grid-template-columns:1fr}}
+.cf-field{display:flex;flex-direction:column;gap:4px}
+.cf-field.full{grid-column:1/-1}
+.cf-field label{font-size:13px;color:#6b6860}
+.cf-field input[type="text"],.cf-field input[type="date"],.cf-field textarea,.cf-field select{
+  padding:7px 10px;font-size:15px;border:0.5px solid rgba(0,0,0,0.18);border-radius:8px;
+  background:#f0ede8;color:#1a1917;width:100%;font-family:inherit}
+.cf-field select{cursor:pointer;-webkit-appearance:none;-moz-appearance:none;appearance:none;
+  padding-right:32px;background-color:#f0ede8;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%236b6860' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 10px center}
+.cf-field textarea{font-size:14px;resize:vertical;min-height:64px}
+.cf-field input:focus,.cf-field textarea:focus,.cf-field select:focus{outline:none;border-color:#85b7eb}
+
+.qb-pkg-summary{margin-top:14px;padding:14px 16px;border-radius:10px;background:var(--chrome);color:#fff;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.qb-pkg-summary .pkg-name{font-size:15px;font-weight:600;letter-spacing:-.01em}
+.qb-pkg-summary .pkg-code{font-size:10px;color:rgba(255,255,255,.5);font-family:monospace;margin-top:2px}
+.qb-pkg-summary .pkg-price{font-size:18px;font-weight:700;text-align:right}
+.qb-pkg-summary .pkg-price .ex{display:block;font-size:11px;font-weight:400;color:rgba(255,255,255,.6)}
+.qb-pkg-summary.missing{background:#f8f7f4;color:#9a9890;font-size:13px}
+
+.qb-addon-filters{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.qb-addon-filters input,.qb-addon-filters select{padding:7px 10px;font-size:13px;border:0.5px solid rgba(0,0,0,0.15);border-radius:7px;background:#fff;color:#1a1917;font-family:inherit}
+.qb-addon-filters input{flex:2;min-width:140px}
+.qb-addon-filters select{flex:1;min-width:120px;cursor:pointer}
+.qb-addon-list{max-height:420px;overflow-y:auto;border:0.5px solid rgba(0,0,0,0.08);border-radius:10px}
+.qb-addon-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;border-bottom:0.5px solid rgba(0,0,0,0.06)}
+.qb-addon-row:last-child{border-bottom:0}
+.qb-addon-row.in-cart{background:#f8f7f4}
+.qb-addon-info{min-width:0;flex:1}
+.qb-addon-name{font-size:13px;font-weight:500;color:#1a1917;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.qb-addon-cat{font-size:11.5px;color:#9a9890;margin-top:2px}
+.qb-addon-price{font-size:13px;font-weight:500;color:#185FA5;white-space:nowrap;text-align:right}
+.disc-badge{display:inline-block;font-size:9.5px;font-weight:600;color:var(--green);background:var(--green-bg);border-radius:4px;padding:1px 5px;margin-left:2px;vertical-align:1px}
+.qb-addon-price .ex{display:block;font-size:10.5px;font-weight:400;color:#9a9890}
+.qb-addon-qty{display:flex;align-items:center;gap:6px}
+.qb-addon-qty button{width:24px;height:24px;border-radius:6px;border:0.5px solid rgba(0,0,0,0.18);background:#fff;color:#1a1917;cursor:pointer;font-size:14px;line-height:1;font-family:inherit}
+.qb-addon-qty button:hover{background:#f0ede8}
+.qb-addon-qty .qty-val{min-width:16px;text-align:center;font-size:13px;font-weight:500}
+.qb-addon-empty{padding:32px 16px;font-size:13px;color:#9a9890;text-align:center}
+
+.qb-summary-card{position:sticky;top:76px}
+.qb-summary-line{display:flex;justify-content:space-between;gap:10px;font-size:13px;color:#5c5b57;padding:6px 0}
+.qb-summary-line .lbl{color:#6b6860}
+.qb-summary-line .val{color:#1a1917;font-weight:500;white-space:nowrap}
+.qb-summary-addons{border-top:0.5px solid rgba(0,0,0,0.08);margin-top:6px;padding-top:6px}
+.qb-summary-addon-row{font-size:12px;color:#6b6860;padding:5px 0}
+.qb-summary-addon-row button{border:none;background:none;color:#a7141e;cursor:pointer;font-size:11px;font-family:inherit;padding:0 0 0 8px}
+.qb-summary-addon-toprow{display:flex;justify-content:space-between;gap:10px}
+.qb-summary-addon-pricerow{display:flex;align-items:center;gap:8px;margin-top:2px;padding-left:2px}
+.qb-summary-addon-pricerow .full-price{font-size:12px;color:#9a9890}
+.qb-summary-addon-pricerow .disc-price{font-size:13px;font-weight:600;color:var(--green)}
+.qb-summary-total{border-top:1px solid rgba(0,0,0,0.12);margin-top:10px;padding-top:10px;display:flex;justify-content:space-between;align-items:baseline}
+.qb-summary-total .lbl{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#9a9890;font-weight:600}
+.qb-summary-total .val{font-size:22px;font-weight:700;color:var(--chrome)}
+.qb-summary-total .val .ex{display:block;font-size:11px;font-weight:400;color:#9a9890;text-align:right}
+.qb-note{font-size:11px;color:#9a9890;line-height:1.5;margin-top:10px}
+.qb-save-status{font-size:12px;font-weight:500;margin-top:10px;min-height:16px}
+.qb-save-status.ok{color:var(--green)}
+.qb-save-status.err{color:var(--red)}
+.qb-save-status.pending{color:#9a9890}
+.qb-actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.qb-actions button{flex:1;min-width:90px;padding:9px 10px;font-size:12.5px;font-weight:500;border-radius:8px;border:0.5px solid rgba(0,0,0,0.18);background:transparent;color:#1a1917;cursor:pointer;font-family:inherit}
+.qb-actions button:hover{background:#f0ede8}
+.qb-actions button.primary{background:var(--brand);color:#fff;border-color:var(--brand)}
+.qb-actions button.primary:hover{background:#8c1018}
+</style>
+</head>
+<body>
+
+<!-- ── PORTAL HEADER ── -->
+<header class="portal-header">
+  <div class="portal-brand">
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAIAAAAlC+aJAAABCGlDQ1BJQ0MgUHJvZmlsZQAAeJxjYGA8wQAELAYMDLl5JUVB7k4KEZFRCuwPGBiBEAwSk4sLGHADoKpv1yBqL+viUYcLcKakFicD6Q9ArFIEtBxopAiQLZIOYWuA2EkQtg2IXV5SUAJkB4DYRSFBzkB2CpCtkY7ETkJiJxcUgdT3ANk2uTmlyQh3M/Ck5oUGA2kOIJZhKGYIYnBncAL5H6IkfxEDg8VXBgbmCQixpJkMDNtbGRgkbiHEVBYwMPC3MDBsO48QQ4RJQWJRIliIBYiZ0tIYGD4tZ2DgjWRgEL7AwMAVDQsIHG5TALvNnSEfCNMZchhSgSKeDHkMyQx6QJYRgwGDIYMZAKbWPz9HbOBQAAAD9ElEQVR42u2ZzYscVRTFz73v1Ud3dU9nZloJGmLcRDQJiIr4GRdKUNfuVPD/8A8IuBKX7twr4iILQRB0IYigGTCJMU4M6jBJzGQyPd01Ve/juGgHXGe6TArq/QHF+9V579x7z5OjKmjzUrR8dQAdQAfQAXQAHUAH0AHcnwAEEpFUhG0EECCChWghJoDSRgUCUagZqMYmJbBNKoChGCMIgABsFwCAAIzUWEFECxUAQGJZjRUhAWkhAIAVYw1EpIUKEEgEK2qNwDZ2ARoEiEBfdFmtCgpVx6actBEbFcCTY2OHqoXoWK1vHwBwzGaZaCZ6zGausWvcVCFT4GTa86QjT6Q906I7oMCUPGKTp7Pi63LHg6/1RodNshFcIbLwmmBGCzW5eQFeUvPecByBjyc3L9blU2nxWJJfdGUN6v2pgOxvHUAgV6xdVrus9niSO3LVGIKH1E58pSJzlbggb12AAgoEoCLnnbMVuR78pbp8Lh88arMn0l4i8sGdzb+Cy/d3X5IiYhbBoAf88QAm5CE1z2bFZN8rR6rXgvuhmj5okqM2/WK2veF9JqjJitwlX8gHQ9EJiQO7090fIQKBVJETSf5WsXLEppnot3uTQERwqHrMZoXqudn2l+XOA0b7YgAkIs9kxeu90bqvPpvevuarACru/hjI3cXrBArRx9Pe89ngZNorGUvGFbVXfXW+LmvGJ9P+SM252Z0bwZ3pjZbUrPsqFzmZ9saa3IyuEJOLrNXld3u7l1w5Y5T/E2AufSoyVHsq7b2aL43UrNWztbqcMhCYxfirr17OBm8PV7dD+HBn80/vLLBs7Ju90ene8O8QvirvXKjLCYMjeU+OUElOfb3u6t9ddSrtfzrdcoQKDDAjXsz77wzHkfy+mq47t6rqwa3gP9m9NWP8qZ79XFd9gTlYtyoHfKGZG2hNBiATUUCAPTIXfX/5oVyEwDTGs9sbFZntb7UiFZi7Fu+5jRIwInb/Ox4Ym+Tdwfh4kn8+vX3ZVa/kw8MmueqrkpxXACtiFpRWLKaQ/XcrkcxFHrHpH77+Zm8SwNP58GGbJiLEv7PZAseDBbcSAKzIRgib0b3RH01iOGqzl/LhRzvXr/i630BGtPhmLgJLKr+48rLbO9MfCXChLn9z1VIDnVyD80BFnK9nQzEDMT/WM9+ukZKAAa64yoGBvOoq27pcKBHZDG4aoyNvRJc0lpA2qMBuDNvRO3IaY94ugPk1qIGt6B3pCZEWRoskbgUfmgyFmgUQwVYMBFuZzM0dejt6NPwK1GC0aICdGASLGR3vjQLTGKW9CqjIjBGANvlM1qwCe3OAJhXonlk7gA6gA+gAOoAOoAPoAFq8/gEOw8obGr3j9QAAAABJRU5ErkJggg==" alt="Chrome Mercy Studio">
+    <div class="portal-brand-text">
+      <span class="portal-brand-name">Chrome Mercy Studio</span>
+      <span class="portal-brand-sub">Studio Portal</span>
+    </div>
+  </div>
+  <div class="portal-header-right">
+    <span class="sync-badge sync-loading" id="sync-badge">Loading&hellip;</span>
+  </div>
+</header>
+
+<!-- ── TAB NAVIGATION ── -->
+<nav class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('pricelist')" id="tab-pricelist">Price List</button>
+  <button class="tab-btn" onclick="switchTab('calculator')" id="tab-calculator">Services &amp; Product Calculator</button>
+  <button class="tab-btn" onclick="switchTab('specifications')" id="tab-specifications">Specifications</button>
+  <button class="tab-btn" onclick="switchTab('consultation')" id="tab-consultation">Consultation</button>
+</nav>
+<div id="live-error" class="live-error" style="display:none"></div>
+
+<!-- ── ADMIN MODAL ── -->
+<!-- ════════════════════════════════════════════════════════
+     TAB 1 — PRICE LIST
+════════════════════════════════════════════════════════ -->
+<div class="tab-pane active" id="pane-pricelist">
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <span class="export-label" id="export-label">Export</span>
+    <button class="export-btn" id="export-xero" onclick="exportXeroCSV()">&#8595; Xero Items CSV</button>
+  </div>
+
+  <!-- Main pricing list content -->
+  <div class="main">
+    <aside class="sidebar">
+      <div class="rate-display">
+        <div class="rd-label">Hourly rate</div>
+        <div class="rd-val">$299 <span style="font-size:12px;font-weight:400;color:var(--amber)">inc GST</span></div>
+        <div class="rd-note">$271.82 ex GST</div>
+      </div>
+      <div class="sidebar-divider"></div>
+      <div class="filter-group">
+        <div class="filter-heading">Tier <span class="filter-clear" onclick="clearFilter('tier')">Clear</span></div>
+        <div id="tier-filters"></div>
+      </div>
+      <div class="sidebar-divider"></div>
+      <div class="filter-group">
+        <div class="filter-heading">Category <span class="filter-clear" onclick="clearFilter('cat')">Clear</span></div>
+        <div id="cat-filters"></div>
+      </div>
+      <div class="sidebar-divider"></div>
+      <div class="filter-group">
+        <div class="filter-heading">Vehicle Type <span class="filter-clear" onclick="clearFilter('vehicle')">Clear</span></div>
+        <div id="vehicle-filters"></div>
+      </div>
+    </aside>
+
+    <div class="content">
+      <div class="search-row">
+        <div class="search-wrap">
+          <span class="search-icon">&#8981;</span>
+          <input class="search-input" type="text" id="search" placeholder="Search services, materials, subcontractors&hellip;" oninput="applyFilters()">
+        </div>
+        <span class="result-info" id="result-info"></span>
+      </div>
+      <div class="table-wrap">
+        <table id="main-table">
+          <thead>
+            <tr>
+              <th style="width:100px;color:#ccc;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;padding:10px 8px;cursor:pointer" onclick="sortBy('id')">SKU</th>
+              <th class="col-cat" onclick="sortBy('category')">Category</th>
+              <th style="width:120px;color:#ccc;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;padding:10px 8px;cursor:pointer" onclick="sortBy('sub_category')">Sub Category</th>
+              <th class="col-name" onclick="sortBy('customer_description')">Customer Description</th>
+              <th class="col-tier" onclick="sortBy('tier')">Tier</th>
+              <th style="width:100px;color:#ccc;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;padding:10px 8px">Supplier</th>
+              <th class="col-price" onclick="sortBy('final_inc_gst')" style="text-align:right">Material Price inc. GST</th>
+              <th class="col-action" style="text-align:right">Detail</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+        <div class="empty" id="empty" style="display:none">
+          <h3>No results found</h3>
+          <p>Try adjusting your search or filters</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     TAB 2 — CALCULATOR
+════════════════════════════════════════════════════════ -->
+<div class="tab-pane" id="pane-calculator">
+  <div class="calc-tab-wrap">
+    <h2>Services &amp; Product Calculator</h2>
+    <p class="sub">Target 30% net profit after tax &mdash; $299/hr inc GST ($271.82 ex GST) for service labour</p>
+
+    <div class="toggle-wrap">
+      <button class="toggle-btn active" id="btn-service" onclick="setMode('service')">Service job</button>
+      <button class="toggle-btn" id="btn-product" onclick="setMode('product')">Product job</button>
+    </div>
+
+    <div id="service-inputs" class="section">
+      <p class="sec-title">Service job inputs</p>
+      <div class="field-grid">
+        <div class="field"><label>Internal hours</label><input type="number" id="s-hours" value="4" min="0" step="0.5" oninput="calcService()"></div>
+        <div class="field"><label>Subcontractor cost (ex GST) $</label><input type="number" id="s-subco" value="0" min="0" step="10" oninput="calcService()"></div>
+        <div class="field"><label>Subco markup %</label><input type="number" id="s-markup" value="15" min="0" max="100" step="5" oninput="calcService()"></div>
+        <div class="field"><label>Shipping (ex GST) $</label><input type="number" id="s-shipping" value="0" min="0" step="5" oninput="calcService()"></div>
+        <div class="field full"><label>Other direct costs (ex GST) $</label><input type="number" id="s-direct" value="0" min="0" step="10" oninput="calcService()"></div>
+        <div class="field"><label>Target net profit (after tax) %</label><input type="number" id="s-target" value="30" min="0" max="80" step="5" oninput="calcService()"></div>
+        <div class="field"><label>Company tax rate %</label><input type="number" id="s-tax" value="25" min="0" max="30" step="5" oninput="calcService()"></div>
+        <div class="field"><label>Leather hide</label><select id="s-hide" onchange="calcService()"><option value="0">None</option></select></div>
+        <div class="field"><label>Hide qty</label><input type="number" id="s-hide-qty" value="1" min="0" step="1" oninput="calcService()"></div>
+      </div>
+    </div>
+
+    <div id="product-inputs" class="section hidden">
+      <p class="sec-title">Product job inputs</p>
+      <div class="field-grid">
+        <div class="field"><label>Product cost (ex GST) $</label><input type="number" id="p-cost" value="0" min="0" step="10" oninput="calcProduct()"></div>
+        <div class="field"><label>Shipping (ex GST) $</label><input type="number" id="p-shipping" value="0" min="0" step="5" oninput="calcProduct()"></div>
+        <div class="field"><label>Other costs (ex GST) $</label><input type="number" id="p-other" value="0" min="0" step="10" oninput="calcProduct()"></div>
+        <div class="field"><label>Target net profit (after tax) %</label><input type="number" id="p-target" value="30" min="0" max="80" step="5" oninput="calcProduct()"></div>
+        <div class="field"><label>Company tax rate %</label><input type="number" id="p-tax" value="25" min="0" max="30" step="5" oninput="calcProduct()"></div>
+      </div>
+      <div class="competitor-box">
+        <p class="comp-label">Competitor price check (optional)</p>
+        <div class="field-grid">
+          <div class="field"><label>Competitor price inc GST $</label><input type="number" id="p-comp" value="" min="0" step="10" oninput="calcProduct()" placeholder="Leave blank to skip"></div>
+          <div class="field"><label>Max price you&apos;d charge inc GST $</label><input type="number" id="p-max" value="" min="0" step="10" oninput="calcProduct()" placeholder="Leave blank to skip"></div>
+        </div>
+        <div class="comp-result hidden" id="comp-result"></div>
+      </div>
+    </div>
+
+    <div id="service-metrics" class="metrics">
+      <div class="metric"><p class="metric-label">Total cost base</p><p class="metric-value" id="sm-cost">&mdash;</p><p class="metric-sub">ex GST</p></div>
+      <div class="metric"><p class="metric-label">Required gross margin</p><p class="metric-value" id="sm-gross">&mdash;</p><p class="metric-sub">before tax</p></div>
+      <div class="metric hi"><p class="metric-label">Quote ex GST</p><p class="metric-value" id="sm-price">&mdash;</p><p class="metric-sub">&mdash;</p></div>
+      <div class="metric hi"><p class="metric-label">Invoice inc GST</p><p class="metric-value" id="sm-gst">&mdash;</p><p class="metric-sub">what you send</p></div>
+      <div class="metric"><p class="metric-label">Net profit $</p><p class="metric-value" id="sm-profit">&mdash;</p><p class="metric-sub" id="sm-pct">after tax</p></div>
+    </div>
+
+    <div id="product-metrics" class="metrics hidden">
+      <div class="metric"><p class="metric-label">Total cost base</p><p class="metric-value" id="pm-cost">&mdash;</p><p class="metric-sub">ex GST</p></div>
+      <div class="metric"><p class="metric-label">Min price ex GST</p><p class="metric-value" id="pm-price">&mdash;</p><p class="metric-sub">for 30% net profit</p></div>
+      <div class="metric hi"><p class="metric-label">Min price inc GST</p><p class="metric-value" id="pm-gst">&mdash;</p><p class="metric-sub">baseline to charge</p></div>
+      <div class="metric"><p class="metric-label">Net profit $</p><p class="metric-value" id="pm-profit">&mdash;</p><p class="metric-sub" id="pm-pct">at min price</p></div>
+      <div class="metric success hidden" id="pm-upside-card"><p class="metric-label">Extra profit if competitor price</p><p class="metric-value" id="pm-upside">&mdash;</p><p class="metric-sub" id="pm-upside-sub">vs min price</p></div>
+    </div>
+
+    <div class="section"><p class="sec-title">Cost breakdown</p><div class="bd" id="breakdown">&mdash;</div></div>
+
+    <div class="section">
+      <p class="sec-title">Save to job history</p>
+      <div class="field-grid">
+        <div class="field"><label>Job name</label><input type="text" id="job-name" placeholder="e.g. Smith residence install"></div>
+        <div class="field"><label>Date</label><input type="date" id="job-date"></div>
+        <div class="field full"><label>Description / notes</label><textarea id="job-desc" placeholder="e.g. 3-zone system, tight access, included cable run"></textarea></div>
+      </div>
+      <button class="btn primary" id="save-btn" onclick="saveJob()">Save to history</button>
+      <div class="toast" id="toast"></div>
+    </div>
+
+    <div class="section"><p class="sec-title">Job history</p><div id="history-list"><p class="history-loading">Loading job history...</p></div></div>
+  </div>
+</div>
+
+
+<div class="tab-pane" id="pane-specifications">
+  <div style="padding:20px 24px 12px;border-bottom:0.5px solid rgba(0,0,0,0.08);display:flex;align-items:baseline;gap:16px;justify-content:space-between;flex-wrap:wrap">
+    <div>
+      <div style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--brand);font-weight:600;margin-bottom:3px">Chrome Mercy Studio</div>
+      <h2 style="font-size:20px;font-weight:600;margin:0;letter-spacing:-.01em;color:var(--text)">Specifications</h2>
+      <div style="font-size:13px;color:var(--text2);margin-top:3px">Compare specifications and reference the sales call script.</div>
+    </div>
+    <div id="spec-status" style="font-size:12px;color:var(--text2)"></div>
+  </div>
+  <div class="spec-layout">
+    <div class="spec-main">
+      <div class="spec-grid" id="spec-grid">
+        <div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--text2);font-size:14px">Loading specifications&hellip;</div>
+      </div>
+      <div class="spec-delta" id="spec-delta"></div>
+    </div>
+    <div class="spec-script" id="spec-script"></div>
+  </div>
+</div>
+
+<!-- ── CONSULTATION / QUOTE BUILDER TAB ── -->
+<div class="tab-pane" id="pane-consultation">
+  <iframe id="consult-frame" src="consultation.html" title="Consultation build sheet"
+    style="width:100%;height:calc(100vh - 110px);border:none;display:block;background:#15171c"></iframe>
+</div>
+
+<script>
+// ── CATALOGUE DATA (v15 — single price per service) ──────────────
+let CATALOGUE = [];
+let MATERIAL_RATES = {}; // key/value map from the Material Rates sheet (Settings endpoint)
+
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxA778Rcd3dy9Yvi1QG8wMUYL1Ua-dpd1DEztfxh9AjAoxrgbdlrqJYmHrKMtzMt542wg/exec';
+// Updated: $299 inc GST / 1.1 = $271.82 ex GST
+const RATE_EX         = 299 / 1.1;
+const SUBCO_MUP       = 0.15;
+const GM              = 0.35;
+const CC_FEE          = 0.02;
+const TAX_RATE        = 0.25;
+
+// Category → badge class mapping
+const CAT_CLASS = {
+  'Centre Console':'b-con','Dash':'b-dsh','Design':'b-dsn','Door Card':'b-dcr',
+  'Flooring':'b-flr','Interior Controls':'b-ctl','Logo':'b-log','Motorbike':'b-bik',
+  'Pillar':'b-pil','Powder Coating':'b-pwc','Roof':'b-rof','Sound Deadening':'b-snd',
+  'Steering Wheel':'b-stw','Seats':'b-sea','Seat Belt':'b-sbt','Sun Visor':'b-svs'
+};
+const TIER_CLASS = {'Tier 1':'b-t1','Tier 2':'b-t2','Tier 3':'b-t3','Tier 4':'b-t4','Tier A':'b-ta'};
+
+var sortCol = 'category';
+var sortDir = 1;
+var filters = {cat:[], tier:[], vehicle:[]};
+var edited  = {};
+
+// ── HELPERS ──────────────────────────────────────────────────────
+function fmt(n) {
+  return '$' + Number(n||0).toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function pct(n) { return n ? (n*100).toFixed(1)+'%' : '0.0%'; }
+function clean(v) {
+  if(!v) return '';
+  var s = String(v).trim();
+  return (s==='nan'||s==='None'||s==='NaT') ? '' : s;
+}
+function evenRound(n) {
+  if(!n||n===0) return 0;
+  var c = Math.ceil(n);
+  return c%2===0 ? c : c+1;
+}
+
+// Option A — mirrors the spreadsheet exactly. RATE_EX = $271.82/hr ($299 inc GST).
+// Labour passes through at the ex-GST rate with NO margin; the gross margin applies
+// only to pass-through costs (subco+markup + materials + supplies + freight).
+// Psychological rounding is applied to the inc-GST price; ex-GST is back-calculated.
+function calcPrice(d) {
+  var smk    = (d.subco_markup !== undefined) ? d.subco_markup : SUBCO_MUP;
+  var margin = (d.margin_override !== undefined) ? d.margin_override : GM;
+  var labour = (d.labour_hrs||0) * RATE_EX;
+  var subcoT = (d.subco_cost||0) * (1 + smk);
+  var passThrough = subcoT + (d.materials_cost||0) + (d.supplies||0) + (d.freight||0);
+  var total  = labour + passThrough;   // Total Cost Base (col T) — labour booked at sell rate
+  // Quote ex GST (col V): =IF(U=1, R, R + (S+M+P+Q)/(1-U))
+  var qEx;
+  if (margin === 1)                    qEx = labour;
+  else if (margin >= 0 && margin < 1)  qEx = labour + passThrough/(1-margin);
+  else                                 qEx = 0;
+  var ccF    = qEx * CC_FEE;
+  var tEx    = qEx + ccF;
+  // Price inc GST (col AA): MROUND(X*1.1, 5) − $1 if the result lands on a round $10.
+  // Ex-GST rounded (col Y) and GST (col Z) are back-calculated from the inc-GST price.
+  var inc, rnd, gst;
+  if (qEx > 0) {
+    var inc5 = Math.round(tEx * 1.1 / 5) * 5;
+    inc      = (inc5 % 10 === 0) ? inc5 - 1 : inc5;
+    rnd      = Math.round(inc / 1.1 * 100) / 100;
+    gst      = Math.round((inc - rnd) * 100) / 100;
+  } else {
+    inc = 0; rnd = 0; gst = 0;
+  }
+  // Margins derive from (V−T), consistent with the sheet (AB/AC/AD)
+  var gm     = qEx>0 ? (qEx-total)/qEx : 0;
+  var np     = qEx>0 ? (qEx-total)*(1-TAX_RATE) : 0;
+  var npPct  = qEx>0 ? np/qEx : 0;
+  return {labour:labour,subcoTot:subcoT,totalCost:total,quoteEx:qEx,
+          ccFee:ccF,totalEx:tEx,totalExRounded:rnd,
+          gst:gst,incGst:inc,grossMargin:gm,netProfit:np,netPct:npPct,margin:margin};
+}
+
+// ── TAB SWITCHING ────────────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.tab-pane').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
+  document.getElementById('pane-'+tab).classList.add('active');
+  document.getElementById('tab-'+tab).classList.add('active');
+  if(tab === 'specifications') initSpecTab();
+}
+
+var SPEC_RECIPES = {};  // populated live from list_specifications in loadFromSheet()
+
+// ── SPECIFICATIONS TAB ────────────────────────────────────────────
+// Specs are ordinary Catalogue rows (category 'Specifications', ZSPEC- codes).
+// This tab reads them straight from CATALOGUE — no iframe, no async fetch.
+var specTabReady = false;
+
+function fmt0(n){ return '$'+Math.round(n||0).toLocaleString('en-AU'); }
+
+var COLLECTIONS = ['Select','Reserve','Private','Atelier'];
+var SLOT_DEFAULTS = [
+  {collection:'Select',  tier:'1', seats:'5'},
+  {collection:'Reserve', tier:'1', seats:'5'}
+];
+
+function initSpecTab(){
+  document.getElementById('spec-status').textContent =
+    CATALOGUE.filter(function(r){return r.category==='Specifications';}).length + ' specifications';
+  renderSpecGrid();
+  renderSalesScript();
+  specTabReady = true;
+}
+
+// ── SALES CALL SCRIPT (phone reference) ───────────────────────
+function renderSalesScript(){
+  var el=document.getElementById('spec-script');
+  if(!el || el.dataset.built) return;
+  el.innerHTML=
+    '<div class="script-hd">Sales call reference</div>'+
+    '<div class="script-cols">'+
+
+    // LEFT — collections
+    '<div class="script-panel">'+
+      '<div class="sp-title">Collections &amp; starting prices</div>'+
+
+      '<div class="sp-col sel">'+
+        '<div class="sp-col-name">SELECT</div>'+
+        '<div class="sp-col-price">from $7,685 <span>inc GST</span></div>'+
+        '<ul>'+
+          '<li>Front &amp; rear seats</li>'+
+          '<li>Console lid</li>'+
+          '<li>Door centre inserts</li>'+
+          '<li>Best when seats are the main issue</li>'+
+          '<li class="upsell">For every surface you touch while driving, step up to Reserve &mdash; or go straight to Private and have the cabin feel completely resolved</li>'+
+        '</ul>'+
+      '</div>'+
+
+      '<div class="sp-col res">'+
+        '<div class="sp-col-name">RESERVE</div>'+
+        '<div class="sp-col-price">from $12,745 <span>inc GST</span></div>'+
+        '<ul>'+
+          '<li>Everything in Select</li>'+
+          '<li>Steering wheel, shifter, handbrake</li>'+
+          '<li>Door pull handles</li>'+
+          '<li>All surfaces you touch while driving</li>'+
+          '<li class="upsell">For seatbelts, armrests and the dash pieces that make the cabin feel finished, Private is only a step further &mdash; and usually the smarter choice</li>'+
+        '</ul>'+
+      '</div>'+
+
+      '<div class="sp-col pri">'+
+        '<div class="sp-col-name">PRIVATE ★ hero</div>'+
+        '<div class="sp-col-price">from $16,229 <span>inc GST</span></div>'+
+        '<ul>'+
+          '<li>Everything in Reserve</li>'+
+          '<li>Door armrests</li>'+
+          '<li>Seat belt re-webbing</li>'+
+          '<li>Removable dash components</li>'+
+          '<li>Cabin feels complete, not left behind</li>'+
+          '<li class="upsell">For clients who want every surface addressed &mdash; console, full door cards, dashboard, headliner &mdash; Atelier is the complete no-compromise transformation</li>'+
+        '</ul>'+
+      '</div>'+
+
+      '<div class="sp-col atl">'+
+        '<div class="sp-col-name">ATELIER</div>'+
+        '<div class="sp-col-price">from $48,269 <span>inc GST</span></div>'+
+        '<ul>'+
+          '<li>Full cabin — no major surface left behind</li>'+
+          '<li>Full console, door cards, dashboard, headliner</li>'+
+          '<li>Show cars, exotics, full restorations</li>'+
+          '<li>Final price varies heavily with complexity</li>'+
+          '<li class="upsell">There is no further step &mdash; this is the interior built as one complete direction, beginning to end</li>'+
+        '</ul>'+
+      '</div>'+
+
+      '<div class="sp-note">Always add: &ldquo;Final pricing depends on vehicle type, seating layout, material selection, design complexity, and interior condition.&rdquo;</div>'+
+    '</div>'+
+
+    // RIGHT — call flow + objections
+    '<div class="script-panel">'+
+      '<div class="sp-title">Call structure</div>'+
+      '<ol class="sp-steps">'+
+        '<li>Open &mdash; <em>"Does now still work?"</em></li>'+
+        '<li>Vehicle &mdash; make, year, daily/weekend/resto, stage of build</li>'+
+        '<li>Interior pain &mdash; <em>"When you open the door, what feels wrong?"</em></li>'+
+        '<li>Component vs cabin &mdash; fixing one thing or bringing the whole interior up?</li>'+
+        '<li>Recommend pathway &mdash; <em>"Based on what you told me, I&rsquo;d guide you toward [PACKAGE]"</em></li>'+
+        '<li>Starting price &mdash; give the from price, explain it depends on selections</li>'+
+        '<li>Comfort check &mdash; see below, then <b>stop talking</b></li>'+
+        '<li>Explain the Interior Direction Consultation</li>'+
+        '<li>Close &mdash; <em>"Would you like to book the Interior Direction Consultation?"</em></li>'+
+      '</ol>'+
+
+      '<div class="sp-title" style="margin-top:18px">Starting price comfort check</div>'+
+      '<ul class="sp-list">'+
+        '<li>Give the from price &amp; say it depends on vehicle, selections, condition</li>'+
+        '<li><em>"Is that within the range you were expecting for this kind of work?"</em></li>'+
+        '<li>Stop talking — let them respond</li>'+
+        '<li>Yes → explain consultation &amp; book</li>'+
+        '<li>Hesitates → <em>"Is it the overall investment, the package, or not knowing the direction yet?"</em></li>'+
+        '<li>Too much → <em>"We&rsquo;re better suited to meaningful upgrades — may not be the right fit."</em></li>'+
+      '</ul>'+
+
+      '<div class="sp-title" style="margin-top:18px">Package advantage</div>'+
+      '<ul class="sp-list">'+
+        '<li>Individual items = separate jobs, each with its own setup, scheduling &amp; QC</li>'+
+        '<li>Package = one planned interior direction — better value &amp; better result</li>'+
+        '<li><b>Never say:</b> cheaper overseas / we save on shipping / bulk orders / discounted</li>'+
+        '<li><b>Say instead:</b> planned as one cohesive scope / better finish consistency</li>'+
+      '</ul>'+
+
+      '<div class="sp-title" style="margin-top:18px">Objections</div>'+
+      '<ul class="sp-list">'+
+        '<li><b>Quote over phone</b> &mdash; final price needs vehicle, condition, materials → that&rsquo;s what the consultation is for</li>'+
+        '<li><b>Too expensive</b> &mdash; are you fixing one component or bringing the whole cabin up to the car?</li>'+
+        '<li><b>Cheaper elsewhere</b> &mdash; looking for lowest price or a result that holds up long-term? (If lowest price: may not be right fit)</li>'+
+        '<li><b>Need to think</b> &mdash; what part? Package, investment, timing, or direction?</li>'+
+        '<li><b>Talk to partner</b> &mdash; can I send a short summary of what we discussed?</li>'+
+        '<li><b>Why consultation?</b> &mdash; final quote needs choices to be made properly — quoting before that means guessing</li>'+
+      '</ul>'+
+
+      '<div class="sp-title" style="margin-top:18px">Do not</div>'+
+      '<ul class="sp-list">'+
+        '<li>Book consultation before confirming comfort with starting price</li>'+
+        '<li>Give a final quote on the phone</li>'+
+        '<li>Lock materials or design direction on the call</li>'+
+        '<li>Apologise for being premium</li>'+
+        '<li>Chase poor-fit leads</li>'+
+      '</ul>'+
+    '</div>'+
+    '</div>';
+  el.dataset.built='1';
+}
+
+function specRow(collection, tier, seats){
+  var name = collection+' \u2014 '+seats+' Seat \u2014 T'+tier;
+  return CATALOGUE.filter(function(r){
+    return r.category==='Specifications' && (r.service_name===name || r.name===name);
+  })[0] || null;
+}
+
+function collectionForSlot(idx){
+  var el=document.getElementById('scol-'+idx);   return el?el.value:SLOT_DEFAULTS[idx].collection;
+}
+function tierForSlot(idx){
+  var el=document.getElementById('stier-'+idx);  return el?el.value:SLOT_DEFAULTS[idx].tier;
+}
+function seatsForSlot(idx){
+  var el=document.getElementById('sseats-'+idx); return el?el.value:SLOT_DEFAULTS[idx].seats;
+}
+
+function renderSpecGrid(){
+  var grid=document.getElementById('spec-grid');
+  grid.innerHTML=[0,1].map(function(idx){
+    var d=SLOT_DEFAULTS[idx];
+    var collOpts=COLLECTIONS.map(function(c){
+      return '<option value="'+c+'"'+(c===d.collection?' selected':'')+'>'+c+'</option>';
+    }).join('');
+    return '<div class="spec-col">'+
+      '<div class="spec-col-hd">'+
+        '<div class="eyebrow">Specification '+(idx===0?'A':'B')+'</div>'+
+        '<h3 id="sname-'+idx+'">'+d.collection+'</h3>'+
+        '<div class="spec-code" id="scode-'+idx+'"></div>'+
+      '</div>'+
+      '<div class="spec-filters">'+
+        '<select id="scol-'+idx+'" onchange="updateSlot('+idx+')">'+collOpts+'</select>'+
+        '<select id="stier-'+idx+'" onchange="updateSlot('+idx+')">'+
+          '<option value="1" selected>Tier 1</option><option value="2">Tier 2</option>'+
+          '<option value="3">Tier 3</option><option value="4">Tier 4</option>'+
+        '</select>'+
+        '<select id="sseats-'+idx+'" onchange="updateSlot('+idx+')">'+
+          '<option value="2">2 Seat</option><option value="5" selected>5 Seat</option>'+
+          '<option value="7">7 Seat</option>'+
+        '</select>'+
+      '</div>'+
+      '<div id="sbody-'+idx+'"><div class="spec-loading-msg">Loading\u2026</div></div>'+
+    '</div>';
+  }).join('');
+  [0,1].forEach(function(idx){ refreshSlotBody(idx); });
+  renderDeltaCalc();
+}
+
+function updateSlot(idx){
+  var nameEl=document.getElementById('sname-'+idx);
+  if(nameEl) nameEl.textContent=collectionForSlot(idx);
+  refreshSlotBody(idx);
+  renderDeltaCalc();
+}
+
+function renderDeltaCalc(){
+  var el=document.getElementById('spec-delta');
+  if(!el) return;
+
+  var specA=specRow(collectionForSlot(0), tierForSlot(0), seatsForSlot(0));
+  var specB=specRow(collectionForSlot(1), tierForSlot(1), seatsForSlot(1));
+  if(!specA || !specB){ el.className='spec-delta'; return; }
+
+  var priceA=Number(specA.final_inc_gst)||0;
+  var priceB=Number(specB.final_inc_gst)||0;
+  if(!priceA || !priceB){ el.className='spec-delta'; return; }
+
+  var nameA=(specA.service_name||specA.name||'Specification A');
+  var nameB=(specB.service_name||specB.name||'Specification B');
+  var diff=priceB-priceA;
+  var absDiff=Math.abs(diff);
+  var isHigher=diff>0;
+  var isSame=diff===0;
+
+  var diffLabel, diffNote, diffClass='';
+  if(isSame){
+    diffLabel='Same price';
+    diffNote='Both specifications are identically priced';
+  } else if(isHigher){
+    diffLabel='B costs more';
+    diffNote='For '+fmt0(absDiff)+' more, the client gets the '+nameB.split('\u2014')[0].trim()+' pathway';
+    diffClass='higher';
+  } else {
+    diffLabel='A costs more';
+    diffNote='For '+fmt0(absDiff)+' more, the client gets the '+nameA.split('\u2014')[0].trim()+' pathway';
+  }
+
+  el.className='spec-delta visible';
+  el.innerHTML=
+    '<div class="spec-delta-title">Price difference</div>'+
+    '<div class="spec-delta-grid">'+
+      '<div class="spec-delta-col">'+
+        '<div class="dl-label">Specification A</div>'+
+        '<div class="dl-name">'+nameA+'</div>'+
+        '<div class="dl-price">'+fmt0(priceA)+'</div>'+
+        '<div class="dl-ex">ex GST '+fmt0(priceA/1.1)+'</div>'+
+      '</div>'+
+      '<div class="spec-delta-arrow">&rarr;</div>'+
+      '<div class="spec-delta-col">'+
+        '<div class="dl-label">Specification B</div>'+
+        '<div class="dl-name">'+nameB+'</div>'+
+        '<div class="dl-price">'+fmt0(priceB)+'</div>'+
+        '<div class="dl-ex">ex GST '+fmt0(priceB/1.1)+'</div>'+
+      '</div>'+
+    '</div>'+
+    '<div style="margin-top:14px">'+
+      '<div class="spec-delta-diff '+diffClass+'">'+
+        '<div class="dd-label">'+diffLabel+'</div>'+
+        '<div class="dd-amount">'+(isSame?'—':(isHigher?'+':'\u2212')+fmt0(absDiff))+'</div>'+
+        (isSame?'':'<div class="dd-ex">ex GST '+(isSame?'—':(isHigher?'+':'\u2212')+fmt0(absDiff/1.1))+'</div>')+
+        '<div class="dd-note">'+diffNote+'</div>'+
+      '</div>'+
+    '</div>';
+}
+
+// Parse the spec's component recipe from its saved list if available;
+// otherwise fall back to just showing the spec's own price. Component
+// detail comes from the Saved Specifications data embedded at load.
+function refreshSlotBody(idx){
+  var collection=collectionForSlot(idx), tier=tierForSlot(idx), seats=seatsForSlot(idx);
+  var spec=specRow(collection,tier,seats);
+  var codeEl=document.getElementById('scode-'+idx);
+  var bodyEl=document.getElementById('sbody-'+idx);
+
+  if(!spec){
+    if(codeEl) codeEl.textContent='';
+    if(bodyEl) bodyEl.innerHTML='<div class="spec-missing">Specification not found</div>';
+    return;
+  }
+  if(codeEl) codeEl.textContent=spec.id||spec.sku||'';
+
+  var totalInc = Number(spec.final_inc_gst)||0;
+  var recipe = SPEC_RECIPES[spec.service_name||spec.name] || [];
+
+  // Two-pass: compute naiveTotal first so footer rows can reference it
+  var naiveTotal = 0;
+  var componentData = recipe.map(function(c){
+    var item=CATALOGUE.find(function(r){return r.id===c.id || r.sku===c.id;});
+    var nm = item ? (item.service_name||item.name) : c.id;
+    var unitInc = item ? (Number(item.final_inc_gst)||0) : 0;
+    var lineInc = unitInc*c.qty;
+    naiveTotal += lineInc;
+    return {nm:nm, qty:c.qty, unitInc:unitInc, lineInc:lineInc};
+  });
+
+  var rowsHtml;
+  if(componentData.length){
+    rowsHtml = componentData.map(function(d){
+      var pkgLine = naiveTotal > 0 ? Math.round((d.lineInc / naiveTotal) * totalInc) : 0;
+      return '<tr>'+
+        '<td class="svc">'+d.nm+'</td>'+
+        '<td class="qty-cell">'+d.qty+'</td>'+
+        '<td class="price-cell">'+fmt0(pkgLine)+'<div class="px">'+fmt0(pkgLine/1.1)+' ex</div></td>'+
+      '</tr>';
+    }).join('');
+  } else {
+    rowsHtml = '<tr><td class="svc" colspan="3" style="color:#9a9890">Component list unavailable</td></tr>';
+  }
+
+  var saving = naiveTotal - totalInc;
+
+  bodyEl.innerHTML=
+    '<table class="spec-tbl">'+
+      '<thead><tr>'+
+        '<th>Service</th>'+
+        '<th class="r">Qty</th>'+
+        '<th class="r">Package price</th>'+
+      '</tr></thead>'+
+      '<tbody>'+rowsHtml+'</tbody>'+
+      '<tfoot>'+
+        '<tr class="spec-before">'+
+          '<td colspan="2">If booked individually</td>'+
+          '<td class="r">'+fmt0(naiveTotal)+'<div class="ex-total">ex GST '+fmt0(naiveTotal/1.1)+'</div></td>'+
+        '</tr>'+
+        (saving>0
+          ? '<tr class="spec-saving">'+
+              '<td colspan="2">Specification saving</td>'+
+              '<td class="r">\u2212'+fmt0(saving)+'<div class="ex-total">ex GST \u2212'+fmt0(saving/1.1)+'</div></td>'+
+            '</tr>'
+          : '')+
+        '<tr class="spec-total-row">'+
+          '<td colspan="2">Specification total</td>'+
+          '<td class="r">'+fmt0(totalInc)+'<div class="ex-total">ex GST '+fmt0(totalInc/1.1)+'</div></td>'+
+        '</tr>'+
+      '</tfoot>'+
+    '</table>';
+}
+
+// ── SIDEBAR FILTERS ──────────────────────────────────────────────
+function handleFilter(el) {
+  toggleFilter(el.getAttribute('data-ftype'), decodeURIComponent(el.getAttribute('data-fval')));
+}
+
+function buildSidebar() {
+  var catSet={}, tierSet={}, vehSet={};
+  CATALOGUE.forEach(function(d) {
+    // Specifications are shown on their own tab, not the price list
+    if(d.category === 'Specifications') return;
+    catSet[d.category]     = (catSet[d.category]||0)+1;
+    tierSet[d.tier]        = (tierSet[d.tier]||0)+1;
+    // For vehicle type counts, only count non-Tier-A rows
+    // (Tier A = All Vehicles, so it shows with everything)
+    if(d.tier !== 'Tier A') {
+      vehSet[d.vehicle_type] = (vehSet[d.vehicle_type]||0)+1;
+    }
+  });
+
+  function mkBox(k,v,type,pfx) {
+    return '<div class="filter-item">' +
+      '<input type="checkbox" id="'+pfx+encodeURIComponent(k)+'" data-ftype="'+type+'" data-fval="'+encodeURIComponent(k)+'" onchange="handleFilter(this)">' +
+      '<label for="'+pfx+encodeURIComponent(k)+'">'+k+'</label>' +
+      '<span class="fc">'+v+'</span>' +
+    '</div>';
+  }
+
+  var tierOrder = ['Tier 1','Tier 2','Tier 3','Tier 4'];
+  document.getElementById('tier-filters').innerHTML =
+    tierOrder.filter(function(t){return tierSet[t];}).map(function(k){return mkBox(k,tierSet[k],'tier','t-');}).join('');
+  document.getElementById('cat-filters').innerHTML =
+    Object.keys(catSet).sort().map(function(k){return mkBox(k,catSet[k],'cat','c-');}).join('');
+  // Vehicle filter excludes "All Vehicles" since Tier A always shows
+  var vehOrder = ['Basic (Base Model)','European (Base Models)','Complex/Classics (Higher Models)','Exotic/Showcar'];
+  document.getElementById('vehicle-filters').innerHTML =
+    vehOrder.filter(function(v){return vehSet[v];}).map(function(k){return mkBox(k,vehSet[k],'vehicle','v-');}).join('');
+}
+
+function toggleFilter(type,val) {
+  var a = filters[type];
+  var idx = a.indexOf(val);
+  if(idx>-1) a.splice(idx,1); else a.push(val);
+  applyFilters();
+}
+function clearFilter(type) {
+  filters[type] = [];
+  var pfx = {cat:'c-',tier:'t-',vehicle:'v-'}[type];
+  document.querySelectorAll('[id^="'+pfx+'"]').forEach(function(el){
+    if(el.type==='checkbox') el.checked=false;
+  });
+  applyFilters();
+}
+
+// ── FILTERING + SORTING ──────────────────────────────────────────
+// Tier A logic: Tier A rows always show when a tier filter is active
+// (they apply to all vehicles regardless of tier selection)
+function applyFilters() {
+  var q = (document.getElementById('search').value||'').toLowerCase().trim();
+  var items = CATALOGUE.filter(function(item) {
+    // Specifications live on their own tab, never on the price list
+    if(item.category === 'Specifications') return false;
+
+    // Category filter
+    if(filters.cat.length && filters.cat.indexOf(item.category) === -1) return false;
+
+    // Tier filter: if tiers selected, show matching tier rows PLUS all Tier A rows
+    if(filters.tier.length) {
+      var isTierA = item.tier === 'Tier A';
+      var tierMatch = filters.tier.indexOf(item.tier) !== -1;
+      if(!isTierA && !tierMatch) return false;
+    }
+
+    // Vehicle filter: only applies to non-Tier-A rows
+    if(filters.vehicle.length && item.tier !== 'Tier A') {
+      if(filters.vehicle.indexOf(item.vehicle_type) === -1) return false;
+    }
+
+    // Search
+    if(q) {
+      var hay = [item.name,item.category,item.sub_category,
+                 item.material_rate_key,item.tier,item.vehicle_type,
+                 item.customer_description,item.subcontractor].join(' ').toLowerCase();
+      if(hay.indexOf(q) === -1) return false;
+    }
+    return true;
+  });
+
+  items.sort(function(a,b) {
+    var av = (edited[a.id]||a)[sortCol];
+    var bv = (edited[b.id]||b)[sortCol];
+    if(typeof av==='string') av=av.toLowerCase();
+    if(typeof bv==='string') bv=bv.toLowerCase();
+    return av<bv ? -sortDir : av>bv ? sortDir : 0;
+  });
+
+  document.getElementById('result-info').textContent = items.length+' item'+(items.length!==1?'s':'');
+  renderTable(items);
+}
+
+function sortBy(col) {
+  if(sortCol===col) sortDir*=-1; else {sortCol=col; sortDir=1;}
+  applyFilters();
+}
+
+// ── TABLE RENDER ─────────────────────────────────────────────────
+function renderTable(items) {
+  var tbody = document.getElementById('tbody');
+  var empty = document.getElementById('empty');
+  if(!items.length) { tbody.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display = 'none';
+
+  var rows = [];
+  for(var i=0; i<items.length; i++) {
+    var item = items[i];
+    var d    = edited[item.id] || item;
+    // Use baked-in spreadsheet prices; only recalc if admin has edited
+    var incGst  = edited[item.id] ? calcPrice(d).incGst : item.final_inc_gst;
+    var exRnd   = edited[item.id] ? calcPrice(d).totalExRounded : item.total_ex_rounded;
+    var tc   = TIER_CLASS[item.tier] || 'b-ta';
+    var bc   = CAT_CLASS[item.category] || 'b-cus';
+    var sup  = clean(d.subcontractor) || '&mdash;';
+    var subcat = clean(item.sub_category) || '&mdash;';
+    var custDesc = clean(item.customer_description) || item.name;
+    var rowbg = i%2===0 ? '' : ' class="row-alt"';
+
+    rows.push(
+      '<tr id="row-'+item.id+'"'+rowbg+'>'+
+        '<td class="td-sku">'+(item.sku||item.id)+'</td>'+
+        '<td class="td-cat"><span class="badge '+bc+'">'+item.category+'</span></td>'+
+        '<td class="td-subcat">'+subcat+'</td>'+
+        '<td class="td-name"><div class="n">'+custDesc+'</div></td>'+
+        '<td><span class="badge '+tc+'">'+item.tier+'</span></td>'+
+        '<td style="font-size:12px;color:var(--text2);white-space:nowrap">'+sup+'</td>'+
+        '<td class="td-price-cell">'+
+          '<div class="price-main">'+fmt(incGst)+'</div>'+
+          '<div class="price-ex">ex GST $'+Number(exRnd).toLocaleString('en-AU')+'</div>'+
+        '</td>'+
+        '<td class="td-action-cell">'+
+          '<button class="exp-btn" id="ebtn-'+item.id+'" data-id="'+item.id+'">Cost breakdown</button>'+
+        '</td>'+
+      '</tr>'+
+      '<tr class="detail-row'+(i%2===0?'':' row-alt')+'" id="drow-'+item.id+'" style="display:none">'+
+        '<td colspan="8" id="dcell-'+item.id+'"></td>'+
+      '</tr>'
+    );
+  }
+  tbody.innerHTML = rows.join('');
+}
+
+function toggleDetail(id) {
+  var drow = document.getElementById('drow-'+id);
+  var btn  = document.getElementById('ebtn-'+id);
+  var open = drow.style.display !== 'none';
+  document.querySelectorAll('.detail-row').forEach(function(r){r.style.display='none';});
+  document.querySelectorAll('.exp-btn').forEach(function(b){b.classList.remove('open');});
+  if(!open) {
+    document.getElementById('dcell-'+id).innerHTML = renderDetail(id);
+    drow.style.display = '';
+    btn.classList.add('open');
+    btn.textContent = 'Close';
+  } else {
+    btn.textContent = 'Cost breakdown';
+  }
+}
+
+function renderDetail(id) {
+  var item = CATALOGUE.find(function(x){return x.id===id;});
+  var d    = edited[id] || item;
+  var hasEdit = !!edited[id];
+  // Use spreadsheet values unless admin has edited
+  var incGst   = hasEdit ? calcPrice(d).incGst        : item.final_inc_gst;
+  var exRnd    = hasEdit ? calcPrice(d).totalExRounded : item.total_ex_rounded;
+  var quoteEx  = hasEdit ? calcPrice(d).quoteEx        : item.quote_ex;
+  var ccFee    = hasEdit ? calcPrice(d).ccFee          : item.cc_fee;
+  var gst      = hasEdit ? calcPrice(d).gst            : item.gst;
+  var labour   = hasEdit ? calcPrice(d).labour         : item.labour_hrs * RATE_EX;
+  var subcoTot = hasEdit ? calcPrice(d).subcoTot       : (item.subco_cost * (1 + item.subco_markup));
+  var totalCost= hasEdit ? calcPrice(d).totalCost      : item.total_cost;
+  var gm       = hasEdit ? calcPrice(d).grossMargin    : item.gross_margin_pct;
+  var netProfit= hasEdit ? calcPrice(d).netProfit      : item.net_profit;
+  var netPct   = hasEdit ? calcPrice(d).netPct         : item.net_pct;
+  var smk      = d.subco_markup !== undefined ? d.subco_markup : SUBCO_MUP;
+  var mgn      = d.margin_override !== undefined ? d.margin_override : GM;
+
+  var isLow    = mgn < (0.30/(1-TAX_RATE));
+  var mgnStyle = isLow ? 'border-color:#d97706;background:#fef3c7;' : '';
+  var mgnNote  = isLow
+    ? '<div style="font-size:10px;color:#92400e;margin-top:2px">&#9888; Below 30% net profit target</div>'
+    : '<div style="font-size:10px;color:var(--amber);margin-top:2px">Per service &mdash; '+Math.round(mgn*100)+'% margin</div>';
+
+  var vehPill  = clean(d.vehicle_type)  ? '<span class="meta-pill">&#128663; '+clean(d.vehicle_type)+'</span>'  : '';
+  var supPill  = clean(d.subcontractor) ? '<span class="meta-pill">&#128295; '+clean(d.subcontractor)+'</span>' : '';
+  var timePill = clean(d.timeframe)     ? '<span class="meta-pill">&#9201; '+clean(d.timeframe)+'</span>'       : '';
+
+  return '<div class="detail-inner">'+
+    '<div class="breakdown-grid">'+
+      '<div class="bc hl"><div class="bc-label">Price inc GST</div><div class="bc-val">'+fmt(incGst)+'</div></div>'+
+      '<div class="bc hl"><div class="bc-label">Total ex GST (rounded)</div><div class="bc-val">$'+Number(exRnd).toLocaleString('en-AU')+'</div></div>'+
+      '<div class="bc"><div class="bc-label">Quote ex GST</div><div class="bc-val">'+fmt(quoteEx)+'</div></div>'+
+      '<div class="bc"><div class="bc-label">CC Fee (2%)</div><div class="bc-val">'+fmt(ccFee)+'</div></div>'+
+      '<div class="bc"><div class="bc-label">GST (10%)</div><div class="bc-val">'+fmt(gst)+'</div></div>'+
+      '<div class="bc"><div class="bc-label">Labour ('+d.labour_hrs+'h &times; $'+RATE_EX.toFixed(2)+')</div><div class="bc-val">'+fmt(labour)+'</div></div>'+
+      '<div class="bc"><div class="bc-label">Materials</div><div class="bc-val">'+fmt(d.materials_cost)+'</div></div>'+
+      '<div class="bc"><div class="bc-label">Subcontractor</div><div class="bc-val">'+fmt(d.subco_cost)+(d.subco_cost>0?' <span style="font-size:10px">+'+Math.round(smk*100)+'% = '+fmt(subcoTot)+'</span>':'')+'</div></div>'+
+      '<div class="bc"><div class="bc-label">Supplies + Freight</div><div class="bc-val">'+fmt((d.supplies||0)+(d.freight||0))+'</div></div>'+
+      '<div class="bc"><div class="bc-label">Total Cost Base</div><div class="bc-val">'+fmt(totalCost)+'</div></div>'+
+      '<div class="bc '+(gm<0.35?'warn':'')+'"><div class="bc-label">Gross Margin %</div><div class="bc-val">'+pct(gm)+'</div></div>'+
+      '<div class="bc" style="background:var(--brand-light)"><div class="bc-label">Net Profit $</div><div class="bc-val" style="color:var(--brand)">'+fmt(netProfit)+'</div></div>'+
+      '<div class="bc" style="background:var(--brand-light)"><div class="bc-label">Net Profit %</div><div class="bc-val" style="color:var(--brand)">'+pct(netPct)+'</div></div>'+
+    '</div>'+
+    '<div class="detail-meta">'+vehPill+supPill+timePill+'</div>'+
+    '</div>';
+}
+
+// ── EXPORTS ──────────────────────────────────────────────────────
+function exportXeroCSV() {
+  if(!CATALOGUE.length){ alert('Live prices aren\u2019t loaded \u2014 nothing to export. Refresh once the spreadsheet is reachable.'); return; }
+  var headers=['ItemCode','ItemName','PurchasesDescription','PurchasesUnitPrice','PurchasesAccount','PurchasesTaxRate','SalesDescription','SalesUnitPrice','SalesAccount','SalesTaxRate','InventoryAssetAccount','CostOfGoodsSoldAccount'];
+  var rows=[headers];
+  // Specifications are ordinary catalogue rows now (ZSPEC- codes), so they
+  // export here automatically alongside everything else — no separate pass.
+  CATALOGUE.forEach(function(item){
+    var d=edited[item.id]||item;
+    var exRounded = edited[item.id] ? (calcPrice(d).incGst/1.1)
+                  : (item.total_ex_rounded!=null ? item.total_ex_rounded : (item.final_inc_gst||0)/1.1);
+    var unit = exRounded>0 ? (Math.round(exRounded*100)/100).toFixed(2) : '';
+    var name = ((item.category||'')+' - '+(item.sub_category||'')+' - '+(item.name||'')).slice(0,50);
+    rows.push([(item.sku||item.id), name, '', '', '', '', item.customer_description||'', unit, '200', 'GST on Income', '', '']);
+  });
+  var csv = '\ufeff' + rows.map(function(r){
+    return r.map(function(c){ return '"'+String(c==null?'':c).replace(/"/g,'""')+'"'; }).join(',');
+  }).join('\r\n');
+  var blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='chrome_mercy_studio_xero_items.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+
+// ── SHEET SYNC ───────────────────────────────────────────────────
+async function loadFromSheet() {
+  var badge = document.getElementById('sync-badge');
+  if(badge){ badge.textContent='Loading…'; badge.className='sync-badge sync-loading'; }
+  showLiveError('Loading live prices from the spreadsheet…','loading');
+  try {
+    var res  = await fetch(APPS_SCRIPT_URL+'?action=catalogue&t='+Date.now());
+    if(!res.ok) throw new Error('server returned '+res.status);
+    var json = await res.json();
+    if(json.status!=='ok' || !json.rows || !json.rows.length) throw new Error(json.message||'no live data returned');
+    CATALOGUE = json.rows.map(function(r){
+      if(r.name===undefined)            r.name = r.service_name;
+      if(r.margin_override===undefined) r.margin_override = r.margin_pct;
+      return r;
+    });
+    edited = {};
+    hideLiveError();
+    if(badge){ badge.textContent='✓ Live'; badge.className='sync-badge sync-ok'; }
+  } catch(e) {
+    CATALOGUE = [];
+    if(badge){ badge.textContent='⚠ Offline'; badge.className='sync-badge sync-err'; }
+    showLiveError('Live prices are unavailable ('+e.message+'). To avoid showing out-of-date pricing, nothing is displayed here. Check the Google Sheet / Apps Script is published, then refresh.','error');
+  }
+  try {
+    var rres = await fetch(APPS_SCRIPT_URL+'?action=list_specifications&t='+Date.now());
+    var rjson = await rres.json();
+    if(rjson.status==='ok' && rjson.specs){
+      SPEC_RECIPES = {};
+      rjson.specs.forEach(function(sp){ SPEC_RECIPES[sp.name] = sp.components || []; });
+    }
+  } catch(e) { SPEC_RECIPES = {}; }
+  try {
+    var sres = await fetch(APPS_SCRIPT_URL+'?action=settings&t='+Date.now());
+    var sjson = await sres.json();
+    MATERIAL_RATES = (sjson.status==='ok' && sjson.material_rates) ? sjson.material_rates : {};
+  } catch(e) {
+    MATERIAL_RATES = {};
+  }
+  buildSidebar();
+  applyFilters();
+  populateHideDropdown();
+}
+
+function showLiveError(msg,kind){
+  var b=document.getElementById('live-error');
+  if(!b) return;
+  b.textContent=msg; b.style.display='block';
+  b.className='live-error '+(kind||'error');
+}
+function hideLiveError(){
+  var b=document.getElementById('live-error');
+  if(b) b.style.display='none';
+}
+
+// ── CALCULATOR ───────────────────────────────────────────────────
+var cmode     = 'service';
+var clastCalc = {};
+
+function cval(id) { return parseFloat(document.getElementById(id).value)||0; }
+function cfmt(n)  { return '$'+Math.round(n).toLocaleString('en-AU'); }
+function cpct(n)  { return Math.round(n)+'%'; }
+function c$(id)   { return document.getElementById(id); }
+
+c$('job-date').value = new Date().toISOString().split('T')[0];
+
+function setMode(m) {
+  cmode = m;
+  c$('btn-service').classList.toggle('active', m==='service');
+  c$('btn-product').classList.toggle('active', m==='product');
+  c$('service-inputs').classList.toggle('hidden', m!=='service');
+  c$('product-inputs').classList.toggle('hidden', m!=='product');
+  c$('service-metrics').classList.toggle('hidden', m!=='service');
+  c$('product-metrics').classList.toggle('hidden', m!=='product');
+  if(m==='service') calcService(); else calcProduct();
+}
+
+function grossMarginNeeded(target,taxRate) { return target/(1-taxRate); }
+
+function populateHideDropdown(){
+  var sel=document.getElementById('s-hide');
+  if(!sel) return;
+  var cur=sel.value;
+  var hides=Object.keys(MATERIAL_RATES)
+    .filter(function(k){ return k.toLowerCase().indexOf('hide')>-1; })
+    .map(function(k){ return {name:k, cost:Number(MATERIAL_RATES[k])||0}; })
+    .sort(function(a,b){ return a.cost-b.cost; });
+  sel.innerHTML='<option value="0">None</option>'+hides.map(function(h){
+    return '<option value="'+h.cost+'">'+h.name+' ($'+Math.round(h.cost)+')</option>';
+  }).join('');
+  sel.value=cur; if(sel.selectedIndex<0) sel.value='0';
+}
+function calcService() {
+  var hours    = cval('s-hours');
+  var subco    = cval('s-subco');
+  var markup   = cval('s-markup')/100;
+  var shipping = cval('s-shipping');
+  var direct   = cval('s-direct');
+  var target   = cval('s-target')/100;
+  var taxRate  = cval('s-tax')/100;
+  var hideSel  = document.getElementById('s-hide');
+  var hideCost = (hideSel ? (parseFloat(hideSel.value)||0) : 0) * cval('s-hide-qty');
+  // Sell rate: $299 inc GST = $271.82 ex GST — what the client is billed per hour
+  // Cost rate: TRUE labour cost (break-even) = annual cost base / billable hours = 254704/1408 = $180.90/hr ex GST.
+  // Matches Settings!B24 and the Catalogue TRUE profit columns exactly (uses exact value, displayed rounded to $180.90).
+  var sellRateEx = 299/1.1;
+  var costRateEx = 254704/1408;
+  var labourSell = hours * sellRateEx;   // revenue from hours
+  var labourCost = hours * costRateEx;   // true cost of hours
+  var subcoMkp   = subco*(1+markup);
+  // Total cost base uses the true internal cost of labour, not the sell rate
+  var totalCost  = labourCost + subcoMkp + shipping + direct + hideCost;
+  // Total price = sell rate for hours + grossed-up pass-through costs
+  var passThroughCost  = subcoMkp + shipping + direct + hideCost;
+  var gmn              = grossMarginNeeded(target, taxRate);
+  var passThroughPrice = passThroughCost===0 ? 0 : passThroughCost/(1-gmn);
+  var price    = labourSell + passThroughPrice;
+  var priceGST = price * 1.1;
+  var gross    = price - totalCost;
+  var tax      = gross * taxRate;
+  var net      = gross - tax;
+  var netPct   = price>0 ? net/price*100 : 0;
+  c$('sm-cost').textContent   = cfmt(totalCost);
+  c$('sm-gross').textContent  = cpct(Math.round(gmn*100));
+  c$('sm-price').textContent  = cfmt(price);
+  c$('sm-gst').textContent    = cfmt(priceGST);
+  c$('sm-profit').textContent = cfmt(net);
+  c$('sm-pct').textContent    = netPct.toFixed(1)+'% after tax';
+  c$('breakdown').innerHTML   =
+    'Internal hours: <b>'+hours+' hrs &times; '+cfmt(sellRateEx)+' (sell) = '+cfmt(labourSell)+'</b> &mdash; cost base: '+hours+' hrs &times; $'+costRateEx.toFixed(2)+'/hr = <b>'+cfmt(labourCost)+'</b><br>'+
+    'Subcontractor: <b>'+cfmt(subco)+' + '+cpct(Math.round(markup*100))+' markup = '+cfmt(subcoMkp)+'</b><br>'+
+    'Shipping: <b>'+cfmt(shipping)+'</b><br>'+
+    'Other direct costs: <b>'+cfmt(direct)+'</b><br>'+
+    '<b>Total cost base: '+cfmt(totalCost)+'</b><hr>'+
+    'Gross margin needed on pass-through costs (to net '+cpct(cval('s-target'))+' after '+cpct(cval('s-tax'))+' tax): <b>'+cpct(Math.round(gmn*100))+'</b><br>'+
+    'Quote ex GST: <b>'+cfmt(price)+'</b> &rarr; inc GST: <b>'+cfmt(priceGST)+'</b><br>'+
+    'Gross profit: <b>'+cfmt(gross)+'</b> &rarr; tax: <b>'+cfmt(tax)+'</b> &rarr; net profit: <b>'+cfmt(net)+' ('+netPct.toFixed(1)+'%)</b>';
+  clastCalc = {type:'service',hours:hours,subco:subco,markup:Math.round(markup*100),
+               shipping:shipping,direct:direct,target:cval('s-target'),taxRate:cval('s-tax'),
+               totalCost:totalCost,price:price,priceGST:priceGST,netProfit:net,netPct:netPct};
+}
+
+function calcProduct() {
+  var productCost = cval('p-cost');
+  var shipping    = cval('p-shipping');
+  var other       = cval('p-other');
+  var target      = cval('p-target')/100;
+  var taxRate     = cval('p-tax')/100;
+  var compRaw     = c$('p-comp').value;
+  var maxRaw      = c$('p-max').value;
+  var compPrice   = compRaw!=='' ? (parseFloat(compRaw)||0) : null;
+  var maxPrice    = maxRaw!==''  ? (parseFloat(maxRaw)||0)  : null;
+  var total       = productCost+shipping+other;
+  var gmn         = grossMarginNeeded(target,taxRate);
+  var minPrice    = total===0 ? 0 : total/(1-gmn);
+  var minGST      = minPrice*1.1;
+  var gross       = minPrice-total;
+  var tax         = gross*taxRate;
+  var net         = gross-tax;
+  var netPct      = minPrice>0 ? net/minPrice*100 : 0;
+  c$('pm-cost').textContent   = cfmt(total);
+  c$('pm-price').textContent  = cfmt(minPrice);
+  c$('pm-gst').textContent    = cfmt(minGST);
+  c$('pm-profit').textContent = cfmt(net);
+  c$('pm-pct').textContent    = netPct.toFixed(1)+'% at min price';
+  var compHtml = '';
+  if(compPrice!==null && compPrice>0) {
+    var cEx=compPrice/1.1, cGross=cEx-total, cTax=cGross*taxRate, cNet=cGross-cTax;
+    var cPct=cEx>0?cNet/cEx*100:0, extra=cNet-net;
+    var cls=compPrice>=minGST?'good':'bad';
+    compHtml += '<span class="'+cls+'">'+(compPrice>=minGST?'Competitor price covers costs &mdash; you could charge up to '+cfmt(compPrice)+' inc GST':'Competitor price is below your minimum of '+cfmt(minGST)+' inc GST')+'</span><br>';
+    if(compPrice>=minGST) {
+      compHtml += 'At competitor price: net profit <b>'+cfmt(cNet)+' ('+cPct.toFixed(1)+'%)</b> &mdash; <b class="good">+'+cfmt(extra)+'</b> more than minimum<br>';
+      c$('pm-upside-card').classList.remove('hidden');
+      c$('pm-upside').textContent     = cfmt(extra);
+      c$('pm-upside-sub').textContent = 'vs min price at '+cfmt(compPrice)+' inc GST';
+    } else { c$('pm-upside-card').classList.add('hidden'); }
+  } else { c$('pm-upside-card').classList.add('hidden'); }
+  if(maxPrice!==null && maxPrice>0) {
+    var mEx=maxPrice/1.1, mGross=mEx-total, mTax=mGross*taxRate, mNet=mGross-mTax;
+    var mPct=mEx>0?mNet/mEx*100:0, cls2=maxPrice>=minGST?'good':'bad';
+    compHtml += 'At max price <b>'+cfmt(maxPrice)+' inc GST</b>: net profit <span class="'+cls2+'">'+cfmt(mNet)+' ('+mPct.toFixed(1)+'%)</span><br>';
+  }
+  var cr=c$('comp-result');
+  if(compHtml){cr.innerHTML=compHtml;cr.classList.remove('hidden');}else{cr.classList.add('hidden');}
+  c$('breakdown').innerHTML =
+    'Product cost: <b>'+cfmt(productCost)+'</b><br>Shipping: <b>'+cfmt(shipping)+'</b><br>Other costs: <b>'+cfmt(other)+'</b><br>'+
+    '<b>Total cost base: '+cfmt(total)+'</b><hr>'+
+    'Gross margin needed (to net '+cpct(cval('p-target'))+' after '+cpct(cval('p-tax'))+' tax): <b>'+cpct(Math.round(gmn*100))+'</b><br>'+
+    'Minimum price ex GST: <b>'+cfmt(minPrice)+'</b> &rarr; inc GST: <b>'+cfmt(minGST)+'</b><br>'+
+    'Gross profit: <b>'+cfmt(gross)+'</b> &rarr; tax: <b>'+cfmt(tax)+'</b> &rarr; net profit: <b>'+cfmt(net)+' ('+netPct.toFixed(1)+'%)</b>';
+  clastCalc = {type:'product',productCost:productCost,shipping:shipping,other:other,
+               target:cval('p-target'),taxRate:cval('p-tax'),totalCost:total,
+               price:minPrice,priceGST:minGST,netProfit:net,netPct:netPct,
+               compPrice:compPrice,maxPrice:maxPrice};
+}
+
+function showToast(msg,type) {
+  var t=c$('toast'); t.textContent=msg;
+  t.className='toast '+type;
+  setTimeout(function(){t.className='toast';},4000);
+}
+
+async function saveJob() {
+  var name=c$('job-name').value.trim();
+  if(!name){c$('job-name').focus();return;}
+  var job=Object.assign({id:Date.now(),name:name,date:c$('job-date').value,desc:c$('job-desc').value.trim()},clastCalc);
+  var btn=c$('save-btn'); btn.disabled=true; btn.textContent='Saving...';
+  try {
+    // text/plain avoids a CORS preflight (OPTIONS) — Apps Script can't
+    // handle preflight, so application/json was silently killing every
+    // history save. doPost still parses the raw JSON body unchanged.
+    await fetch(APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify(Object.assign({action:'save_job'},job))});
+    showToast('Job saved — reloading history...','success');
+    c$('job-name').value=''; c$('job-desc').value='';
+    setTimeout(loadHistory,2000);
+  } catch(e) { showToast('Could not save — check connection','error'); }
+  btn.disabled=false; btn.textContent='Save to history';
+}
+
+async function loadHistory() {
+  var el=c$('history-list');
+  try {
+    var resS=await fetch(APPS_SCRIPT_URL+'?action=history_service&t='+Date.now());
+    var resP=await fetch(APPS_SCRIPT_URL+'?action=history_product&t='+Date.now());
+    var dS=await resS.json(), dP=await resP.json();
+    var jobs=[].concat((dS.jobs||[]).map(function(j){return Object.assign({},j,{type:'service'});}),
+                       (dP.jobs||[]).map(function(j){return Object.assign({},j,{type:'product'});}));
+    jobs.sort(function(a,b){return b.id-a.id;});
+    if(!jobs.length){el.innerHTML='<p class="history-empty">No jobs saved yet.</p>';return;}
+    el.innerHTML=jobs.map(function(j){
+      var isProd=j.type==='product';
+      var meta=[
+        j.date?'<span>'+j.date+'</span>':'',
+        !isProd&&j.hours?'<span>'+j.hours+' hrs</span>':'',
+        !isProd&&j.subco>0?'<span>Subco '+cfmt(j.subco)+' +'+j.markup+'%</span>':'',
+        isProd&&j.productCost>0?'<span>Product '+cfmt(j.productCost)+'</span>':'',
+        j.shipping>0?'<span>Shipping '+cfmt(j.shipping)+'</span>':'',
+        '<span>Net '+(j.netPct?parseFloat(j.netPct).toFixed(1):'&mdash;')+'%</span>'
+      ].filter(Boolean).join('');
+      return '<div class="job-card">'+
+        '<div class="job-card-top">'+
+          '<span class="job-name">'+j.name+' <span class="type-badge type-'+(isProd?'product':'service')+'">'+(isProd?'product':'service')+'</span></span>'+
+          '<span class="job-price">'+cfmt(j.priceGST)+' inc GST</span>'+
+        '</div>'+
+        (j.desc?'<div class="job-desc">'+j.desc+'</div>':'')+
+        '<div class="job-meta">'+meta+'</div>'+
+        '<div class="job-actions"><button class="btn-sm btn-load-job" data-job="'+encodeURIComponent(JSON.stringify(j))+'">Load inputs</button></div>'+
+      '</div>';
+    }).join('');
+  } catch(e) { el.innerHTML='<p class="history-empty">Could not load history.</p>'; }
+}
+
+function loadJob(j) {
+  setMode(j.type||'service');
+  switchTab('calculator');
+  if(j.type==='product') {
+    c$('p-cost').value=j.productCost||0; c$('p-shipping').value=j.shipping||0;
+    c$('p-other').value=j.other||0; c$('p-target').value=j.target||30;
+    c$('p-tax').value=j.taxRate||25; c$('p-comp').value=j.compPrice||''; c$('p-max').value=j.maxPrice||'';
+    calcProduct();
+  } else {
+    c$('s-hours').value=j.hours||0; c$('s-subco').value=j.subco||0;
+    c$('s-markup').value=j.markup||15; c$('s-shipping').value=j.shipping||0;
+    c$('s-direct').value=j.direct||0; c$('s-target').value=j.target||30; c$('s-tax').value=j.taxRate||25;
+    calcService();
+  }
+  window.scrollTo(0,0);
+}
+
+// ── TBODY EXPAND DELEGATION (single listener, never re-added) ────
+document.getElementById('tbody').addEventListener('click', function(e) {
+  var btn = e.target.closest('.exp-btn');
+  if(btn) toggleDetail(btn.getAttribute('data-id'));
+});
+
+// ── HISTORY LOAD-JOB DELEGATION ──────────────────────────────────
+document.addEventListener('click', function(e) {
+  var btn = e.target.closest('.btn-load-job');
+  if(!btn) return;
+  try { loadJob(JSON.parse(decodeURIComponent(btn.getAttribute('data-job')))); } catch(err) {}
+});
+
+// ── INIT ─────────────────────────────────────────────────────────
+calcService();
+loadHistory();
+// Strictly live: loadFromSheet() populates the catalogue and renders, or shows an error
+loadFromSheet();
+
+</script>
+</body>
+</html>
