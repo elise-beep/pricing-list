@@ -164,9 +164,12 @@
         <div class="colls" id="colls"></div>
         <div class="subhead">The build &mdash; swap or exclude to fit the vehicle</div>
         <div id="build"><div class="empty">Choose a specification to load its build.</div></div>
-        <div class="subhead">Design &amp; material add-ons</div>
-        <div class="catbox" id="addonBox"></div>
-        <div id="addonCart"></div>
+        <div class="subhead">Design add-ons</div>
+        <div class="catbox" id="designAddonBox"></div>
+        <div id="designAddonCart"></div>
+        <div class="subhead">Material add-ons</div>
+        <div class="catbox" id="materialAddonBox"></div>
+        <div id="materialAddonCart"></div>
       </div>
 
       <div class="card">
@@ -329,20 +332,26 @@ function chLineQty(i,d){var L=state.lines[i]; if(L.to===null)return; L.qty=Math.
 function resetBuild(){ if(state.collection) pickColl(state.collection); }
 
 // ================= EXTRAS (add-ons + services) =================
-function isAddon(d){return d.cat==='Specifications' && (d.sub_cat==='Material Add-On'||d.sub_cat==='Design Add-On');}
+function isMaterialAddon(d){ return d.sku && d.sku.indexOf('ZMAT')===0; }
+function isDesignAddon(d){ return d.sku && d.sku.indexOf('ZDSN')===0; }
 function addonMatchesSeats(d){
   var s=seatsTier().seats+' Seat';
   return d.name.indexOf(s)>=0 || d.name.indexOf('Seat')<0;
 }
 function renderSvc(){
-  // Section 4: design & material add-ons for this seat count
-  var addons = CATALOGUE.filter(function(d){ return isAddon(d) && addonMatchesSeats(d); });
-  document.getElementById('addonBox').innerHTML = addons.map(function(d){
+  // Section 4: design add-ons and material add-ons for this seat count, in separate boxes
+  var designAddons = CATALOGUE.filter(function(d){ return isDesignAddon(d) && addonMatchesSeats(d); });
+  var materialAddons = CATALOGUE.filter(function(d){ return isMaterialAddon(d) && addonMatchesSeats(d); });
+  function addonRow(d){
     return '<div class="crow" onclick="addExtra(\''+d.k+'\')"><div><div class="nm" style="font-size:13.5px">'+d.name+'</div>'+
-      '<div class="meta"><span class="key">'+d.k+'</span><span class="badge sw">'+(d.sub_cat||'add-on')+'</span></div></div>'+
+      '<div class="meta"><span class="key">'+d.k+'</span></div></div>'+
       '<div style="text-align:right"><div class="mono" style="font-size:13px">'+fmt0(d.inc)+'</div>'+
       '<div class="add" style="margin-top:3px">Add</div></div></div>';
-  }).join('') || '<div class="empty">No add-ons for this seat count.</div>';
+  }
+  document.getElementById('designAddonBox').innerHTML = designAddons.map(addonRow).join('')
+    || '<div class="empty">No design add-ons for this seat count.</div>';
+  document.getElementById('materialAddonBox').innerHTML = materialAddons.map(addonRow).join('')
+    || '<div class="empty">No material add-ons for this seat count.</div>';
   // Section 5: standard services, search-driven
   var q=(document.getElementById('svcSearch').value||'').toLowerCase().trim();
   var rows = !q ? [] : CATALOGUE.filter(function(d){
@@ -358,8 +367,14 @@ function renderSvc(){
 }
 function addExtra(k){
   var f=state.extras.filter(function(e){return e.id===k;})[0];
-  if(f) f.qty++;
-  else state.extras.push({id:k,qty:1,kind:isAddon(BYKEY[k])?'addon':'service'});
+  if(f){ f.qty++; renderAll(); return; }
+  var d=BYKEY[k];
+  var kind = 'service';
+  if(d){
+    if(isDesignAddon(d)) kind='design_addon';
+    else if(isMaterialAddon(d)) kind='material_addon';
+  }
+  state.extras.push({id:k,qty:1,kind:kind});
   renderAll();
 }
 function chExtraQty(i,d){var e=state.extras[i]; e.qty+=d; if(e.qty<=0) state.extras.splice(i,1); renderAll();}
@@ -372,12 +387,14 @@ function renderExtras(){
       '<button onclick="chExtraQty('+i+',1)">+</button></div>'+
       '<div class="lp mono">'+fmt0(d.inc*e.qty)+'</div></div>';
   }
-  var a='', s='';
+  var dz='', mz='', s='';
   state.extras.forEach(function(e,i){
-    if(e.kind==='addon') a += rowHtml(e,i,'');
+    if(e.kind==='design_addon') dz += rowHtml(e,i,'');
+    else if(e.kind==='material_addon') mz += rowHtml(e,i,'');
     else s += rowHtml(e,i,'<span class="badge disc">\u221210%</span>');
   });
-  document.getElementById('addonCart').innerHTML = a;
+  document.getElementById('designAddonCart').innerHTML = dz;
+  document.getElementById('materialAddonCart').innerHTML = mz;
   document.getElementById('svcCart').innerHTML = s;
   document.getElementById('discNote').style.display =
     state.extras.some(function(e){return e.kind==='service';}) ? '' : 'none';
@@ -439,7 +456,7 @@ function compute(){
   state.extras.forEach(function(e){
     var d=BYKEY[e.id]; if(!d) return;
     var ex=d.qex*e.qty;
-    if(e.kind==='addon') addonEx+=ex;               // package add-ons: engineered deltas, never discounted
+    if(e.kind==='design_addon' || e.kind==='material_addon') addonEx+=ex;  // engineered prices, never discounted
     else { svcEx+=ex; extraDisc += ex*BUNDLE_DISC; } // standard services only: 10%, TRN or in-house alike
   });
   var subEx = mod.V + addonEx + svcEx - extraDisc;
