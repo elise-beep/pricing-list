@@ -334,6 +334,17 @@ function resetBuild(){ if(state.collection) pickColl(state.collection); }
 // ================= EXTRAS (add-ons + services) =================
 function isMaterialAddon(d){ return d.sku && d.sku.indexOf('ZMAT')===0; }
 function isDesignAddon(d){ return d.sku && d.sku.indexOf('ZDSN')===0; }
+// Collection-specific material add-ons (e.g. Car Interior packages) are tagged
+// with the collection in sub_cat instead of the generic 'Material Add-On'.
+// They only apply to the matching collection; universal seat-material upgrades
+// (Nappa, Alcantara, Alston, Maxcom, Vegan) show for every collection.
+var COLLECTIONS = ['Select','Reserve','Private','Atelier'];
+function isCollectionAddon(d){ return isMaterialAddon(d) && COLLECTIONS.indexOf(d.sub_cat)>=0; }
+function addonMatchesCollection(d){
+  // universal upgrades (not collection-tagged) always pass;
+  // collection-tagged add-ons only pass when they match the chosen collection
+  return !isCollectionAddon(d) || d.sub_cat===state.collection;
+}
 function addonMatchesSeats(d){
   var s=seatsTier().seats+' Seat';
   return d.name.indexOf(s)>=0 || d.name.indexOf('Seat')<0;
@@ -341,7 +352,9 @@ function addonMatchesSeats(d){
 function renderSvc(){
   // Section 4: design add-ons and material add-ons for this seat count, in separate boxes
   var designAddons = CATALOGUE.filter(function(d){ return isDesignAddon(d) && addonMatchesSeats(d); });
-  var materialAddons = CATALOGUE.filter(function(d){ return isMaterialAddon(d) && addonMatchesSeats(d); });
+  var materialAddons = CATALOGUE.filter(function(d){
+    return isMaterialAddon(d) && addonMatchesSeats(d) && addonMatchesCollection(d);
+  });
   function addonRow(d){
     return '<div class="crow" onclick="addExtra(\''+d.k+'\')"><div><div class="nm" style="font-size:13.5px">'+d.name+'</div>'+
       '<div class="meta"><span class="key">'+d.k+'</span></div></div>'+
@@ -351,7 +364,9 @@ function renderSvc(){
   document.getElementById('designAddonBox').innerHTML = designAddons.map(addonRow).join('')
     || '<div class="empty">No design add-ons for this seat count.</div>';
   document.getElementById('materialAddonBox').innerHTML = materialAddons.map(addonRow).join('')
-    || '<div class="empty">No material add-ons for this seat count.</div>';
+    || '<div class="empty">'+(state.collection
+         ? 'No material add-ons for this seat count.'
+         : 'Choose a collection to see its material add-ons.')+'</div>';
   // Section 5: standard services, search-driven
   var q=(document.getElementById('svcSearch').value||'').toLowerCase().trim();
   var rows = !q ? [] : CATALOGUE.filter(function(d){
