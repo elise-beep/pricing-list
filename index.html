@@ -723,18 +723,40 @@ var SLOT_DEFAULTS = [
   {collection:'Reserve', tier:'1', seats:'5'}
 ];
 
+// A true specification PACKAGE is a ZSPEC- row. Collection-tagged material
+// add-ons (ZMAT-*) also carry category 'Specifications' and a collection in
+// sub_category, so category alone is no longer enough to identify a package.
+function isSpecPackage(r){
+  return r.category==='Specifications' && String(r.sku||'').indexOf('ZSPEC')===0;
+}
+
 function initSpecTab(){
   document.getElementById('spec-status').textContent =
-    CATALOGUE.filter(function(r){return r.category==='Specifications';}).length + ' specifications';
+    CATALOGUE.filter(isSpecPackage).length + ' specifications';
   renderSpecGrid();
   renderSalesScript();
   specTabReady = true;
 }
 
 // ── SALES CALL SCRIPT (phone reference) ───────────────────────
+// "From" anchors are read live from CATALOGUE (5 Seat — T1 of each
+// collection) so they can never drift from the spreadsheet again.
+function specFromPrice(coll){
+  var row = CATALOGUE.filter(function(r){
+    if(!isSpecPackage(r) || r.sub_category!==coll) return false;
+    var n = String(r.service_name||r.name||'');
+    return n.indexOf('5 Seat')>-1 && n.slice(-2)==='T1';
+  })[0];
+  if(!row){
+    // fallback: cheapest package in the collection (add-ons excluded)
+    var all = CATALOGUE.filter(function(r){ return isSpecPackage(r) && r.sub_category===coll; });
+    if(all.length) row = all.sort(function(a,b){ return (Number(a.final_inc_gst)||0)-(Number(b.final_inc_gst)||0); })[0];
+  }
+  return row ? fmt0(Number(row.final_inc_gst)||0) : '$\u2014';
+}
 function renderSalesScript(){
   var el=document.getElementById('spec-script');
-  if(!el || el.dataset.built) return;
+  if(!el) return;
   el.innerHTML=
     '<div class="script-hd">Sales call reference</div>'+
     '<div class="script-cols">'+
@@ -745,7 +767,7 @@ function renderSalesScript(){
 
       '<div class="sp-col sel">'+
         '<div class="sp-col-name">SELECT</div>'+
-        '<div class="sp-col-price">from $7,685 <span>inc GST</span></div>'+
+        '<div class="sp-col-price">from '+specFromPrice('Select')+' <span>inc GST</span></div>'+
         '<ul>'+
           '<li>Front &amp; rear seats</li>'+
           '<li>Console lid</li>'+
@@ -757,7 +779,7 @@ function renderSalesScript(){
 
       '<div class="sp-col res">'+
         '<div class="sp-col-name">RESERVE</div>'+
-        '<div class="sp-col-price">from $12,745 <span>inc GST</span></div>'+
+        '<div class="sp-col-price">from '+specFromPrice('Reserve')+' <span>inc GST</span></div>'+
         '<ul>'+
           '<li>Everything in Select</li>'+
           '<li>Steering wheel, shifter, handbrake</li>'+
@@ -769,7 +791,7 @@ function renderSalesScript(){
 
       '<div class="sp-col pri">'+
         '<div class="sp-col-name">PRIVATE ★ hero</div>'+
-        '<div class="sp-col-price">from $16,229 <span>inc GST</span></div>'+
+        '<div class="sp-col-price">from '+specFromPrice('Private')+' <span>inc GST</span></div>'+
         '<ul>'+
           '<li>Everything in Reserve</li>'+
           '<li>Door armrests</li>'+
@@ -782,7 +804,7 @@ function renderSalesScript(){
 
       '<div class="sp-col atl">'+
         '<div class="sp-col-name">ATELIER</div>'+
-        '<div class="sp-col-price">from $48,269 <span>inc GST</span></div>'+
+        '<div class="sp-col-price">from '+specFromPrice('Atelier')+' <span>inc GST</span></div>'+
         '<ul>'+
           '<li>Full cabin — no major surface left behind</li>'+
           '<li>Full console, door cards, dashboard, headliner</li>'+
@@ -848,13 +870,12 @@ function renderSalesScript(){
       '</ul>'+
     '</div>'+
     '</div>';
-  el.dataset.built='1';
 }
 
 function specRow(collection, tier, seats){
   var name = collection+' \u2014 '+seats+' Seat \u2014 T'+tier;
   return CATALOGUE.filter(function(r){
-    return r.category==='Specifications' && (r.service_name===name || r.name===name);
+    return isSpecPackage(r) && (r.service_name===name || r.name===name);
   })[0] || null;
 }
 
@@ -1321,6 +1342,9 @@ async function loadFromSheet() {
   buildSidebar();
   applyFilters();
   populateHideDropdown();
+  // If the Specifications tab was opened before live data arrived,
+  // re-render it now so the grid and sales-script anchors show live prices.
+  if(specTabReady) initSpecTab();
 }
 
 function showLiveError(msg,kind){
