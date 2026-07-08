@@ -167,9 +167,12 @@
         <div class="subhead">Design add-ons</div>
         <div class="catbox" id="designAddonBox"></div>
         <div id="designAddonCart"></div>
-        <div class="subhead">Material add-ons</div>
-        <div class="catbox" id="materialAddonBox"></div>
-        <div id="materialAddonCart"></div>
+        <div class="subhead">Seat material choice</div>
+        <div class="catbox" id="seatMaterialBox"></div>
+        <div id="seatMaterialCart"></div>
+        <div class="subhead">Car interior material choice</div>
+        <div class="catbox" id="carInteriorBox"></div>
+        <div id="carInteriorCart"></div>
       </div>
 
       <div class="card">
@@ -350,10 +353,16 @@ function addonMatchesSeats(d){
   return d.name.indexOf(s)>=0 || d.name.indexOf('Seat')<0;
 }
 function renderSvc(){
-  // Section 4: design add-ons and material add-ons for this seat count, in separate boxes
-  var designAddons = CATALOGUE.filter(function(d){ return isDesignAddon(d) && addonMatchesSeats(d); });
-  var materialAddons = CATALOGUE.filter(function(d){
-    return isMaterialAddon(d) && addonMatchesSeats(d) && addonMatchesCollection(d);
+  // Section 4: three add-on sections for this seat count.
+  //   Design add-ons        -> ZDSN rows
+  //   Seat material choice   -> universal ZMAT upgrades + combos (not collection-tagged)
+  //   Car interior material  -> collection-tagged ZMAT Car Interior rows (Alcantara/Alston)
+  var designAddons  = CATALOGUE.filter(function(d){ return isDesignAddon(d) && addonMatchesSeats(d); });
+  var seatMaterials = CATALOGUE.filter(function(d){
+    return isMaterialAddon(d) && !isCollectionAddon(d) && addonMatchesSeats(d);
+  });
+  var carInteriors  = CATALOGUE.filter(function(d){
+    return isCollectionAddon(d) && addonMatchesSeats(d) && addonMatchesCollection(d);
   });
   function addonRow(d){
     return '<div class="crow" onclick="addExtra(\''+d.k+'\')"><div><div class="nm" style="font-size:13.5px">'+d.name+'</div>'+
@@ -363,10 +372,12 @@ function renderSvc(){
   }
   document.getElementById('designAddonBox').innerHTML = designAddons.map(addonRow).join('')
     || '<div class="empty">No design add-ons for this seat count.</div>';
-  document.getElementById('materialAddonBox').innerHTML = materialAddons.map(addonRow).join('')
+  document.getElementById('seatMaterialBox').innerHTML = seatMaterials.map(addonRow).join('')
+    || '<div class="empty">No seat material choices for this seat count.</div>';
+  document.getElementById('carInteriorBox').innerHTML = carInteriors.map(addonRow).join('')
     || '<div class="empty">'+(state.collection
-         ? 'No material add-ons for this seat count.'
-         : 'Choose a collection to see its material add-ons.')+'</div>';
+         ? 'No car interior choices for this seat count.'
+         : 'Choose a collection to see its car interior choices.')+'</div>';
   // Section 5: standard services, search-driven
   var q=(document.getElementById('svcSearch').value||'').toLowerCase().trim();
   var rows = !q ? [] : CATALOGUE.filter(function(d){
@@ -402,14 +413,19 @@ function renderExtras(){
       '<button onclick="chExtraQty('+i+',1)">+</button></div>'+
       '<div class="lp mono">'+fmt0(d.inc*e.qty)+'</div></div>';
   }
-  var dz='', mz='', s='';
+  var dz='', sm='', ci='', s='';
   state.extras.forEach(function(e,i){
     if(e.kind==='design_addon') dz += rowHtml(e,i,'');
-    else if(e.kind==='material_addon') mz += rowHtml(e,i,'');
+    else if(e.kind==='material_addon'){
+      var d=BYKEY[e.id];
+      if(d && isCollectionAddon(d)) ci += rowHtml(e,i,'');   // Car interior
+      else sm += rowHtml(e,i,'');                            // Seat material
+    }
     else s += rowHtml(e,i,'<span class="badge disc">\u221210%</span>');
   });
   document.getElementById('designAddonCart').innerHTML = dz;
-  document.getElementById('materialAddonCart').innerHTML = mz;
+  document.getElementById('seatMaterialCart').innerHTML = sm;
+  document.getElementById('carInteriorCart').innerHTML = ci;
   document.getElementById('svcCart').innerHTML = s;
   document.getElementById('discNote').style.display =
     state.extras.some(function(e){return e.kind==='service';}) ? '' : 'none';
