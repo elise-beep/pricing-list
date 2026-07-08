@@ -367,11 +367,11 @@ function renderSvc(){
   //   Design add-ons        -> ZDSN rows
   //   Seat material choice   -> universal ZMAT upgrades + combos (not collection-tagged)
   //   Car interior material  -> collection-tagged ZMAT Car Interior rows (Alcantara/Alston)
-  var designAddons  = CATALOGUE.filter(function(d){ return isDesignAddon(d) && addonMatchesSeats(d); });
-  var seatMaterials = CATALOGUE.filter(function(d){
+  var designAddons  = !state.collection ? [] : CATALOGUE.filter(function(d){ return isDesignAddon(d) && addonMatchesSeats(d); });
+  var seatMaterials = !state.collection ? [] : CATALOGUE.filter(function(d){
     return isMaterialAddon(d) && !isCollectionAddon(d) && addonMatchesSeats(d);
   });
-  var carInteriors  = CATALOGUE.filter(function(d){
+  var carInteriors  = !state.collection ? [] : CATALOGUE.filter(function(d){
     return isCollectionAddon(d) && addonMatchesSeats(d) && addonMatchesCollection(d);
   });
   function addonRow(d){
@@ -381,9 +381,13 @@ function renderSvc(){
       '<div class="add" style="margin-top:3px">Add</div></div></div>';
   }
   document.getElementById('designAddonBox').innerHTML = designAddons.map(addonRow).join('')
-    || '<div class="empty">No design add-ons for this seat count.</div>';
+    || '<div class="empty">'+(state.collection
+         ? 'No design add-ons for this seat count.'
+         : 'Choose a collection to see its design add-ons.')+'</div>';
   document.getElementById('seatMaterialBox').innerHTML = seatMaterials.map(addonRow).join('')
-    || '<div class="empty">No seat material choices for this seat count.</div>';
+    || '<div class="empty">'+(state.collection
+         ? 'No seat material choices for this seat count.'
+         : 'Choose a collection to see its seat material choices.')+'</div>';
   document.getElementById('carInteriorBox').innerHTML = carInteriors.map(addonRow).join('')
     || '<div class="empty">'+(state.collection
          ? 'No car interior choices for this seat count.'
