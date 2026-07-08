@@ -267,10 +267,13 @@ function onContextChange(){
 }
 
 // ================= BUILD SHEET =================
+function isTranscal(d){ return String(d.sub||'').toUpperCase()==='TRN'; }
 function swapOptions(fromKey){
   var it = BYKEY[fromKey]; if(!it) return [];
+  // Replacements are drawn live from the sheet: same component category as the
+  // item being swapped, and Transcal-supplied only (never CMS / in-house).
   return CATALOGUE.filter(function(d){
-    return d.cat===it.cat && d.cat!=='Specifications' && d.k!==fromKey;
+    return d.cat===it.cat && d.cat!=='Specifications' && isTranscal(d) && d.k!==fromKey;
   });
 }
 
@@ -337,16 +340,23 @@ function resetBuild(){ if(state.collection) pickColl(state.collection); }
 // ================= EXTRAS (add-ons + services) =================
 function isMaterialAddon(d){ return d.sku && d.sku.indexOf('ZMAT')===0; }
 function isDesignAddon(d){ return d.sku && d.sku.indexOf('ZDSN')===0; }
-// Collection-specific material add-ons (e.g. Car Interior packages) are tagged
-// with the collection in sub_cat instead of the generic 'Material Add-On'.
-// They only apply to the matching collection; universal seat-material upgrades
-// (Nappa, Alcantara, Alston, Maxcom, Vegan) show for every collection.
+// Car Interior add-ons are identified by SKU (ZMAT-ALCI- / ZMAT-ALSI-), which
+// encodes the collection (SEL/RES/PRV/ATL) in the SKU itself. This is robust to
+// however the Sub Category or Service Name columns happen to be labelled in the
+// sheet — the routing no longer depends on Sub Category holding the collection.
 var COLLECTIONS = ['Select','Reserve','Private','Atelier'];
-function isCollectionAddon(d){ return isMaterialAddon(d) && COLLECTIONS.indexOf(d.sub_cat)>=0; }
+var COLL_ABBR = {SEL:'Select',RES:'Reserve',PRV:'Private',ATL:'Atelier'};
+function isCarInterior(d){ return d.sku && /^ZMAT-(ALCI|ALSI)-/.test(d.sku); }
+function isCollectionAddon(d){ return isCarInterior(d); }
+function carInteriorCollection(d){
+  var m = d.sku && d.sku.match(/^ZMAT-(?:ALCI|ALSI)-(SEL|RES|PRV|ATL)-/);
+  return m ? COLL_ABBR[m[1]] : null;
+}
 function addonMatchesCollection(d){
-  // universal upgrades (not collection-tagged) always pass;
-  // collection-tagged add-ons only pass when they match the chosen collection
-  return !isCollectionAddon(d) || d.sub_cat===state.collection;
+  // universal seat-material upgrades always pass; Car Interior only when its
+  // collection matches the one chosen for the build
+  if(!isCarInterior(d)) return true;
+  return carInteriorCollection(d)===state.collection;
 }
 function addonMatchesSeats(d){
   var s=seatsTier().seats+' Seat';
