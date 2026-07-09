@@ -505,13 +505,16 @@ function compute(){
     else { svcEx+=ex; extraDisc += ex*BUNDLE_DISC; } // standard services only: 10%, TRN or in-house alike
   });
   var subEx = mod.V + addonEx + svcEx - extraDisc;
-  var withFee = subEx*(1+SETTINGS.cc);
-  var totalInc = psych(withFee*(1+SETTINGS.gst));
+  // Card processing fee is NOT applied here — Xero adds it at payment time.
+  // subEx goes straight to GST; individual catalogue sell prices elsewhere
+  // (price list, spec packages) still carry their own baked-in 2% and are
+  // unaffected by this — this only concerns the composite quote total.
+  var totalInc = psych(subEx*(1+SETTINGS.gst));
   var gst = totalInc - totalInc/(1+SETTINGS.gst);
   return {anchorEx:base.V, packageEx:mod.V, base:base, mod:mod,
           swaps:swaps, removals:removals, freightDelta:freightDelta,
           addonEx:addonEx, svcEx:svcEx, extraDisc:extraDisc,
-          subEx:subEx, fee:withFee-subEx, gst:gst, totalInc:totalInc};
+          subEx:subEx, gst:gst, totalInc:totalInc};
 }
 
 function renderLedger(){
@@ -533,12 +536,27 @@ function renderLedger(){
     h+='<div class="r ind"><span class="sw">shipping recalibrated ('+SETTINGS.mult+'\u00d7 '+fmt0(r.mod.maxF)+' max)</span><span class="mono sw">'+(r.freightDelta>=0?'+':'')+fmt(r.freightDelta)+'</span></div>';
   }
   h+='<div class="r"><span>Build subtotal</span><span class="mono">'+fmt(r.packageEx)+'</span></div>';
-  if(r.addonEx>0) h+='<div class="r"><span>Add-ons</span><span class="mono">'+fmt(r.addonEx)+'</span></div>';
-  if(r.svcEx>0) h+='<div class="r"><span>Services</span><span class="mono">'+fmt(r.svcEx)+'</span></div>';
+  if(r.addonEx>0){
+    h+='<div class="r"><span>Add-ons</span><span class="mono">'+fmt(r.addonEx)+'</span></div>';
+    state.extras.forEach(function(e){
+      if(e.kind!=='design_addon' && e.kind!=='material_addon') return;
+      var d=BYKEY[e.id]; if(!d) return;
+      var lbl=d.name+(e.qty>1?' \u00d7'+e.qty:'');
+      h+='<div class="r ind"><span class="sw">'+lbl+'</span><span class="mono sw">'+fmt(d.qex*e.qty)+'</span></div>';
+    });
+  }
+  if(r.svcEx>0){
+    h+='<div class="r"><span>Services</span><span class="mono">'+fmt(r.svcEx)+'</span></div>';
+    state.extras.forEach(function(e){
+      if(e.kind!=='service') return;
+      var d=BYKEY[e.id]; if(!d) return;
+      var lbl=d.name+(e.qty>1?' \u00d7'+e.qty:'');
+      h+='<div class="r ind"><span class="sw">'+lbl+'</span><span class="mono sw">'+fmt(d.qex*e.qty)+'</span></div>';
+    });
+  }
   if(r.extraDisc>0) h+='<div class="r ind"><span class="disc">collection-client rate \u221210%</span><span class="mono disc">'+fmt(-r.extraDisc)+'</span></div>';
   h+='<div class="div"></div>';
   h+='<div class="r"><span>Subtotal ex GST</span><span class="mono">'+fmt(r.subEx)+'</span></div>';
-  h+='<div class="r"><span>Card fee '+Math.round(SETTINGS.cc*100)+'%</span><span class="mono">'+fmt(r.fee)+'</span></div>';
   h+='<div class="r"><span>GST</span><span class="mono">'+fmt(r.gst)+'</span></div>';
   h+='<div class="div"></div>';
   h+='<div class="r tot"><span>Total inc GST</span><span class="mono">'+fmt0(r.totalInc)+'</span></div>';
@@ -559,16 +577,31 @@ function buildPayload(){
     package:{key:state.spec.key,code:state.spec.code,name:state.spec.name,
              anchor_ex:state.spec.anchorEx,anchor_inc:state.spec.anchorInc},
     swaps: state.lines.filter(function(L){return L.to!==L.from;}).map(function(L){
-      return {from:L.from,to:L.to,qty:L.qty,delta_ex:Math.round(lineDeltaEx(L)*100)/100};
+      var to=BYKEY[L.to];
+      return {from:L.from,to:L.to,sku:to?to.sku:null,name:to?to.name+' (upgrade)':null,
+              qty:L.qty,delta_ex:Math.round(lineDeltaEx(L)*100)/100};
+    }),
+    removals: state.lines.filter(function(L){return L.to===null;}).map(function(L){
+      var from=BYKEY[L.from];
+      return {id:L.from,sku:from?from.sku:null,name:from?'excl. '+from.name:null,
+              qty:L.baseQty,delta_ex:Math.round(lineDeltaEx(L)*100)/100};
     }),
     qty_changes: state.lines.filter(function(L){return L.to===L.from && L.qty!==L.baseQty;}).map(function(L){
       return {id:L.from,qty:L.qty,base_qty:L.baseQty};
     }),
+    // Every add-on / service line at its pre-fee, pre-GST ex-GST amount —
+    // this is the exact figure to push as a Xero invoice line (see note below).
     extras: state.extras.map(function(e){
       var d=BYKEY[e.id];
-      return {id:e.id,qty:e.qty,kind:e.kind,quote_ex:d?Math.round(d.qex*e.qty*100)/100:0};
+      return {id:e.id, sku:d?d.sku:null, name:d?d.name:null, kind:e.kind, qty:e.qty,
+              unit_ex:d?Math.round(d.qex*100)/100:0,
+              quote_ex:d?Math.round(d.qex*e.qty*100)/100:0};
     }),
-    totals:{sub_ex:r.subEx,cc_fee:r.fee,gst:r.gst,inc:r.totalInc},
+    // totals.sub_ex is the sum of every pre-GST ex-GST line above (build +
+    // swaps + removals + add-ons + services, less the 10% service discount).
+    // No card processing fee is included here — Xero applies its own fee at
+    // payment time, so this quote total is fee-free by design.
+    totals:{sub_ex:r.subEx,gst:r.gst,inc:r.totalInc},
     status:state.status, quoted_at:new Date().toISOString()
   };
 }
